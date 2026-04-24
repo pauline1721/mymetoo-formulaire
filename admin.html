@@ -2,100 +2,33 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin - MyMeToo</title>
+<title>Admin sécurisé</title>
 
 <style>
-body{
-  font-family:Arial;
-  background:#f4effa;
-  margin:0;
-  padding:20px;
-}
-
-h1{
-  text-align:center;
-  color:#5b23ad;
-}
-
-#login{
-  max-width:360px;
-  margin:80px auto;
-  background:white;
-  padding:25px;
-  border-radius:12px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.08);
-  text-align:center;
-}
-
-#password{
-  width:100%;
-  padding:12px;
-  margin:15px 0;
-  border:1px solid #ccc;
-  border-radius:8px;
-  font-size:16px;
-}
-
-button{
-  background:#5b23ad;
-  color:white;
-  border:none;
-  padding:12px 22px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-#error{
-  color:red;
-  font-weight:bold;
-}
-
-#adminContent{
-  display:none;
-}
-
-.card{
-  background:white;
-  border-radius:10px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.05);
-}
-
-.field{
-  margin:5px 0;
-}
-
-.label{
-  font-weight:bold;
-  color:#5b23ad;
-}
+body{font-family:Arial;background:#f4effa;padding:20px}
+input{padding:10px;margin:5px;width:250px}
+button{padding:10px;background:#5b23ad;color:white;border:none}
+.card{background:white;padding:10px;margin:10px;border-radius:8px}
 </style>
 </head>
 
 <body>
 
-<div id="login">
-  <h1>🔐 Admin</h1>
-  <p>Entre le mot de passe</p>
-  <input id="password" type="password" placeholder="Mot de passe">
-  <button onclick="login()">Entrer</button>
-  <p id="error"></p>
-</div>
+<h2>Connexion Admin</h2>
 
-<div id="adminContent">
-  <h1>📊 Réponses MyMeToo</h1>
-  <div id="data"></div>
-</div>
+<input id="email" placeholder="Email"><br>
+<input id="password" type="password" placeholder="Mot de passe"><br>
+<button onclick="login()">Se connecter</button>
+
+<hr>
+
+<div id="data"></div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const ADMIN_PASSWORD = "UNIS2026";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
@@ -107,19 +40,20 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
-window.login = function(){
-  const pass = document.getElementById("password").value;
+window.login = async function(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  if(pass === ADMIN_PASSWORD){
-    document.getElementById("login").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
+  try{
+    await signInWithEmailAndPassword(auth, email, password);
     loadData();
-  } else {
-    document.getElementById("error").innerText = "Mot de passe incorrect";
+  }catch(e){
+    alert("Erreur connexion");
   }
-};
+}
 
 async function loadData(){
   const container = document.getElementById("data");
@@ -135,15 +69,10 @@ async function loadData(){
     div.className = "card";
 
     div.innerHTML = `
-      <div class="field"><span class="label">Âge :</span> ${d.age || ""}</div>
-      <div class="field"><span class="label">Genre :</span> ${d.genre || ""}</div>
-      <div class="field"><span class="label">Justice :</span> ${d.justice || ""}</div>
-      <div class="field"><span class="label">Parlé :</span> ${d.parle || ""}</div>
-      <div class="field"><span class="label">Écoute :</span> ${d.ecoute || ""}</div>
-      <div class="field"><span class="label">Expression :</span> ${(d.expression || []).join(", ")}</div>
-      <div class="field"><span class="label">Message :</span> ${d.message || ""}</div>
-      <div class="field"><span class="label">Partage :</span> ${d.partageAutorise ? "Oui" : "Non"}</div>
-      <div class="field"><span class="label">Date :</span> ${d.createdAt?.toDate().toLocaleString() || ""}</div>
+      <b>Âge :</b> ${d.age}<br>
+      <b>Genre :</b> ${d.genre}<br>
+      <b>Écoute :</b> ${d.ecoute}<br>
+      <b>Message :</b> ${d.message}<br>
     `;
 
     container.appendChild(div);
@@ -151,6 +80,5 @@ async function loadData(){
 }
 
 </script>
-
 </body>
 </html>
