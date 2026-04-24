@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Témoignages - MyMeToo</title>
 
 <style>
@@ -14,57 +15,74 @@ body{
   color:#24106b;
 }
 
-h1{
+.header{
   text-align:center;
-  color:#5b23ad;
+  margin-bottom:30px;
+}
+
+.logo{
+  width:90px;
   margin-bottom:10px;
 }
 
+h1{
+  color:#5b23ad;
+  margin-bottom:5px;
+}
+
 .subtitle{
-  text-align:center;
-  margin-bottom:30px;
-  font-size:18px;
+  color:#666;
+  font-size:15px;
 }
 
 .container{
   max-width:800px;
-  margin:0 auto;
+  margin:auto;
 }
 
 .card{
   background:white;
   border-radius:12px;
-  padding:20px;
+  padding:18px;
   margin-bottom:15px;
   box-shadow:0 5px 15px rgba(0,0,0,0.05);
-  font-size:17px;
-  line-height:1.5;
 }
 
-.date{
-  margin-top:10px;
+.meta{
   font-size:13px;
-  color:#888;
+  color:#5b23ad;
+  margin-bottom:8px;
+}
+
+.message{
+  font-size:16px;
+  line-height:1.4;
+  background:#f7effb;
+  padding:12px;
+  border-radius:8px;
 }
 
 .empty{
   text-align:center;
-  padding:30px;
-  background:white;
-  border-radius:12px;
-  font-weight:bold;
+  margin-top:50px;
+  color:#888;
 }
 </style>
 </head>
 
 <body>
 
-<h1>💬 Témoignages anonymes</h1>
-<div class="subtitle">
-Ta voix compte. Tu n’es pas seul(e).
+<div class="header">
+  <img src="logoUNIS.png" class="logo">
+  <h1>💬 Témoignages anonymes</h1>
+  <div class="subtitle">Ta voix compte. Tu n’es pas seul(e).</div>
 </div>
 
-<div class="container" id="data"></div>
+<div class="container" id="list"></div>
+
+<div id="empty" class="empty" style="display:none;">
+  Aucun témoignage pour le moment 💜
+</div>
 
 <script type="module">
 
@@ -83,39 +101,46 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-async function loadMessages(){
-  const container = document.getElementById("data");
-  container.innerHTML = "";
+async function load(){
 
-  const q = query(collection(db, "reponses"), orderBy("createdAt", "desc"));
-  const snapshot = await getDocs(q);
+  const container = document.getElementById("list");
+  const empty = document.getElementById("empty");
+
+  const q = query(collection(db,"reponses"), orderBy("createdAt","desc"));
+  const snap = await getDocs(q);
 
   let count = 0;
 
-  snapshot.forEach(doc => {
+  snap.forEach(doc => {
     const d = doc.data();
 
-    if(d.partageAutorise && d.message){
-      count++;
+    // 🔒 ON FILTRE ICI
+    if(!d.partageAutorise || !d.message) return;
 
-      const div = document.createElement("div");
-      div.className = "card";
+    count++;
 
-      div.innerHTML = `
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <div class="meta">
+        ${d.age || ""} • ${d.genre || ""}
+      </div>
+
+      <div class="message">
         ${d.message}
-        <div class="date">${d.createdAt?.toDate().toLocaleDateString()}</div>
-      `;
+      </div>
+    `;
 
-      container.appendChild(div);
-    }
+    container.appendChild(div);
   });
 
   if(count === 0){
-    container.innerHTML = `<div class="empty">Aucun témoignage pour le moment.</div>`;
+    empty.style.display = "block";
   }
 }
 
-loadMessages();
+load();
 
 </script>
 
