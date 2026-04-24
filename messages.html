@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Messages anonymes</title>
+
+<style>
+body{
+  font-family:Georgia;
+  background:#f7effb;
+  padding:30px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  margin:15px auto;
+  max-width:600px;
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+  font-size:20px;
+  line-height:1.5;
+}
+</style>
+</head>
+
+<body>
+
+<h1 style="text-align:center;">💜 Messages anonymes</h1>
+
+<div id="data"></div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
+  authDomain: "mymetoo-formulaire.firebaseapp.com",
+  projectId: "mymetoo-formulaire",
+  storageBucket: "mymetoo-formulaire.firebasestorage.app",
+  messagingSenderId: "1084270329845",
+  appId: "1:1084270329845:web:337a6172a4817f0db2eabc"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function load(){
+  const container = document.getElementById("data");
+
+  const snapshot = await getDocs(collection(db, "reponses"));
+
+  snapshot.forEach(doc => {
+    const d = doc.data();
+
+    if(d.partageAutorise && d.message){
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerText = "“ " + d.message + " ”";
+      container.appendChild(div);
+    }
+  });
+}
+
+load();
+
+</script>
+</body>
+</html>
