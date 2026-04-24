@@ -85,6 +85,15 @@ button:hover{
   color:#5b23ad;
 }
 
+.chartBox{
+  background:white;
+  border-radius:14px;
+  padding:20px;
+  margin:20px auto;
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+  max-width:900px;
+}
+
 #data{
   max-width:900px;
   margin:0 auto;
@@ -99,6 +108,7 @@ button:hover{
   font-size:16px;
   line-height:1.5;
   color:#24106b;
+  overflow:hidden;
 }
 
 .field{
@@ -116,6 +126,9 @@ button:hover{
   border-radius:8px;
   margin-top:12px;
   font-size:17px;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-word;
 }
 
 .logout{
@@ -171,9 +184,16 @@ button:hover{
     </div>
   </div>
 
+  <div class="chartBox">
+    <h2>Formulaires envoyés par jour</h2>
+    <canvas id="dailyChart"></canvas>
+  </div>
+
   <h2>Liste des réponses</h2>
   <div id="data"></div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script type="module">
 
@@ -193,6 +213,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+let dailyChart = null;
 
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
@@ -223,6 +245,46 @@ onAuthStateChanged(auth, user => {
   }
 });
 
+function renderDailyChart(daysData){
+  const labels = Object.keys(daysData).sort();
+  const values = labels.map(day => daysData[day]);
+
+  const ctx = document.getElementById("dailyChart");
+
+  if(dailyChart){
+    dailyChart.destroy();
+  }
+
+  dailyChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Formulaires envoyés",
+        data: values,
+        backgroundColor: "#6f42bd",
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0
+          }
+        }
+      }
+    }
+  });
+}
+
 async function loadData(){
   const container = document.getElementById("data");
   container.innerHTML = "";
@@ -231,6 +293,7 @@ async function loadData(){
   let partages = 0;
   let femmes = 0;
   let hommes = 0;
+  let daysData = {};
 
   const q = query(collection(db, "reponses"), orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
@@ -243,6 +306,11 @@ async function loadData(){
     const d = doc.data();
 
     total++;
+
+    const dateObj = d.createdAt?.toDate ? d.createdAt.toDate() : null;
+    const dayKey = dateObj ? dateObj.toLocaleDateString("fr-FR") : "Date inconnue";
+
+    daysData[dayKey] = (daysData[dayKey] || 0) + 1;
 
     if(d.partageAutorise && d.message){
       partages++;
@@ -267,7 +335,7 @@ async function loadData(){
       <div class="field"><span class="label">Écoute :</span> ${d.ecoute || ""}</div>
       <div class="field"><span class="label">Expression :</span> ${(d.expression || []).join(", ")}</div>
       <div class="field"><span class="label">Partage autorisé :</span> ${d.partageAutorise ? "Oui" : "Non"}</div>
-      <div class="field"><span class="label">Date :</span> ${d.createdAt?.toDate().toLocaleString() || ""}</div>
+      <div class="field"><span class="label">Date :</span> ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}</div>
       <div class="message"><span class="label">Message :</span><br>${d.message || "Aucun message"}</div>
     `;
 
@@ -278,6 +346,8 @@ async function loadData(){
   document.getElementById("partages").innerText = partages;
   document.getElementById("femmes").innerText = femmes;
   document.getElementById("hommes").innerText = hommes;
+
+  renderDailyChart(daysData);
 }
 
 </script>
