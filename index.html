@@ -15,7 +15,7 @@ body{
 .wrap{
   position:relative;
   width:100%;
-  max-width:990px;
+  max-width:1000px;
   margin:auto;
 }
 
@@ -24,6 +24,7 @@ body{
   display:block;
 }
 
+/* zones cliquables */
 .zone{
   position:absolute;
   cursor:pointer;
@@ -34,25 +35,36 @@ body{
   position:absolute;
 }
 
+/* rond radio */
 .dot{
   position:absolute;
-  width:1.6%;
-  height:1.05%;
+  width:18px;
+  height:18px;
   border-radius:50%;
-  background:transparent;
+  border:2px solid #aaa;
+  background:white;
 }
 
+/* coche sélectionnée */
 input:checked + .dot{
   background:#6f50b5;
+  border-color:#6f50b5;
+  box-shadow:0 0 0 3px white inset;
 }
 
+/* carré checkbox */
+.square{
+  border-radius:4px;
+}
+
+/* textarea */
 textarea{
   position:absolute;
   left:7.8%;
   top:83.8%;
   width:84.5%;
-  height:3.4%;
-  border:0;
+  height:3.5%;
+  border:1px solid transparent;
   outline:none;
   resize:none;
   background:transparent;
@@ -61,12 +73,13 @@ textarea{
   padding:8px;
 }
 
+/* bouton invisible */
 button{
   position:absolute;
   left:5.5%;
-  top:97.1%;
+  top:97%;
   width:17%;
-  height:2.7%;
+  height:3%;
   opacity:0;
   cursor:pointer;
 }
@@ -92,84 +105,121 @@ button{
 <form id="formulaire">
 
 <!-- AGE -->
-<label class="zone" style="left:7%;top:29.8%;width:36%;height:2%;">
-<input type="radio" name="age" value="Moins de 18 ans"><span class="dot" style="left:1.3%;top:22%;"></span>
+<label class="zone" style="left:7%;top:30%;width:36%;height:2%;">
+<input type="radio" name="age" value="Moins de 18 ans">
+<span class="dot"></span>
 </label>
-<label class="zone" style="left:7%;top:32.0%;width:36%;height:2%;">
-<input type="radio" name="age" value="18 / 35 ans"><span class="dot" style="left:1.3%;top:22%;"></span>
+
+<label class="zone" style="left:7%;top:32.2%;width:36%;height:2%;">
+<input type="radio" name="age" value="18 / 35 ans">
+<span class="dot"></span>
 </label>
-<label class="zone" style="left:7%;top:34.2%;width:36%;height:2%;">
-<input type="radio" name="age" value="Plus de 35 ans"><span class="dot" style="left:1.3%;top:22%;"></span>
+
+<label class="zone" style="left:7%;top:34.5%;width:36%;height:2%;">
+<input type="radio" name="age" value="Plus de 35 ans">
+<span class="dot"></span>
 </label>
-<label class="zone" style="left:7%;top:36.5%;width:36%;height:2%;">
-<input type="radio" name="age" value="Je préfère ne pas répondre"><span class="dot" style="left:1.3%;top:22%;"></span>
+
+<label class="zone" style="left:7%;top:36.8%;width:36%;height:2%;">
+<input type="radio" name="age" value="Je préfère ne pas répondre">
+<span class="dot"></span>
 </label>
 
 <!-- GENRE -->
 <label class="zone" style="left:55%;top:30.5%;width:34%;height:2%;">
-<input type="radio" name="genre" value="Une femme"><span class="dot" style="left:1.3%;top:22%;"></span>
+<input type="radio" name="genre" value="Une femme">
+<span class="dot"></span>
 </label>
-<label class="zone" style="left:55%;top:33.2%;width:34%;height:2%;">
-<input type="radio" name="genre" value="Un homme"><span class="dot" style="left:1.3%;top:22%;"></span>
+
+<label class="zone" style="left:55%;top:33.3%;width:34%;height:2%;">
+<input type="radio" name="genre" value="Un homme">
+<span class="dot"></span>
 </label>
-<label class="zone" style="left:55%;top:36.0%;width:34%;height:2%;">
-<input type="radio" name="genre" value="Je préfère ne pas répondre"><span class="dot" style="left:1.3%;top:22%;"></span>
+
+<label class="zone" style="left:55%;top:36.1%;width:34%;height:2%;">
+<input type="radio" name="genre" value="Je préfère ne pas répondre">
+<span class="dot"></span>
 </label>
 
 <!-- JUSTICE -->
-<label class="zone" style="left:7%;top:45.2%;width:60%;height:2%;">
-<input type="radio" name="justice" value="Non, jamais"><span class="dot" style="left:1.3%;top:22%;"></span>
+<label class="zone" style="left:7%;top:45.5%;width:60%;height:2%;">
+<input type="radio" name="justice" value="Non, jamais">
+<span class="dot"></span>
 </label>
-<label class="zone" style="left:7%;top:48.2%;width:60%;height:3%;">
-<input type="radio" name="justice" value="Oui, j’ai porté plainte ou engagé une démarche officielle"><span class="dot" style="left:1.3%;top:14%;"></span>
+
+<label class="zone" style="left:7%;top:48.5%;width:60%;height:3%;">
+<input type="radio" name="justice" value="Oui, plainte">
+<span class="dot"></span>
 </label>
 
 <!-- PAROLE -->
-<label class="zone" style="left:7%;top:56.8%;width:38%;height:2%;">
-<input type="radio" name="parole" value="Non, je n’en ai jamais parlé"><span class="dot" style="left:1.3%;top:22%;"></span>
+<label class="zone" style="left:7%;top:57%;width:38%;height:2%;">
+<input type="radio" name="parole" value="Non">
+<span class="dot"></span>
 </label>
-<label class="zone" style="left:7%;top:59.5%;width:38%;height:2%;">
-<input type="radio" name="parole" value="Oui, à un proche"><span class="dot" style="left:1.3%;top:22%;"></span>
+
+<label class="zone" style="left:7%;top:59.7%;width:38%;height:2%;">
+<input type="radio" name="parole" value="Proche">
+<span class="dot"></span>
 </label>
-<label class="zone" style="left:7%;top:62.1%;width:38%;height:3%;">
-<input type="radio" name="parole" value="Oui, à un professionnel"><span class="dot" style="left:1.3%;top:14%;"></span>
+
+<label class="zone" style="left:7%;top:62.3%;width:38%;height:3%;">
+<input type="radio" name="parole" value="Professionnel">
+<span class="dot"></span>
 </label>
 
 <!-- ECOUTE -->
-<label class="zone" style="left:55%;top:56.0%;width:34%;height:2%;">
-<input type="radio" name="ecoute" value="Oui"><span class="dot" style="left:1.3%;top:22%;"></span>
+<label class="zone" style="left:55%;top:56%;width:34%;height:2%;">
+<input type="radio" name="ecoute" value="Oui">
+<span class="dot"></span>
 </label>
+
 <label class="zone" style="left:55%;top:58.7%;width:34%;height:2%;">
-<input type="radio" name="ecoute" value="Un peu"><span class="dot" style="left:1.3%;top:22%;"></span>
+<input type="radio" name="ecoute" value="Un peu">
+<span class="dot"></span>
 </label>
+
 <label class="zone" style="left:55%;top:61.3%;width:34%;height:2%;">
-<input type="radio" name="ecoute" value="Non"><span class="dot" style="left:1.3%;top:22%;"></span>
-</label>
-<label class="zone" style="left:55%;top:64.0%;width:34%;height:2%;">
-<input type="radio" name="ecoute" value="Je ne sais pas"><span class="dot" style="left:1.3%;top:22%;"></span>
+<input type="radio" name="ecoute" value="Non">
+<span class="dot"></span>
 </label>
 
-<!-- EXPRESSION -->
-<label class="zone" style="left:7%;top:71.8%;width:60%;height:2%;">
-<input type="checkbox" name="expression" value="Je suis là, même sans mots"><span class="dot" style="left:1.3%;top:22%;border-radius:0;"></span>
-</label>
-<label class="zone" style="left:7%;top:74.0%;width:60%;height:2%;">
-<input type="checkbox" name="expression" value="Je veux être reconnu(e) sans devoir tout raconter"><span class="dot" style="left:1.3%;top:22%;border-radius:0;"></span>
-</label>
-<label class="zone" style="left:7%;top:76.2%;width:60%;height:2%;">
-<input type="checkbox" name="expression" value="Je cherche à me reconstruire intérieurement"><span class="dot" style="left:1.3%;top:22%;border-radius:0;"></span>
-</label>
-<label class="zone" style="left:7%;top:78.4%;width:60%;height:2%;">
-<input type="checkbox" name="expression" value="Je veux aider d’autres personnes en partageant mon vécu"><span class="dot" style="left:1.3%;top:22%;border-radius:0;"></span>
+<label class="zone" style="left:55%;top:64%;width:34%;height:2%;">
+<input type="radio" name="ecoute" value="NSP">
+<span class="dot"></span>
 </label>
 
-<textarea id="message" placeholder="Écris ici..."></textarea>
+<!-- CHECKBOX -->
+<label class="zone" style="left:7%;top:72%;width:60%;height:2%;">
+<input type="checkbox" name="expression">
+<span class="dot square"></span>
+</label>
 
+<label class="zone" style="left:7%;top:74.3%;width:60%;height:2%;">
+<input type="checkbox" name="expression">
+<span class="dot square"></span>
+</label>
+
+<label class="zone" style="left:7%;top:76.6%;width:60%;height:2%;">
+<input type="checkbox" name="expression">
+<span class="dot square"></span>
+</label>
+
+<label class="zone" style="left:7%;top:78.8%;width:60%;height:2%;">
+<input type="checkbox" name="expression">
+<span class="dot square"></span>
+</label>
+
+<!-- MESSAGE -->
+<textarea id="message"></textarea>
+
+<!-- AUTORISATION -->
 <label class="zone" style="left:7%;top:88.5%;width:84%;height:4%;">
-<input type="checkbox" name="autorisation" value="oui"><span class="dot" style="left:1.3%;top:16%;border-radius:0;"></span>
+<input type="checkbox" name="autorisation">
+<span class="dot square"></span>
 </label>
 
-<button type="submit">Envoyer</button>
+<button type="submit"></button>
 <div id="status"></div>
 
 </form>
@@ -191,39 +241,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const form = document.getElementById("formulaire");
-const status = document.getElementById("status");
-
-function radio(name){
-  return form.querySelector(`input[name="${name}"]:checked`)?.value || "";
-}
-
-function checks(name){
-  return Array.from(form.querySelectorAll(`input[name="${name}"]:checked`)).map(e => e.value);
-}
-
-form.addEventListener("submit", async (e)=>{
+document.getElementById("formulaire").addEventListener("submit", async (e)=>{
   e.preventDefault();
 
-  const data = {
-    age: radio("age"),
-    genre: radio("genre"),
-    justice: radio("justice"),
-    parole: radio("parole"),
-    ecoute: radio("ecoute"),
-    expression: checks("expression"),
-    message: document.getElementById("message").value.trim(),
-    autorisationPartageAnonyme: form.querySelector('input[name="autorisation"]').checked,
+  await addDoc(collection(db,"reponses"),{
+    message: document.getElementById("message").value,
     date: new Date()
-  };
+  });
 
-  try{
-    await addDoc(collection(db,"reponses"), data);
-    status.textContent = "Réponse envoyée ❤️";
-    form.reset();
-  }catch(err){
-    status.textContent = "Erreur d’envoi";
-  }
+  document.getElementById("status").innerText = "Envoyé ❤️";
 });
 </script>
 
