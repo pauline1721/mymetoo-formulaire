@@ -2,32 +2,163 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Admin sécurisé</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin sécurisé - MyMeToo</title>
 
 <style>
-body{font-family:Arial;background:#f4effa;padding:20px}
-input{padding:10px;margin:5px;width:250px}
-button{padding:10px;background:#5b23ad;color:white;border:none}
-.card{background:white;padding:10px;margin:10px;border-radius:8px}
+body{
+  font-family:Arial, sans-serif;
+  background:#f4effa;
+  margin:0;
+  padding:20px;
+  color:#24106b;
+}
+
+h1,h2{
+  text-align:center;
+  color:#5b23ad;
+}
+
+#login{
+  max-width:380px;
+  margin:70px auto;
+  background:white;
+  padding:25px;
+  border-radius:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  text-align:center;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border:1px solid #ccc;
+  border-radius:8px;
+  font-size:16px;
+}
+
+button{
+  background:#5b23ad;
+  color:white;
+  border:none;
+  padding:12px 22px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+button:hover{
+  background:#47208d;
+}
+
+#error{
+  color:red;
+  font-weight:bold;
+}
+
+#adminContent{
+  display:none;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+  margin:20px 0;
+}
+
+.stat{
+  background:white;
+  padding:18px;
+  border-radius:12px;
+  text-align:center;
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+.stat strong{
+  display:block;
+  font-size:28px;
+  color:#5b23ad;
+}
+
+.card{
+  background:white;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+.field{
+  margin:6px 0;
+}
+
+.label{
+  font-weight:bold;
+  color:#5b23ad;
+}
+
+.message{
+  background:#f7effb;
+  padding:10px;
+  border-radius:8px;
+  margin-top:8px;
+}
+
+.logout{
+  display:block;
+  margin:0 auto 20px;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Connexion Admin</h2>
+<div id="login">
+  <h1>🔐 Admin MyMeToo</h1>
+  <p>Connexion sécurisée</p>
 
-<input id="email" placeholder="Email"><br>
-<input id="password" type="password" placeholder="Mot de passe"><br>
-<button onclick="login()">Se connecter</button>
+  <input id="email" type="email" placeholder="Email admin">
+  <input id="password" type="password" placeholder="Mot de passe">
 
-<hr>
+  <button onclick="login()">Se connecter</button>
+  <p id="error"></p>
+</div>
 
-<div id="data"></div>
+<div id="adminContent">
+  <h1>📊 Réponses MyMeToo</h1>
+
+  <button class="logout" onclick="logout()">Se déconnecter</button>
+
+  <div class="stats">
+    <div class="stat">
+      <strong id="total">0</strong>
+      Réponses totales
+    </div>
+    <div class="stat">
+      <strong id="partages">0</strong>
+      Messages partageables
+    </div>
+    <div class="stat">
+      <strong id="femmes">0</strong>
+      Femmes
+    </div>
+    <div class="stat">
+      <strong id="hommes">0</strong>
+      Hommes
+    </div>
+  </div>
+
+  <h2>Liste des réponses</h2>
+  <div id="data"></div>
+</div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -44,20 +175,42 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 window.login = async function(){
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const error = document.getElementById("error");
+
+  error.innerText = "";
 
   try{
     await signInWithEmailAndPassword(auth, email, password);
-    loadData();
   }catch(e){
-    alert("Erreur connexion");
+    error.innerText = "Email ou mot de passe incorrect";
   }
-}
+};
+
+window.logout = async function(){
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, user => {
+  if(user){
+    document.getElementById("login").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    loadData();
+  }else{
+    document.getElementById("login").style.display = "block";
+    document.getElementById("adminContent").style.display = "none";
+  }
+});
 
 async function loadData(){
   const container = document.getElementById("data");
   container.innerHTML = "";
+
+  let total = 0;
+  let partages = 0;
+  let femmes = 0;
+  let hommes = 0;
 
   const q = query(collection(db, "reponses"), orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
@@ -65,20 +218,45 @@ async function loadData(){
   snapshot.forEach(doc => {
     const d = doc.data();
 
+    total++;
+
+    if(d.partageAutorise && d.message){
+      partages++;
+    }
+
+    if(d.genre === "Une femme"){
+      femmes++;
+    }
+
+    if(d.genre === "Un homme"){
+      hommes++;
+    }
+
     const div = document.createElement("div");
     div.className = "card";
 
     div.innerHTML = `
-      <b>Âge :</b> ${d.age}<br>
-      <b>Genre :</b> ${d.genre}<br>
-      <b>Écoute :</b> ${d.ecoute}<br>
-      <b>Message :</b> ${d.message}<br>
+      <div class="field"><span class="label">Âge :</span> ${d.age || ""}</div>
+      <div class="field"><span class="label">Genre :</span> ${d.genre || ""}</div>
+      <div class="field"><span class="label">Justice :</span> ${d.justice || ""}</div>
+      <div class="field"><span class="label">Parlé :</span> ${d.parle || ""}</div>
+      <div class="field"><span class="label">Écoute :</span> ${d.ecoute || ""}</div>
+      <div class="field"><span class="label">Expression :</span> ${(d.expression || []).join(", ")}</div>
+      <div class="field"><span class="label">Partage autorisé :</span> ${d.partageAutorise ? "Oui" : "Non"}</div>
+      <div class="field"><span class="label">Date :</span> ${d.createdAt?.toDate().toLocaleString() || ""}</div>
+      <div class="message"><span class="label">Message :</span><br>${d.message || "Aucun message"}</div>
     `;
 
     container.appendChild(div);
   });
+
+  document.getElementById("total").innerText = total;
+  document.getElementById("partages").innerText = partages;
+  document.getElementById("femmes").innerText = femmes;
+  document.getElementById("hommes").innerText = hommes;
 }
 
 </script>
+
 </body>
 </html>
