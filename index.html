@@ -8,175 +8,173 @@
 <style>
 body{
   margin:0;
-  background:#efe5f7;
-  font-family:Arial;
-  color:#2d176b;
+  background:#000;
+  font-family:Arial,sans-serif;
 }
 
-.container{
-  max-width:900px;
+.wrap{
+  position:relative;
+  width:100%;
+  max-width:990px;
   margin:auto;
-  background:white;
-  padding:25px;
-  border-radius:20px;
 }
 
-.logo{
+.bg{
+  width:100%;
   display:block;
-  margin:0 auto;
-  width:120px;
 }
 
-h1{
-  text-align:center;
-  font-size:50px;
-  margin:10px 0;
+.zone{
+  position:absolute;
+  cursor:pointer;
 }
 
-.subtitle{
-  text-align:center;
-  font-size:22px;
-  margin-bottom:20px;
+.zone input{
+  opacity:0;
+  position:absolute;
 }
 
-.box{
-  background:#f4ecfb;
-  padding:15px;
-  border-radius:10px;
-  text-align:center;
-  margin-bottom:20px;
+.dot{
+  position:absolute;
+  width:1.6%;
+  height:1.05%;
+  border-radius:50%;
+  background:transparent;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
-}
-
-.question{
-  border:1px solid #ddd;
-  border-radius:12px;
-  padding:15px;
-  background:white;
-}
-
-.full{
-  grid-column:1 / -1;
+input:checked + .dot{
+  background:#6f50b5;
 }
 
 textarea{
-  width:100%;
-  height:80px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  padding:10px;
+  position:absolute;
+  left:7.8%;
+  top:83.8%;
+  width:84.5%;
+  height:3.4%;
+  border:0;
+  outline:none;
+  resize:none;
+  background:transparent;
+  color:#2d176b;
+  font-size:16px;
+  padding:8px;
 }
 
 button{
-  background:#6c3cd2;
-  color:white;
-  border:none;
-  padding:14px;
-  border-radius:8px;
-  font-size:18px;
+  position:absolute;
+  left:5.5%;
+  top:97.1%;
+  width:17%;
+  height:2.7%;
+  opacity:0;
   cursor:pointer;
-  margin-top:20px;
 }
 
-button:hover{
-  background:#4d2bb3;
-}
-
-.footer{
+#status{
+  position:absolute;
+  left:25%;
+  top:95.8%;
+  width:50%;
   text-align:center;
-  margin-top:20px;
-  font-size:16px;
+  color:#2d176b;
+  font-weight:bold;
+  font-size:14px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="wrap">
+<img src="formulaire-mymetoo.png" class="bg">
 
-<img src="logoUNIS.png" class="logo">
+<form id="formulaire">
 
-<h1>MyMeToo*</h1>
-<div class="subtitle">Ta voix, même silencieuse, compte ❤️</div>
+<!-- AGE -->
+<label class="zone" style="left:7%;top:29.8%;width:36%;height:2%;">
+<input type="radio" name="age" value="Moins de 18 ans"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:7%;top:32.0%;width:36%;height:2%;">
+<input type="radio" name="age" value="18 / 35 ans"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:7%;top:34.2%;width:36%;height:2%;">
+<input type="radio" name="age" value="Plus de 35 ans"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:7%;top:36.5%;width:36%;height:2%;">
+<input type="radio" name="age" value="Je préfère ne pas répondre"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
 
-<div class="box">
-Ici, tu n’as pas besoin de tout raconter.<br>
-<b>Simplement d’exister.</b><br>
-Juste de déposer ce que tu peux.
-</div>
+<!-- GENRE -->
+<label class="zone" style="left:55%;top:30.5%;width:34%;height:2%;">
+<input type="radio" name="genre" value="Une femme"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:55%;top:33.2%;width:34%;height:2%;">
+<input type="radio" name="genre" value="Un homme"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:55%;top:36.0%;width:34%;height:2%;">
+<input type="radio" name="genre" value="Je préfère ne pas répondre"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
 
-<form id="form">
+<!-- JUSTICE -->
+<label class="zone" style="left:7%;top:45.2%;width:60%;height:2%;">
+<input type="radio" name="justice" value="Non, jamais"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:7%;top:48.2%;width:60%;height:3%;">
+<input type="radio" name="justice" value="Oui, j’ai porté plainte ou engagé une démarche officielle"><span class="dot" style="left:1.3%;top:14%;"></span>
+</label>
 
-<div class="grid">
+<!-- PAROLE -->
+<label class="zone" style="left:7%;top:56.8%;width:38%;height:2%;">
+<input type="radio" name="parole" value="Non, je n’en ai jamais parlé"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:7%;top:59.5%;width:38%;height:2%;">
+<input type="radio" name="parole" value="Oui, à un proche"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:7%;top:62.1%;width:38%;height:3%;">
+<input type="radio" name="parole" value="Oui, à un professionnel"><span class="dot" style="left:1.3%;top:14%;"></span>
+</label>
 
-<div class="question">
-<b>1. Quel est ton âge ?</b><br><br>
-<label><input type="radio" name="age" value="Moins de 18 ans"> Moins de 18 ans</label><br>
-<label><input type="radio" name="age" value="18-35"> 18 / 35 ans</label><br>
-<label><input type="radio" name="age" value="Plus de 35"> Plus de 35 ans</label><br>
-<label><input type="radio" name="age" value="NR"> Je préfère ne pas répondre</label>
-</div>
+<!-- ECOUTE -->
+<label class="zone" style="left:55%;top:56.0%;width:34%;height:2%;">
+<input type="radio" name="ecoute" value="Oui"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:55%;top:58.7%;width:34%;height:2%;">
+<input type="radio" name="ecoute" value="Un peu"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:55%;top:61.3%;width:34%;height:2%;">
+<input type="radio" name="ecoute" value="Non"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
+<label class="zone" style="left:55%;top:64.0%;width:34%;height:2%;">
+<input type="radio" name="ecoute" value="Je ne sais pas"><span class="dot" style="left:1.3%;top:22%;"></span>
+</label>
 
-<div class="question">
-<b>2. Quel est ton genre ?</b><br><br>
-<label><input type="radio" name="genre" value="femme"> Une femme</label><br>
-<label><input type="radio" name="genre" value="homme"> Un homme</label><br>
-<label><input type="radio" name="genre" value="NR"> Je préfère ne pas répondre</label>
-</div>
+<!-- EXPRESSION -->
+<label class="zone" style="left:7%;top:71.8%;width:60%;height:2%;">
+<input type="checkbox" name="expression" value="Je suis là, même sans mots"><span class="dot" style="left:1.3%;top:22%;border-radius:0;"></span>
+</label>
+<label class="zone" style="left:7%;top:74.0%;width:60%;height:2%;">
+<input type="checkbox" name="expression" value="Je veux être reconnu(e) sans devoir tout raconter"><span class="dot" style="left:1.3%;top:22%;border-radius:0;"></span>
+</label>
+<label class="zone" style="left:7%;top:76.2%;width:60%;height:2%;">
+<input type="checkbox" name="expression" value="Je cherche à me reconstruire intérieurement"><span class="dot" style="left:1.3%;top:22%;border-radius:0;"></span>
+</label>
+<label class="zone" style="left:7%;top:78.4%;width:60%;height:2%;">
+<input type="checkbox" name="expression" value="Je veux aider d’autres personnes en partageant mon vécu"><span class="dot" style="left:1.3%;top:22%;border-radius:0;"></span>
+</label>
 
-<div class="question full">
-<b>3. Ton vécu a-t-il été porté devant la justice ?</b><br><br>
-<label><input type="radio" name="justice" value="non"> Non, jamais</label><br>
-<label><input type="radio" name="justice" value="oui"> Oui, j’ai porté plainte</label>
-</div>
+<textarea id="message" placeholder="Écris ici..."></textarea>
 
-<div class="question">
-<b>4. As-tu déjà parlé de ce que tu as vécu ?</b><br><br>
-<label><input type="radio" name="parole" value="non"> Non</label><br>
-<label><input type="radio" name="parole" value="proche"> Oui, à un proche</label><br>
-<label><input type="radio" name="parole" value="pro"> Oui, à un professionnel</label>
-</div>
-
-<div class="question">
-<b>5. Te sens-tu écouté(e) ?</b><br><br>
-<label><input type="radio" name="ecoute" value="oui"> Oui</label><br>
-<label><input type="radio" name="ecoute" value="un_peu"> Un peu</label><br>
-<label><input type="radio" name="ecoute" value="non"> Non</label>
-</div>
-
-<div class="question full">
-<b>6. Que souhaites-tu exprimer ?</b><br><br>
-<label><input type="checkbox" value="present"> Je suis là</label><br>
-<label><input type="checkbox" value="reconnu"> Être reconnu</label><br>
-<label><input type="checkbox" value="reconstruction"> Me reconstruire</label><br>
-<label><input type="checkbox" value="aider"> Aider d’autres</label>
-</div>
-
-<div class="question full">
-<b>7. Message anonyme</b><br><br>
-<textarea id="message"></textarea>
-</div>
-
-</div>
+<label class="zone" style="left:7%;top:88.5%;width:84%;height:4%;">
+<input type="checkbox" name="autorisation" value="oui"><span class="dot" style="left:1.3%;top:16%;border-radius:0;"></span>
+</label>
 
 <button type="submit">Envoyer</button>
-
-</form>
-
 <div id="status"></div>
 
-<div class="footer">
-Chaque réponse compte ❤️
+</form>
 </div>
 
-</div>
-
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -193,28 +191,41 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-document.getElementById("form").addEventListener("submit", async (e)=>{
+const form = document.getElementById("formulaire");
+const status = document.getElementById("status");
+
+function radio(name){
+  return form.querySelector(`input[name="${name}"]:checked`)?.value || "";
+}
+
+function checks(name){
+  return Array.from(form.querySelectorAll(`input[name="${name}"]:checked`)).map(e => e.value);
+}
+
+form.addEventListener("submit", async (e)=>{
   e.preventDefault();
 
   const data = {
-    age: document.querySelector('input[name="age"]:checked')?.value || "",
-    genre: document.querySelector('input[name="genre"]:checked')?.value || "",
-    justice: document.querySelector('input[name="justice"]:checked')?.value || "",
-    parole: document.querySelector('input[name="parole"]:checked')?.value || "",
-    ecoute: document.querySelector('input[name="ecoute"]:checked')?.value || "",
-    message: document.getElementById("message").value,
+    age: radio("age"),
+    genre: radio("genre"),
+    justice: radio("justice"),
+    parole: radio("parole"),
+    ecoute: radio("ecoute"),
+    expression: checks("expression"),
+    message: document.getElementById("message").value.trim(),
+    autorisationPartageAnonyme: form.querySelector('input[name="autorisation"]').checked,
     date: new Date()
   };
 
   try{
     await addDoc(collection(db,"reponses"), data);
-    document.getElementById("status").innerHTML = "✅ Merci ❤️";
+    status.textContent = "Réponse envoyée ❤️";
+    form.reset();
   }catch(err){
-    document.getElementById("status").innerHTML = "❌ Erreur";
+    status.textContent = "Erreur d’envoi";
   }
 });
 </script>
 
 </body>
 </html>
-
