@@ -40,38 +40,66 @@ window.envoyer = async function () {
 
 <style>
 body {
-  background: #f3eef9;
+  background: #f4eef9;
   font-family: Arial;
   margin: 0;
   padding: 20px;
 }
 
-h1 {
+.container {
+  max-width: 800px;
+  margin: auto;
+}
+
+.header {
   text-align: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 32px;
   color: #5c3ea8;
 }
 
-.container {
-  max-width: 700px;
-  margin: auto;
+.subtitle {
+  color: #6b5aa6;
+}
+
+.intro {
+  background: #e9e1f5;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
 }
 
 .box {
   background: white;
-  padding: 20px;
-  margin: 15px 0;
+  padding: 15px;
   border-radius: 15px;
+}
+
+.full {
+  grid-column: 1 / 2;
 }
 
 .question {
   font-weight: bold;
   margin-bottom: 10px;
+  color: #4a3c8a;
 }
 
 textarea {
   width: 100%;
   border-radius: 10px;
   padding: 10px;
+  border: 1px solid #ccc;
 }
 
 button {
@@ -82,6 +110,7 @@ button {
   border: none;
   border-radius: 12px;
   font-size: 18px;
+  margin-top: 20px;
   cursor: pointer;
 }
 
@@ -94,9 +123,20 @@ button:hover {
 
 <body>
 
-<h1>MyMeToo</h1>
-
 <div class="container">
+
+<div class="header">
+  <div class="title">MyMeToo</div>
+  <div class="subtitle">Ta voix, même silencieuse, compte</div>
+</div>
+
+<div class="intro">
+  Ici, tu n’as pas besoin de tout raconter.<br>
+  <b>Simplement d’exister.</b><br>
+  Juste de déposer ce que tu peux.
+</div>
+
+<div class="grid">
 
 <div class="box">
   <div class="question">1. Quel est ton âge ?</div>
@@ -130,12 +170,23 @@ button:hover {
   <div class="question">5. Aujourd’hui, te sens-tu écouté(e) ?</div>
   <label><input type="radio" name="ecoute" value="oui"> Oui</label><br>
   <label><input type="radio" name="ecoute" value="peu"> Un peu</label><br>
-  <label><input type="radio" name="ecoute" value="non"> Non</label>
+  <label><input type="radio" name="ecoute" value="non"> Non</label><br>
+  <label><input type="radio" name="ecoute" value="ns"> Je ne sais pas</label>
 </div>
 
 <div class="box">
-  <div class="question">6. Message anonyme</div>
+  <div class="question">6. Que souhaites-tu exprimer ?</div>
+  <label><input type="checkbox"> Je suis là, même sans mots</label><br>
+  <label><input type="checkbox"> Être reconnu(e)</label><br>
+  <label><input type="checkbox"> Me reconstruire</label><br>
+  <label><input type="checkbox"> Aider d’autres personnes</label>
+</div>
+
+<div class="box full">
+  <div class="question">7. Message anonyme</div>
   <textarea id="message" rows="4" placeholder="Écris ici..."></textarea>
+</div>
+
 </div>
 
 <button onclick="envoyer()">Envoyer</button>
