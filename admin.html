@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - MyMeToo</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:#f4effa;
+  margin:0;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  color:#5b23ad;
+}
+
+.card{
+  background:white;
+  border-radius:10px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+.field{
+  margin:5px 0;
+}
+
+.label{
+  font-weight:bold;
+  color:#5b23ad;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📊 Réponses MyMeToo</h1>
+
+<div id="data"></div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// 🔥 TA CONFIG FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
+  authDomain: "mymetoo-formulaire.firebaseapp.com",
+  projectId: "mymetoo-formulaire",
+  storageBucket: "mymetoo-formulaire.firebasestorage.app",
+  messagingSenderId: "1084270329845",
+  appId: "1:1084270329845:web:337a6172a4817f0db2eabc"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const container = document.getElementById("data");
+
+async function loadData(){
+  const q = query(collection(db, "reponses"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+
+  snapshot.forEach(doc => {
+    const d = doc.data();
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <div class="field"><span class="label">Âge :</span> ${d.age || ""}</div>
+      <div class="field"><span class="label">Genre :</span> ${d.genre || ""}</div>
+      <div class="field"><span class="label">Justice :</span> ${d.justice || ""}</div>
+      <div class="field"><span class="label">Parlé :</span> ${d.parle || ""}</div>
+      <div class="field"><span class="label">Écoute :</span> ${d.ecoute || ""}</div>
+      <div class="field"><span class="label">Expression :</span> ${(d.expression || []).join(", ")}</div>
+      <div class="field"><span class="label">Message :</span> ${d.message || ""}</div>
+      <div class="field"><span class="label">Partage :</span> ${d.partageAutorise ? "Oui" : "Non"}</div>
+      <div class="field"><span class="label">Date :</span> ${d.createdAt?.toDate().toLocaleString() || ""}</div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
