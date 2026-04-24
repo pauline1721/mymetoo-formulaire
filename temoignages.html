@@ -3,41 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Témoignages - MyMeToo</title>
+<title>Témoignages anonymes - MyMeToo</title>
 
 <style>
-:root{
-  --violet:#24106b;
-  --violet2:#6f42bd;
-  --fond:#e8d7f3;
-  --soft:#f7effb;
-  --border:#d8c2eb;
-}
-
-*{box-sizing:border-box}
-
 body{
-  margin:0;
-  background:var(--fond);
   font-family:Arial, sans-serif;
-  color:var(--violet);
+  background:#f4effa;
+  margin:0;
+  padding:20px;
+  color:#24106b;
 }
 
-.page{
-  width:100%;
-  max-width:1030px;
-  min-height:100vh;
-  margin:0 auto;
+.container{
+  max-width:800px;
+  margin:auto;
   background:white;
-  border:7px solid var(--border);
-  border-radius:0 0 18px 18px;
-  padding:18px 40px 30px;
-
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.08);
   position:relative;
   overflow:hidden;
 }
 
-/* 🌿 FEUILLES */
+/* FEUILLES */
 .leaf{
   position:absolute;
   width:480px;
@@ -51,9 +39,10 @@ body{
 }
 
 .leaf.right{
-  right:0;
+  right:0; /* tu peux ajuster ici */
 }
 
+/* HEADER */
 .header{
   text-align:center;
   position:relative;
@@ -61,154 +50,104 @@ body{
 }
 
 .logo{
-  width:170px;
-  display:block;
-  margin:0 auto;
-}
-
-.unis{
-  font-family:Georgia, serif;
-  font-weight:bold;
-  font-size:24px;
-}
-
-h1{
-  font-family:Georgia, serif;
-  font-size:60px;
-  line-height:.9;
-  margin:5px 0 8px;
-}
-
-.subtitle{
-  font-family:Georgia, serif;
-  font-size:30px;
-  font-weight:bold;
-  margin-bottom:18px;
-}
-
-.intro{
-  position:relative;
-  z-index:2;
-  max-width:850px;
-  margin:0 auto 25px;
-  background:var(--soft);
-  border:2px solid #ded2ec;
-  border-radius:12px;
-  text-align:center;
-  padding:16px;
-  font-size:20px;
-  line-height:1.5;
-}
-
-.container{
-  max-width:850px;
-  margin:0 auto;
-  position:relative;
-  z-index:2;
-}
-
-.card{
-  background:white;
-  border:2px solid #eeeaf3;
-  border-radius:14px;
-  padding:22px;
-  margin-bottom:18px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.04);
-}
-
-.meta{
-  color:#6f42bd;
-  font-weight:bold;
-  font-size:14px;
+  width:90px;
   margin-bottom:10px;
 }
 
-.message{
+h1{
+  margin:10px 0 0;
+  color:#3b2c80;
+}
+
+.subtitle{
+  font-size:20px;
+  margin-top:5px;
+}
+
+/* TEXTE INTRO */
+.info{
+  margin:20px 0;
+  padding:15px;
   background:#f7effb;
   border-radius:12px;
-  padding:18px;
-  font-family:Georgia, serif;
-  font-size:22px;
-  line-height:1.45;
+  text-align:center;
 }
 
-.message::before{
-  content:"“";
-  font-size:34px;
-  color:#6f42bd;
+/* CARD */
+.card{
+  background:white;
+  border-radius:14px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+  overflow:hidden;
 }
 
-.message::after{
-  content:" ”";
-  font-size:34px;
-  color:#6f42bd;
+.meta{
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+/* MESSAGE */
+.message{
+  background:#f7effb;
+  padding:15px;
+  border-radius:10px;
+  font-size:18px;
+  line-height:1.5;
+
+  /* 🔥 FIX MOBILE */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .date{
-  margin-top:10px;
-  color:#8b78a8;
-  font-size:13px;
   text-align:right;
+  font-size:12px;
+  margin-top:10px;
+  color:#777;
 }
 
-.empty{
-  text-align:center;
-  background:var(--soft);
-  border-radius:12px;
-  padding:25px;
-  font-weight:bold;
-  color:#6f42bd;
-}
-
+/* FOOTER */
 .footer{
   text-align:center;
-  margin-top:30px;
-  color:#6e4cb0;
+  margin-top:20px;
   font-weight:bold;
-}
-
-@media(max-width:800px){
-  .page{padding:12px}
-  .logo{width:130px}
-  h1{font-size:46px}
-  .subtitle{font-size:24px}
-  .message{font-size:19px}
-  .leaf{width:180px; opacity:.3}
+  color:#6a4fb3;
 }
 </style>
 </head>
 
 <body>
 
-<main class="page">
+<div class="container">
 
-<!-- 🌿 FEUILLES -->
-<img src="feuille-gauche.png" class="leaf left" alt="">
-<img src="feuille-droite.png" class="leaf right" alt="">
+  <!-- FEUILLES -->
+  <img src="feuille-gauche.png" class="leaf left">
+  <img src="feuille-droite.png" class="leaf right">
 
-<div class="header">
-  <img src="logoUNIS.png" class="logo" alt="UNIS">
-  <div class="unis">UNIS</div>
-  <h1>MyMeToo*</h1>
-  <div class="subtitle">Les voix silencieuses</div>
+  <!-- HEADER -->
+  <div class="header">
+    <img src="logoUNIS.png" class="logo">
+    <h1>MyMeToo*</h1>
+    <div class="subtitle">Les voix silencieuses</div>
+  </div>
+
+  <!-- TEXTE -->
+  <div class="info">
+    Ici, seules les paroles partagées volontairement apparaissent.<br>
+    Chaque témoignage reste anonyme. Chaque voix compte.
+  </div>
+
+  <!-- DONNÉES -->
+  <div id="data"></div>
+
+  <div class="footer">
+    ♡ Merci d’être là. Tu n’es pas seul(e). ♡
+  </div>
+
 </div>
-
-<div class="intro">
-  Ici, seules les paroles partagées volontairement apparaissent.<br>
-  Chaque témoignage reste anonyme. Chaque voix compte.
-</div>
-
-<div class="container" id="list"></div>
-
-<div id="empty" class="empty" style="display:none;">
-  Aucun témoignage pour le moment 💜
-</div>
-
-<div class="footer">
-  ♡ Merci d’être là. Tu n’es pas seul(e). ♡
-</div>
-
-</main>
 
 <script type="module">
 
@@ -227,42 +166,33 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-async function load(){
-  const container = document.getElementById("list");
-  const empty = document.getElementById("empty");
+async function loadData(){
+  const container = document.getElementById("data");
+  container.innerHTML = "";
 
-  const q = query(collection(db,"reponses"), orderBy("createdAt","desc"));
-  const snap = await getDocs(q);
+  const q = query(collection(db, "reponses"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
 
-  let count = 0;
-
-  snap.forEach(doc => {
+  snapshot.forEach(doc => {
     const d = doc.data();
 
+    // 🔥 On filtre uniquement les témoignages autorisés
     if(!d.partageAutorise || !d.message) return;
-
-    count++;
-
-    const date = d.createdAt?.toDate().toLocaleDateString("fr-FR") || "";
 
     const div = document.createElement("div");
     div.className = "card";
 
     div.innerHTML = `
       <div class="meta">${d.age || ""} • ${d.genre || ""}</div>
-      <div class="message">${d.message}</div>
-      <div class="date">${date}</div>
+      <div class="message">“ ${d.message} ”</div>
+      <div class="date">${d.createdAt?.toDate().toLocaleDateString() || ""}</div>
     `;
 
     container.appendChild(div);
   });
-
-  if(count === 0){
-    empty.style.display = "block";
-  }
 }
 
-load();
+loadData();
 
 </script>
 
