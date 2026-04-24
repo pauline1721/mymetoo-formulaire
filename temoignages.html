@@ -195,6 +195,38 @@ h1{
   color:#5b23ad;
 }
 
+.replies{
+  margin-top:18px;
+  padding-top:14px;
+  border-top:1px solid #e5d9f2;
+}
+
+.replies-title{
+  font-weight:bold;
+  color:#6f42bd;
+  margin-bottom:10px;
+}
+
+.reply{
+  background:#fbf8ff;
+  border-left:4px solid #6f42bd;
+  border-radius:8px;
+  padding:12px;
+  margin-top:10px;
+  font-size:16px;
+  line-height:1.45;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+
+.reply small{
+  display:block;
+  color:#8b78a8;
+  margin-top:8px;
+  font-size:12px;
+}
+
 .empty{
   text-align:center;
   background:var(--soft);
@@ -295,11 +327,56 @@ window.sendReply = async function(id){
 
     document.getElementById("text-" + id).value = "";
     status.textContent = "Merci 💜 ta réponse anonyme a été envoyée.";
+
+    setTimeout(() => {
+      location.reload();
+    }, 800);
+
   }catch(e){
     console.error(e);
     status.textContent = "Erreur : la réponse n’a pas pu être envoyée.";
   }
 };
+
+async function loadReplies(parentId){
+  const repliesContainer = document.getElementById("replies-" + parentId);
+  repliesContainer.innerHTML = "";
+
+  const q = query(
+    collection(db, "reponses", parentId, "commentaires"),
+    orderBy("createdAt", "asc")
+  );
+
+  const snap = await getDocs(q);
+
+  let replyCount = 0;
+
+  snap.forEach(replyDoc => {
+    const r = replyDoc.data();
+
+    if(!r.message || r.visible === false) return;
+
+    replyCount++;
+
+    const date = r.createdAt?.toDate().toLocaleDateString("fr-FR") || "";
+
+    const div = document.createElement("div");
+    div.className = "reply";
+    div.innerHTML = `
+      ${r.message}
+      <small>Réponse anonyme${date ? " • " + date : ""}</small>
+    `;
+
+    repliesContainer.appendChild(div);
+  });
+
+  if(replyCount > 0){
+    const title = document.createElement("div");
+    title.className = "replies-title";
+    title.textContent = replyCount === 1 ? "1 réponse anonyme" : replyCount + " réponses anonymes";
+    repliesContainer.prepend(title);
+  }
+}
 
 async function load(){
   const container = document.getElementById("list");
@@ -310,11 +387,11 @@ async function load(){
 
   let count = 0;
 
-  snap.forEach(doc => {
-    const d = doc.data();
-    const id = doc.id;
+  for(const docSnap of snap.docs){
+    const d = docSnap.data();
+    const id = docSnap.id;
 
-    if(!d.partageAutorise || !d.message || d.visible === false) return;
+    if(!d.partageAutorise || !d.message || d.visible === false) continue;
 
     count++;
 
@@ -337,10 +414,14 @@ async function load(){
         <button class="reply-send" onclick="sendReply('${id}')">Envoyer</button>
         <div class="reply-status" id="status-${id}"></div>
       </div>
+
+      <div class="replies" id="replies-${id}"></div>
     `;
 
     container.appendChild(div);
-  });
+
+    await loadReplies(id);
+  }
 
   if(count === 0){
     empty.style.display = "block";
