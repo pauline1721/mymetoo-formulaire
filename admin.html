@@ -111,6 +111,12 @@ button:hover{
   overflow:hidden;
 }
 
+.card.hidden-response{
+  opacity:.65;
+  border:2px dashed #bfa9df;
+  background:#fbf8ff;
+}
+
 .field{
   margin:8px 0;
 }
@@ -129,6 +135,32 @@ button:hover{
   word-wrap:break-word;
   overflow-wrap:break-word;
   word-break:break-word;
+}
+
+.badge-hidden{
+  display:inline-block;
+  background:#d94b6a;
+  color:white;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.hide-btn{
+  margin-top:12px;
+  background:#6f42bd;
+  color:white;
+  border:none;
+  padding:9px 14px;
+  border-radius:7px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.hide-btn:hover{
+  background:#5a35a3;
 }
 
 .logout{
@@ -199,7 +231,7 @@ button:hover{
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
@@ -232,6 +264,19 @@ window.login = async function(){
 
 window.logout = async function(){
   await signOut(auth);
+};
+
+window.toggleVisibility = async function(id, isVisible){
+  try{
+    await updateDoc(doc(db, "reponses", id), {
+      visible: !isVisible
+    });
+
+    loadData();
+  }catch(e){
+    alert("Erreur lors de la modification");
+    console.error(e);
+  }
 };
 
 onAuthStateChanged(auth, user => {
@@ -302,8 +347,10 @@ async function loadData(){
     container.innerHTML = `<div class="empty">Aucune réponse pour le moment.</div>`;
   }
 
-  snapshot.forEach(doc => {
-    const d = doc.data();
+  snapshot.forEach(item => {
+    const d = item.data();
+    const id = item.id;
+    const isVisible = d.visible !== false;
 
     total++;
 
@@ -312,7 +359,7 @@ async function loadData(){
 
     daysData[dayKey] = (daysData[dayKey] || 0) + 1;
 
-    if(d.partageAutorise && d.message){
+    if(d.partageAutorise && d.message && isVisible){
       partages++;
     }
 
@@ -325,9 +372,10 @@ async function loadData(){
     }
 
     const div = document.createElement("div");
-    div.className = "card";
+    div.className = isVisible ? "card" : "card hidden-response";
 
     div.innerHTML = `
+      ${!isVisible ? `<div class="badge-hidden">Témoignage masqué</div>` : ""}
       <div class="field"><span class="label">Âge :</span> ${d.age || ""}</div>
       <div class="field"><span class="label">Genre :</span> ${d.genre || ""}</div>
       <div class="field"><span class="label">Justice :</span> ${d.justice || ""}</div>
@@ -335,8 +383,13 @@ async function loadData(){
       <div class="field"><span class="label">Écoute :</span> ${d.ecoute || ""}</div>
       <div class="field"><span class="label">Expression :</span> ${(d.expression || []).join(", ")}</div>
       <div class="field"><span class="label">Partage autorisé :</span> ${d.partageAutorise ? "Oui" : "Non"}</div>
+      <div class="field"><span class="label">Affiché sur la page témoignages :</span> ${isVisible ? "Oui" : "Non"}</div>
       <div class="field"><span class="label">Date :</span> ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}</div>
       <div class="message"><span class="label">Message :</span><br>${d.message || "Aucun message"}</div>
+
+      <button onclick="toggleVisibility('${id}', ${isVisible})" class="hide-btn">
+        ${isVisible ? "Masquer" : "Afficher"}
+      </button>
     `;
 
     container.appendChild(div);
