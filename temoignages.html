@@ -236,7 +236,7 @@ async function load(){
   snap.forEach(doc => {
     const d = doc.data();
 
-    if(!d.partageAutorise || !d.message) return;
+    if(!d.partageAutorise || !d.message || d.visible === false) return;
 
     count++;
 
