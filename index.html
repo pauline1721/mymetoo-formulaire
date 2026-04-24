@@ -115,6 +115,18 @@ header{position:relative; z-index:2}
   background:#fff;
 }
 
+.card.error{
+  border:3px solid #d94b6a !important;
+  background:#fff5f7 !important;
+}
+
+.error-message{
+  color:#d94b6a;
+  font-weight:bold;
+  font-size:14px;
+  margin-top:8px;
+}
+
 .full{grid-column:1/-1}
 
 .title{
@@ -451,7 +463,74 @@ function getChecks(name){
   return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value);
 }
 
+function clearErrors(){
+  document.querySelectorAll(".card").forEach(el => {
+    el.classList.remove("error");
+  });
+
+  document.querySelectorAll(".error-message").forEach(el => {
+    el.remove();
+  });
+}
+
+function showError(element, message){
+  element.classList.add("error");
+
+  const error = document.createElement("div");
+  error.className = "error-message";
+  error.innerText = message;
+
+  element.appendChild(error);
+}
+
+function validateForm(){
+  clearErrors();
+
+  let isValid = true;
+
+  const requiredRadios = [
+    { name:"age", message:"Merci de choisir une réponse." },
+    { name:"genre", message:"Merci de choisir une réponse." },
+    { name:"justice", message:"Merci de choisir une réponse." },
+    { name:"parle", message:"Merci de choisir une réponse." },
+    { name:"ecoute", message:"Merci de choisir une réponse." }
+  ];
+
+  requiredRadios.forEach(item => {
+    const checked = document.querySelector(`input[name="${item.name}"]:checked`);
+
+    if(!checked){
+      const firstInput = document.querySelector(`input[name="${item.name}"]`);
+      const card = firstInput.closest(".card");
+      showError(card, item.message);
+      isValid = false;
+    }
+  });
+
+  const expressionChecked = document.querySelectorAll('input[name="expression"]:checked');
+
+  if(expressionChecked.length === 0){
+    const card = document.querySelector('input[name="expression"]').closest(".card");
+    showError(card, "Merci de cocher au moins une réponse.");
+    isValid = false;
+  }
+
+  if(!isValid){
+    document.querySelector(".error")?.scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    });
+  }
+
+  return isValid;
+}
+
 sendBtn.addEventListener("click", async () => {
+  if(!validateForm()){
+    status.textContent = "Merci de compléter toutes les questions obligatoires 💜";
+    return;
+  }
+
   sendBtn.disabled = true;
   status.textContent = "Envoi en cours...";
 
