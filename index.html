@@ -3,166 +3,428 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MyMeToo - UNIS</title>
+<title>UNIS - MyMeToo</title>
 
 <style>
+:root{
+  --violet:#24106b;
+  --violet2:#6f42bd;
+  --soft:#f7effb;
+  --border:#ded2ec;
+}
+
+*{box-sizing:border-box}
+
 body{
   margin:0;
-  font-family:Arial;
-  background:#eadcf7;
+  background:#e8d7f3;
+  font-family: Arial, sans-serif;
+  color:var(--violet);
 }
 
-.container{
-  max-width:900px;
-  margin:auto;
-  background:white;
-  padding:30px;
-  border:6px solid #d7bdf0;
+.page{
+  width:100%;
+  max-width:1030px;
+  margin:0 auto;
+  background:#fff;
+  border:7px solid #d8c2eb;
+  border-radius:0 0 18px 18px;
+  padding:10px 40px 8px;
   position:relative;
+  overflow:hidden;
 }
-
-.leaf{
-  position:absolute;
-  width:180px;
-  opacity:0.5;
-}
-.left{left:0;top:0;}
-.right{right:0;top:0;}
 
 .logo{
   display:block;
-  margin:auto;
-  width:180px;
+  width:210px;
+  margin:0 auto -3px;
+}
+
+.unis{
+  text-align:center;
+  font-family:Georgia, serif;
+  font-weight:bold;
+  font-size:27px;
 }
 
 h1{
   text-align:center;
-  font-size:60px;
+  font-family:Georgia, serif;
+  font-size:72px;
+  line-height:.85;
   margin:0;
 }
 
 .subtitle{
   text-align:center;
-  font-size:28px;
-  margin-bottom:20px;
+  font-family:Georgia, serif;
+  font-size:35px;
+  font-weight:bold;
+  margin:10px 0 16px;
+}
+
+.leaf{
+  position:absolute;
+  top:0;
+  width:260px;
+  opacity:.75;
+  z-index:1;
+}
+
+.leaf.left{left:0}
+.leaf.right{right:0}
+
+header{position:relative; z-index:2}
+
+.intro{
+  position:relative;
+  z-index:2;
+  max-width:860px;
+  margin:0 auto 14px;
+  background:#f7f0fb;
+  border:2px solid var(--border);
+  border-radius:11px;
+  text-align:center;
+  padding:13px;
+  font-size:22px;
+  line-height:1.45;
+}
+
+.intro strong{font-weight:900}
+
+.intro-heart{
+  position:absolute;
+  right:28px;
+  top:38px;
+  font-size:48px;
+  color:var(--violet2);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px 24px;
 }
 
 .card{
-  border:1px solid #ddd;
-  border-radius:10px;
-  padding:15px;
-  margin:10px 0;
+  border:2px solid #eeeaf3;
+  border-radius:12px;
+  padding:14px 20px;
+  min-height:150px;
   position:relative;
+  background:#fff;
+}
+
+.full{grid-column:1/-1}
+
+.title{
+  font-family:Georgia, serif;
+  font-weight:bold;
+  font-size:25px;
+  margin-bottom:12px;
+}
+
+.option{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin:8px 0;
+  font-size:18px;
+  font-weight:600;
+}
+
+input{
+  appearance:none;
+  width:23px;
+  height:23px;
+  border:2.5px solid #835ac4;
+  background:#fff;
+  flex-shrink:0;
+}
+
+input[type=radio]{border-radius:50%}
+input[type=checkbox]{border-radius:1px}
+
+input:checked{
+  background:radial-gradient(circle,#6e42b7 42%,transparent 46%);
+}
+
+input[type=checkbox]:checked{
+  background:
+    linear-gradient(45deg,transparent 43%,#6e42b7 44%,#6e42b7 56%,transparent 57%),
+    linear-gradient(-45deg,transparent 35%,#6e42b7 36%,#6e42b7 52%,transparent 53%);
 }
 
 .icon{
   position:absolute;
-  right:10px;
-  bottom:10px;
-  width:60px;
+  right:28px;
+  bottom:22px;
+  width:92px;
+  height:auto;
+}
+
+.icon.big{
+  width:130px;
+  right:70px;
+  bottom:20px;
+}
+
+.icon.heartbig{
+  width:145px;
+  right:95px;
+  bottom:12px;
+}
+
+.hint{
+  font-size:17px;
+  font-weight:600;
+  margin-top:-7px;
+  margin-bottom:6px;
 }
 
 textarea{
   width:100%;
-  height:80px;
+  height:58px;
+  border:2px solid #c4b2e4;
+  border-radius:8px;
+  resize:none;
+  outline:none;
+  padding:10px 60px 10px 10px;
+  font-size:18px;
+}
+
+.pen{
+  position:absolute;
+  right:37px;
+  bottom:23px;
+  width:43px;
+  height:auto;
+}
+
+.consent{
+  grid-column:1/-1;
+  border:2px solid #eeeaf3;
+  border-radius:10px;
+  padding:14px 145px 14px 20px;
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  font-family:Georgia, serif;
+  font-size:21px;
+  font-weight:bold;
+  line-height:1.35;
+  position:relative;
+}
+
+.share{
+  position:absolute;
+  right:58px;
+  top:22px;
+  width:58px;
+  height:auto;
+}
+
+.bottom{
+  grid-column:1/-1;
+  background:#f6ebfb;
+  border-radius:10px;
+  min-height:88px;
+  display:grid;
+  grid-template-columns:170px 1fr 120px;
+  align-items:center;
+  padding:10px 30px;
+}
+
+.env{
+  width:90px;
+  height:auto;
+}
+
+.bottom-text{
+  font-size:19px;
+  line-height:1.35;
+}
+
+.bottom-text strong{
+  font-family:Georgia, serif;
+  font-size:24px;
+}
+
+.big-heart{
+  font-size:62px;
+  text-align:right;
+  color:#5d2fac;
+}
+
+.footer{
+  display:flex;
+  align-items:center;
+  margin-top:8px;
 }
 
 button{
-  background:#6a2ccf;
+  background:linear-gradient(90deg,#5b23ad,#7e45d1);
   color:white;
-  padding:10px 30px;
   border:none;
-  border-radius:8px;
+  border-radius:9px 9px 0 0;
+  padding:10px 42px;
+  font-size:20px;
+  font-weight:bold;
   cursor:pointer;
-  font-size:18px;
+}
+
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.thanks{
+  flex:1;
+  text-align:center;
+  color:#6e4cb0;
+  font-size:17px;
+  font-weight:600;
+}
+
+#status{
+  text-align:center;
+  font-weight:bold;
+  margin-top:8px;
+  color:#5b23ad;
+}
+
+@media(max-width:800px){
+  .page{padding:8px 12px}
+  .grid{grid-template-columns:1fr}
+  .full,.consent,.bottom{grid-column:auto}
+  h1{font-size:52px}
+  .subtitle{font-size:26px}
+  .logo{width:165px}
+  .leaf{width:150px; opacity:.35}
+  .icon{opacity:.28}
+  .bottom{grid-template-columns:80px 1fr 50px}
+  .consent{padding-right:20px}
+  .share{display:none}
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<main class="page">
 
-<img src="feuille-gauche.png" class="leaf left">
-<img src="feuille-droite.png" class="leaf right">
+<img src="feuille-gauche.png" class="leaf left" alt="">
+<img src="feuille-droite.png" class="leaf right" alt="">
 
-<img src="logoUNIS.png" class="logo">
+<header>
+  <img class="logo" src="logoUNIS.png" alt="UNIS">
+  <div class="unis">UNIS</div>
+  <h1>MyMeToo*</h1>
+  <div class="subtitle">Ta voix, même silencieuse, compte ♡</div>
+</header>
 
-<h1>MyMeToo*</h1>
-<div class="subtitle">Ta voix, même silencieuse, compte ♡</div>
+<section class="intro">
+  Ici, tu n’as pas besoin de tout raconter.<br>
+  <strong>Simplement d’exister.</strong><br>
+  Juste de déposer ce que tu peux.
+  <span class="intro-heart">♡</span>
+</section>
 
-<div class="card">
-1. Quel est ton âge ?
-<br><input type="radio" name="age" value="moins18"> Moins de 18 ans
-<br><input type="radio" name="age" value="18-35"> 18 / 35 ans
-<br><input type="radio" name="age" value="plus35"> Plus de 35 ans
-<br><input type="radio" name="age" value="na"> Je préfère ne pas répondre
-<img src="icon-age.png" class="icon">
-</div>
-
-<div class="card">
-2. Genre ?
-<br><input type="radio" name="genre" value="femme"> Femme
-<br><input type="radio" name="genre" value="homme"> Homme
-<br><input type="radio" name="genre" value="na"> Je préfère ne pas répondre
-<img src="icon-genre.png" class="icon">
-</div>
+<section class="grid">
 
 <div class="card">
-3. Justice ?
-<br><input type="radio" name="justice" value="non"> Non
-<br><input type="radio" name="justice" value="oui"> Oui
-<img src="icon-justice.png" class="icon">
+  <div class="title">1. Quel est ton âge ?</div>
+  <label class="option"><input type="radio" name="age" value="Moins de 18 ans">Moins de 18 ans</label>
+  <label class="option"><input type="radio" name="age" value="18 / 35 ans">18 / 35 ans</label>
+  <label class="option"><input type="radio" name="age" value="Plus de 35 ans">Plus de 35 ans</label>
+  <label class="option"><input type="radio" name="age" value="Je préfère ne pas répondre">Je préfère ne pas répondre</label>
+  <img src="icon-age.png" class="icon" alt="">
 </div>
 
 <div class="card">
-4. As-tu parlé ?
-<br><input type="radio" name="parle" value="non"> Non
-<br><input type="radio" name="parle" value="proche"> Proche
-<br><input type="radio" name="parle" value="pro"> Professionnel
-<img src="icon-discussion.png" class="icon">
+  <div class="title">2. Quel est ton genre ?</div>
+  <label class="option"><input type="radio" name="genre" value="Une femme">Une femme</label>
+  <label class="option"><input type="radio" name="genre" value="Un homme">Un homme</label>
+  <label class="option"><input type="radio" name="genre" value="Je préfère ne pas répondre">Je préfère ne pas répondre</label>
+  <img src="icon-genre.png" class="icon" alt="">
+</div>
+
+<div class="card full">
+  <div class="title">3. Ton vécu a-t-il été porté devant la justice ?</div>
+  <label class="option"><input type="radio" name="justice" value="Non, jamais">Non, jamais</label>
+  <label class="option"><input type="radio" name="justice" value="Oui, j’ai porté plainte ou engagé une démarche officielle">Oui, j’ai porté plainte ou engagé<br>une démarche officielle</label>
+  <img src="icon-justice.png" class="icon big" alt="">
 </div>
 
 <div class="card">
-5. Te sens-tu écouté ?
-<br><input type="radio" name="ecoute" value="oui"> Oui
-<br><input type="radio" name="ecoute" value="unpeu"> Un peu
-<br><input type="radio" name="ecoute" value="non"> Non
-<img src="icon-ecoute.png" class="icon">
+  <div class="title">4. As-tu déjà parlé de ce que tu as vécu<br>(hors justice) ?</div>
+  <label class="option"><input type="radio" name="parle" value="Non, je n’en ai jamais parlé">Non, je n’en ai jamais parlé.</label>
+  <label class="option"><input type="radio" name="parle" value="Oui, à un proche">Oui, à un proche (famille, ami, ...)</label>
+  <label class="option"><input type="radio" name="parle" value="Oui, à un professionnel">Oui, à un professionnel<br>(médecin, psychologue, ...)</label>
+  <img src="icon-discussion.png" class="icon" alt="">
 </div>
 
 <div class="card">
-6. Expression
-<br><input type="checkbox" name="expr" value="present"> Je suis là
-<br><input type="checkbox" name="expr" value="reconnu"> Être reconnu
-<br><input type="checkbox" name="expr" value="reconstruire"> Me reconstruire
-<br><input type="checkbox" name="expr" value="aider"> Aider
-<img src="icon-coeur.png" class="icon">
+  <div class="title">5. Aujourd’hui, te sens-tu écouté(e) ?</div>
+  <label class="option"><input type="radio" name="ecoute" value="Oui">Oui</label>
+  <label class="option"><input type="radio" name="ecoute" value="Un peu">Un peu</label>
+  <label class="option"><input type="radio" name="ecoute" value="Non">Non</label>
+  <label class="option"><input type="radio" name="ecoute" value="Je ne sais pas">Je ne sais pas</label>
+  <img src="icon-ecoute.png" class="icon" alt="">
 </div>
 
-<div class="card">
-7. Message
-<textarea id="message"></textarea>
-<img src="icon-stylo.png" class="icon">
+<div class="card full">
+  <div class="title">6. Que souhaites-tu exprimer par ta voix silencieuse ?</div>
+  <div class="hint">(Tu peux cocher une ou plusieurs réponses.)</div>
+  <label class="option"><input type="checkbox" name="expression" value="Je suis là, même sans mots">Je suis là, même sans mots.</label>
+  <label class="option"><input type="checkbox" name="expression" value="Je veux être reconnu(e) sans devoir tout raconter">Je veux être reconnu(e) sans devoir tout raconter.</label>
+  <label class="option"><input type="checkbox" name="expression" value="Je cherche à me reconstruire intérieurement">Je cherche à me reconstruire intérieurement.</label>
+  <label class="option"><input type="checkbox" name="expression" value="Je veux aider d’autres personnes en partageant mon vécu">Je veux aider d’autres personnes en partageant mon vécu.</label>
+  <img src="icon-coeur.png" class="icon heartbig" alt="">
 </div>
 
-<div class="card">
-<input type="checkbox" id="partage"> Autoriser partage anonyme
-<img src="icon-partage.png" class="icon">
+<div class="card full">
+  <div class="title">7. Si tu souhaites laisser quelques mots anonymes, cet espace est pour toi.</div>
+  <div class="hint">Aucun jugement. Juste un espace sûr pour déposer ce que tu veux.</div>
+  <textarea id="message"></textarea>
+  <img src="icon-stylo.png" class="pen" alt="">
 </div>
 
-<div style="text-align:center;margin-top:20px;">
-<button onclick="envoyer()">Envoyer</button>
+<div class="consent">
+  <input type="checkbox" id="partage">
+  <div>
+    Si mes mots peuvent aider d’autres personnes, j’autorise le partage anonyme<br>
+    de mon message écrit, sans mon nom ni aucune information personnelle.
+  </div>
+  <img src="icon-partage.png" class="share" alt="">
 </div>
 
-<p id="resultat" style="text-align:center;color:green;"></p>
+<div class="bottom">
+  <img src="icon-envelope.png" class="env" alt="">
 
+  <div class="bottom-text">
+    <strong>Ici, chaque réponse compte.</strong><br>
+    Chaque silence aussi.<br>
+    Quand tu es prêt(e), clique sur “Envoyer”.
+  </div>
+
+  <div class="big-heart">♡</div>
 </div>
+
+</section>
+
+<div class="footer">
+  <button type="button" id="sendBtn">✈ Envoyer</button>
+  <div class="thanks">♡ &nbsp; Merci d’être là. Tu n’es pas seul(e). &nbsp; ♡</div>
+</div>
+
+<div id="status"></div>
+
+</main>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
@@ -176,32 +438,43 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.envoyer = async function(){
+const sendBtn = document.getElementById("sendBtn");
+const status = document.getElementById("status");
 
-  const age = document.querySelector('input[name="age"]:checked')?.value;
-  const genre = document.querySelector('input[name="genre"]:checked')?.value;
-  const justice = document.querySelector('input[name="justice"]:checked')?.value;
-  const parle = document.querySelector('input[name="parle"]:checked')?.value;
-  const ecoute = document.querySelector('input[name="ecoute"]:checked')?.value;
-
-  const expr = [...document.querySelectorAll('input[name="expr"]:checked')].map(e=>e.value);
-
-  const message = document.getElementById("message").value;
-  const partage = document.getElementById("partage").checked;
-
-  try{
-    await addDoc(collection(db, "reponses"), {
-      age, genre, justice, parle, ecoute, expr, message, partage,
-      date: new Date()
-    });
-
-    document.getElementById("resultat").innerText = "Merci ❤️ ta réponse a été envoyée";
-  }catch(e){
-    document.getElementById("resultat").innerText = "Erreur ❌";
-  }
-
+function getRadio(name){
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
 }
 
+function getChecks(name){
+  return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value);
+}
+
+sendBtn.addEventListener("click", async () => {
+  sendBtn.disabled = true;
+  status.textContent = "Envoi en cours...";
+
+  const data = {
+    age: getRadio("age"),
+    genre: getRadio("genre"),
+    justice: getRadio("justice"),
+    parle: getRadio("parle"),
+    ecoute: getRadio("ecoute"),
+    expression: getChecks("expression"),
+    message: document.getElementById("message").value.trim(),
+    partageAutorise: document.getElementById("partage").checked,
+    createdAt: serverTimestamp()
+  };
+
+  try {
+    await addDoc(collection(db, "reponses"), data);
+    status.textContent = "Merci ❤️ ta réponse a bien été envoyée.";
+    sendBtn.textContent = "Envoyé";
+  } catch (error) {
+    console.error(error);
+    status.textContent = "Erreur : la réponse n’a pas pu être envoyée.";
+    sendBtn.disabled = false;
+  }
+});
 </script>
 
 </body>
