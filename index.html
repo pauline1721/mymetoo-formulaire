@@ -2,8 +2,9 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>MyMeToo - Questionnaire</title>
+<title>MyMeToo</title>
 
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -20,39 +21,72 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.envoyer = async function() {
-  const age = document.querySelector('input[name="age"]:checked')?.value;
-  const genre = document.querySelector('input[name="genre"]:checked')?.value;
-  const message = document.getElementById("message").value;
-
-  await addDoc(collection(db, "reponses"), {
-    age,
-    genre,
-    message,
+window.envoyer = async function () {
+  const data = {
+    age: document.querySelector('input[name="age"]:checked')?.value || "",
+    genre: document.querySelector('input[name="genre"]:checked')?.value || "",
+    justice: document.querySelector('input[name="justice"]:checked')?.value || "",
+    parole: document.querySelector('input[name="parole"]:checked')?.value || "",
+    ecoute: document.querySelector('input[name="ecoute"]:checked')?.value || "",
+    message: document.getElementById("message").value,
     date: new Date()
-  });
+  };
 
-  alert("Merci pour ta réponse ❤️");
+  await addDoc(collection(db, "reponses"), data);
+
+  alert("Merci pour ta voix ❤️");
 }
 </script>
 
 <style>
 body {
-  background: #f5f0fa;
+  background: #f3eef9;
   font-family: Arial;
-  text-align: center;
+  margin: 0;
   padding: 20px;
 }
 
 h1 {
-  color: #6a4caf;
+  text-align: center;
+  color: #5c3ea8;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
 }
 
 .box {
   background: white;
   padding: 20px;
-  margin: 20px;
+  margin: 15px 0;
   border-radius: 15px;
+}
+
+.question {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+textarea {
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  background: #7c5ac2;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #5c3ea8;
 }
 </style>
 
@@ -62,25 +96,51 @@ h1 {
 
 <h1>MyMeToo</h1>
 
+<div class="container">
+
 <div class="box">
-  <p>1. Quel est ton âge ?</p>
+  <div class="question">1. Quel est ton âge ?</div>
   <label><input type="radio" name="age" value="moins18"> Moins de 18 ans</label><br>
   <label><input type="radio" name="age" value="18-35"> 18 / 35 ans</label><br>
-  <label><input type="radio" name="age" value="plus35"> Plus de 35 ans</label>
+  <label><input type="radio" name="age" value="plus35"> Plus de 35 ans</label><br>
+  <label><input type="radio" name="age" value="none"> Je préfère ne pas répondre</label>
 </div>
 
 <div class="box">
-  <p>2. Quel est ton genre ?</p>
-  <label><input type="radio" name="genre" value="femme"> Femme</label><br>
-  <label><input type="radio" name="genre" value="homme"> Homme</label>
+  <div class="question">2. Quel est ton genre ?</div>
+  <label><input type="radio" name="genre" value="femme"> Une femme</label><br>
+  <label><input type="radio" name="genre" value="homme"> Un homme</label><br>
+  <label><input type="radio" name="genre" value="none"> Je préfère ne pas répondre</label>
 </div>
 
 <div class="box">
-  <p>Message :</p>
-  <textarea id="message" rows="4" style="width:100%"></textarea>
+  <div class="question">3. Ton vécu a-t-il été porté devant la justice ?</div>
+  <label><input type="radio" name="justice" value="non"> Non, jamais</label><br>
+  <label><input type="radio" name="justice" value="oui"> Oui</label>
+</div>
+
+<div class="box">
+  <div class="question">4. As-tu déjà parlé de ce que tu as vécu ?</div>
+  <label><input type="radio" name="parole" value="non"> Non</label><br>
+  <label><input type="radio" name="parole" value="proche"> À un proche</label><br>
+  <label><input type="radio" name="parole" value="pro"> À un professionnel</label>
+</div>
+
+<div class="box">
+  <div class="question">5. Aujourd’hui, te sens-tu écouté(e) ?</div>
+  <label><input type="radio" name="ecoute" value="oui"> Oui</label><br>
+  <label><input type="radio" name="ecoute" value="peu"> Un peu</label><br>
+  <label><input type="radio" name="ecoute" value="non"> Non</label>
+</div>
+
+<div class="box">
+  <div class="question">6. Message anonyme</div>
+  <textarea id="message" rows="4" placeholder="Écris ici..."></textarea>
 </div>
 
 <button onclick="envoyer()">Envoyer</button>
+
+</div>
 
 </body>
 </html>
