@@ -163,6 +163,57 @@ button:hover{
   background:#5a35a3;
 }
 
+.replies-admin{
+  margin-top:18px;
+  padding-top:14px;
+  border-top:1px solid #e5d9f2;
+}
+
+.replies-admin-title{
+  font-weight:bold;
+  color:#5b23ad;
+  margin-bottom:10px;
+}
+
+.reply-admin{
+  background:#fbf8ff;
+  border-left:4px solid #6f42bd;
+  border-radius:8px;
+  padding:12px;
+  margin-top:10px;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+
+.reply-admin.hidden-reply{
+  opacity:.6;
+  border-left:4px solid #d94b6a;
+  background:#fff5f7;
+}
+
+.reply-admin small{
+  display:block;
+  color:#8b78a8;
+  margin-top:8px;
+  font-size:12px;
+}
+
+.reply-hide-btn{
+  margin-top:8px;
+  background:#d94b6a;
+  color:white;
+  border:none;
+  padding:7px 11px;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.reply-hide-btn.show{
+  background:#6f42bd;
+}
+
 .logout{
   display:block;
   margin:0 auto 20px;
@@ -279,6 +330,19 @@ window.toggleVisibility = async function(id, isVisible){
   }
 };
 
+window.toggleReplyVisibility = async function(parentId, replyId, isVisible){
+  try{
+    await updateDoc(doc(db, "reponses", parentId, "commentaires", replyId), {
+      visible: !isVisible
+    });
+
+    loadData();
+  }catch(e){
+    alert("Erreur lors de la modification de la réponse");
+    console.error(e);
+  }
+};
+
 onAuthStateChanged(auth, user => {
   if(user){
     document.getElementById("login").style.display = "none";
@@ -330,6 +394,48 @@ function renderDailyChart(daysData){
   });
 }
 
+async function loadReplies(parentId, repliesContainer){
+  repliesContainer.innerHTML = "";
+
+  const q = query(
+    collection(db, "reponses", parentId, "commentaires"),
+    orderBy("createdAt", "asc")
+  );
+
+  const snap = await getDocs(q);
+
+  let count = 0;
+
+  snap.forEach(replyDoc => {
+    const r = replyDoc.data();
+    const replyId = replyDoc.id;
+    const isVisible = r.visible !== false;
+    const dateObj = r.createdAt?.toDate ? r.createdAt.toDate() : null;
+
+    count++;
+
+    const div = document.createElement("div");
+    div.className = isVisible ? "reply-admin" : "reply-admin hidden-reply";
+
+    div.innerHTML = `
+      ${!isVisible ? `<div class="badge-hidden">Réponse masquée</div>` : ""}
+      ${r.message || "Réponse vide"}
+      <small>Réponse anonyme ${dateObj ? "• " + dateObj.toLocaleString("fr-FR") : ""}</small>
+
+      <button onclick="toggleReplyVisibility('${parentId}', '${replyId}', ${isVisible})"
+        class="reply-hide-btn ${isVisible ? "" : "show"}">
+        ${isVisible ? "Masquer cette réponse" : "Afficher cette réponse"}
+      </button>
+    `;
+
+    repliesContainer.appendChild(div);
+  });
+
+  if(count === 0){
+    repliesContainer.innerHTML = `<div class="field"><span class="label">Réponses :</span> Aucune réponse pour ce témoignage.</div>`;
+  }
+}
+
 async function loadData(){
   const container = document.getElementById("data");
   container.innerHTML = "";
@@ -347,7 +453,7 @@ async function loadData(){
     container.innerHTML = `<div class="empty">Aucune réponse pour le moment.</div>`;
   }
 
-  snapshot.forEach(item => {
+  for(const item of snapshot.docs){
     const d = item.data();
     const id = item.id;
     const isVisible = d.visible !== false;
@@ -388,12 +494,19 @@ async function loadData(){
       <div class="message"><span class="label">Message :</span><br>${d.message || "Aucun message"}</div>
 
       <button onclick="toggleVisibility('${id}', ${isVisible})" class="hide-btn">
-        ${isVisible ? "Masquer" : "Afficher"}
+        ${isVisible ? "Masquer le témoignage" : "Afficher le témoignage"}
       </button>
+
+      <div class="replies-admin">
+        <div class="replies-admin-title">Réponses anonymes à ce témoignage</div>
+        <div id="admin-replies-${id}"></div>
+      </div>
     `;
 
     container.appendChild(div);
-  });
+
+    await loadReplies(id, document.getElementById("admin-replies-" + id));
+  }
 
   document.getElementById("total").innerText = total;
   document.getElementById("partages").innerText = partages;
