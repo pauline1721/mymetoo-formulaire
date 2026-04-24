@@ -307,6 +307,51 @@ button:disabled{
   color:#5b23ad;
 }
 
+/* écran de confirmation */
+#successScreen{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#24106b;
+  z-index:9999;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.success-box{
+  background:white;
+  max-width:390px;
+  padding:38px 26px;
+  border-radius:18px;
+  text-align:center;
+  color:#24106b;
+  box-shadow:0 10px 35px rgba(0,0,0,.18);
+}
+
+.success-box h2{
+  font-family:Georgia, serif;
+  font-size:36px;
+  margin:0 0 15px;
+}
+
+.success-box p{
+  font-size:18px;
+  line-height:1.5;
+  margin:0;
+}
+
+.success-btn{
+  display:inline-block;
+  margin-top:22px;
+  background:#6f42bd;
+  color:white;
+  padding:13px 22px;
+  border-radius:9px;
+  text-decoration:none;
+  font-weight:bold;
+}
+
 @media(max-width:800px){
   .page{padding:8px 12px}
   .grid{grid-template-columns:1fr}
@@ -436,6 +481,17 @@ button:disabled{
 
 </main>
 
+<div id="successScreen">
+  <div class="success-box">
+    <h2>Merci 💜</h2>
+    <p>
+      Ta voix a été entendue.<br><br>
+      Même silencieuse, elle compte vraiment.
+    </p>
+    <a href="temoignages.html" class="success-btn">Voir les témoignages</a>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -548,8 +604,10 @@ sendBtn.addEventListener("click", async () => {
 
   try {
     await addDoc(collection(db, "reponses"), data);
-    status.textContent = "Merci ❤️ ta réponse a bien été envoyée.";
-    sendBtn.textContent = "Envoyé";
+
+    document.querySelector(".page").style.display = "none";
+    document.getElementById("successScreen").style.display = "flex";
+
   } catch (error) {
     console.error(error);
     status.textContent = "Erreur : la réponse n’a pas pu être envoyée.";
