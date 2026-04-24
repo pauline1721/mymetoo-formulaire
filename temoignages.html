@@ -3,86 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Témoignages - MyMeToo</title>
 
 <style>
+:root{
+  --violet:#24106b;
+  --violet2:#6f42bd;
+  --fond:#e8d7f3;
+  --soft:#f7effb;
+  --border:#d8c2eb;
+}
+
+*{box-sizing:border-box}
+
 body{
-  font-family:Arial, sans-serif;
-  background:#f4effa;
   margin:0;
-  padding:20px;
-  color:#24106b;
+  background:var(--fond);
+  font-family:Arial, sans-serif;
+  color:var(--violet);
+  padding:0;
+}
+
+.page{
+  width:100%;
+  max-width:1030px;
+  min-height:100vh;
+  margin:0 auto;
+  background:white;
+  border:7px solid var(--border);
+  border-radius:0 0 18px 18px;
+  padding:18px 40px 30px;
 }
 
 .header{
   text-align:center;
-  margin-bottom:30px;
 }
 
 .logo{
-  width:90px;
-  margin-bottom:10px;
+  width:170px;
+  display:block;
+  margin:0 auto 0;
+}
+
+.unis{
+  font-family:Georgia, serif;
+  font-weight:bold;
+  font-size:24px;
 }
 
 h1{
-  color:#5b23ad;
-  margin-bottom:5px;
+  font-family:Georgia, serif;
+  font-size:60px;
+  line-height:.9;
+  margin:5px 0 8px;
+  color:var(--violet);
 }
 
 .subtitle{
-  color:#666;
-  font-size:15px;
+  font-family:Georgia, serif;
+  font-size:30px;
+  font-weight:bold;
+  margin-bottom:18px;
+}
+
+.intro{
+  max-width:850px;
+  margin:0 auto 25px;
+  background:var(--soft);
+  border:2px solid #ded2ec;
+  border-radius:12px;
+  text-align:center;
+  padding:16px;
+  font-size:20px;
+  line-height:1.5;
 }
 
 .container{
-  max-width:800px;
-  margin:auto;
+  max-width:850px;
+  margin:0 auto;
 }
 
 .card{
   background:white;
-  border-radius:12px;
-  padding:18px;
-  margin-bottom:15px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+  border:2px solid #eeeaf3;
+  border-radius:14px;
+  padding:22px;
+  margin-bottom:18px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.04);
 }
 
 .meta{
-  font-size:13px;
-  color:#5b23ad;
-  margin-bottom:8px;
+  color:#6f42bd;
+  font-weight:bold;
+  font-size:14px;
+  margin-bottom:10px;
 }
 
 .message{
-  font-size:16px;
-  line-height:1.4;
   background:#f7effb;
-  padding:12px;
-  border-radius:8px;
+  border-radius:12px;
+  padding:18px;
+  font-family:Georgia, serif;
+  font-size:22px;
+  line-height:1.45;
+}
+
+.message::before{
+  content:"“";
+  font-size:34px;
+  color:#6f42bd;
+}
+
+.message::after{
+  content:" ”";
+  font-size:34px;
+  color:#6f42bd;
+}
+
+.date{
+  margin-top:10px;
+  color:#8b78a8;
+  font-size:13px;
+  text-align:right;
 }
 
 .empty{
   text-align:center;
-  margin-top:50px;
-  color:#888;
+  background:var(--soft);
+  border-radius:12px;
+  padding:25px;
+  font-weight:bold;
+  color:#6f42bd;
+}
+
+.footer{
+  text-align:center;
+  margin-top:30px;
+  color:#6e4cb0;
+  font-weight:bold;
+}
+
+@media(max-width:800px){
+  .page{
+    padding:12px;
+  }
+
+  .logo{
+    width:130px;
+  }
+
+  h1{
+    font-size:46px;
+  }
+
+  .subtitle{
+    font-size:24px;
+  }
+
+  .message{
+    font-size:19px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <img src="logoUNIS.png" class="logo">
-  <h1>💬 Témoignages anonymes</h1>
-  <div class="subtitle">Ta voix compte. Tu n’es pas seul(e).</div>
-</div>
+<main class="page">
 
-<div class="container" id="list"></div>
+  <div class="header">
+    <img src="logoUNIS.png" class="logo" alt="UNIS">
+    <div class="unis">UNIS</div>
+    <h1>MyMeToo*</h1>
+    <div class="subtitle">Les voix silencieuses</div>
+  </div>
 
-<div id="empty" class="empty" style="display:none;">
-  Aucun témoignage pour le moment 💜
-</div>
+  <div class="intro">
+    Ici, seules les paroles partagées volontairement apparaissent.<br>
+    Chaque témoignage reste anonyme. Chaque voix compte.
+  </div>
+
+  <div class="container" id="list"></div>
+
+  <div id="empty" class="empty" style="display:none;">
+    Aucun témoignage pour le moment 💜
+  </div>
+
+  <div class="footer">
+    ♡ Merci d’être là. Tu n’es pas seul(e). ♡
+  </div>
+
+</main>
 
 <script type="module">
 
@@ -102,7 +213,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 async function load(){
-
   const container = document.getElementById("list");
   const empty = document.getElementById("empty");
 
@@ -114,22 +224,19 @@ async function load(){
   snap.forEach(doc => {
     const d = doc.data();
 
-    // 🔒 ON FILTRE ICI
     if(!d.partageAutorise || !d.message) return;
 
     count++;
+
+    const date = d.createdAt?.toDate().toLocaleDateString("fr-FR") || "";
 
     const div = document.createElement("div");
     div.className = "card";
 
     div.innerHTML = `
-      <div class="meta">
-        ${d.age || ""} • ${d.genre || ""}
-      </div>
-
-      <div class="message">
-        ${d.message}
-      </div>
+      <div class="meta">${d.age || "Âge non renseigné"} • ${d.genre || "Genre non renseigné"}</div>
+      <div class="message">${d.message}</div>
+      <div class="date">${date}</div>
     `;
 
     container.appendChild(div);
