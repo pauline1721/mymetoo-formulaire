@@ -124,7 +124,6 @@ h1{
   font-family:Georgia, serif;
   font-size:22px;
   line-height:1.45;
-
   word-wrap:break-word;
   overflow-wrap:break-word;
   word-break:break-word;
@@ -147,6 +146,53 @@ h1{
   color:#8b78a8;
   font-size:13px;
   text-align:right;
+}
+
+.reply-btn{
+  margin-top:14px;
+  background:#6f42bd;
+  color:white;
+  border:none;
+  padding:10px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.reply-box{
+  display:none;
+  margin-top:15px;
+  background:#f7effb;
+  border-radius:12px;
+  padding:14px;
+}
+
+.reply-box textarea{
+  width:100%;
+  min-height:80px;
+  border:2px solid #d8c2eb;
+  border-radius:10px;
+  padding:10px;
+  resize:vertical;
+  font-size:16px;
+  font-family:Arial, sans-serif;
+}
+
+.reply-send{
+  margin-top:10px;
+  background:linear-gradient(90deg,#5b23ad,#7e45d1);
+  color:white;
+  border:none;
+  padding:10px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.reply-status{
+  margin-top:8px;
+  font-weight:bold;
+  color:#5b23ad;
 }
 
 .empty{
@@ -210,7 +256,7 @@ h1{
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
@@ -224,6 +270,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+window.toggleReply = function(id){
+  const box = document.getElementById("reply-" + id);
+  box.style.display = box.style.display === "block" ? "none" : "block";
+};
+
+window.sendReply = async function(id){
+  const text = document.getElementById("text-" + id).value.trim();
+  const status = document.getElementById("status-" + id);
+
+  if(!text){
+    status.textContent = "Merci d’écrire une réponse avant d’envoyer.";
+    return;
+  }
+
+  status.textContent = "Envoi en cours...";
+
+  try{
+    await addDoc(collection(db, "reponses", id, "commentaires"), {
+      message: text,
+      visible: true,
+      createdAt: serverTimestamp()
+    });
+
+    document.getElementById("text-" + id).value = "";
+    status.textContent = "Merci 💜 ta réponse anonyme a été envoyée.";
+  }catch(e){
+    console.error(e);
+    status.textContent = "Erreur : la réponse n’a pas pu être envoyée.";
+  }
+};
+
 async function load(){
   const container = document.getElementById("list");
   const empty = document.getElementById("empty");
@@ -235,6 +312,7 @@ async function load(){
 
   snap.forEach(doc => {
     const d = doc.data();
+    const id = doc.id;
 
     if(!d.partageAutorise || !d.message || d.visible === false) return;
 
@@ -249,6 +327,16 @@ async function load(){
       <div class="meta">${d.age || ""} • ${d.genre || ""}</div>
       <div class="message">${d.message}</div>
       <div class="date">${date}</div>
+
+      <button class="reply-btn" onclick="toggleReply('${id}')">
+        Répondre anonymement
+      </button>
+
+      <div class="reply-box" id="reply-${id}">
+        <textarea id="text-${id}" placeholder="Écris ta réponse anonyme ici..."></textarea>
+        <button class="reply-send" onclick="sendReply('${id}')">Envoyer</button>
+        <div class="reply-status" id="status-${id}"></div>
+      </div>
     `;
 
     container.appendChild(div);
