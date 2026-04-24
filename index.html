@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>MyMeToo - Questionnaire</title>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPaxlstCCC1J_gWCSAI2cNt23yu8iLaK0",
+  authDomain: "mymetoo-formulaire.firebaseapp.com",
+  projectId: "mymetoo-formulaire",
+  storageBucket: "mymetoo-formulaire.firebasestorage.app",
+  messagingSenderId: "1084270329845",
+  appId: "1:1084270329845:web:337a6172a4817f0db2eabc"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.envoyer = async function() {
+  const age = document.querySelector('input[name="age"]:checked')?.value;
+  const genre = document.querySelector('input[name="genre"]:checked')?.value;
+  const message = document.getElementById("message").value;
+
+  await addDoc(collection(db, "reponses"), {
+    age,
+    genre,
+    message,
+    date: new Date()
+  });
+
+  alert("Merci pour ta réponse ❤️");
+}
+</script>
+
+<style>
+body {
+  background: #f5f0fa;
+  font-family: Arial;
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  color: #6a4caf;
+}
+
+.box {
+  background: white;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 15px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>MyMeToo</h1>
+
+<div class="box">
+  <p>1. Quel est ton âge ?</p>
+  <label><input type="radio" name="age" value="moins18"> Moins de 18 ans</label><br>
+  <label><input type="radio" name="age" value="18-35"> 18 / 35 ans</label><br>
+  <label><input type="radio" name="age" value="plus35"> Plus de 35 ans</label>
+</div>
+
+<div class="box">
+  <p>2. Quel est ton genre ?</p>
+  <label><input type="radio" name="genre" value="femme"> Femme</label><br>
+  <label><input type="radio" name="genre" value="homme"> Homme</label>
+</div>
+
+<div class="box">
+  <p>Message :</p>
+  <textarea id="message" rows="4" style="width:100%"></textarea>
+</div>
+
+<button onclick="envoyer()">Envoyer</button>
+
+</body>
+</html>
