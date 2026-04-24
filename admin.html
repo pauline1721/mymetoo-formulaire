@@ -18,6 +18,44 @@ h1{
   color:#5b23ad;
 }
 
+#login{
+  max-width:360px;
+  margin:80px auto;
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.08);
+  text-align:center;
+}
+
+#password{
+  width:100%;
+  padding:12px;
+  margin:15px 0;
+  border:1px solid #ccc;
+  border-radius:8px;
+  font-size:16px;
+}
+
+button{
+  background:#5b23ad;
+  color:white;
+  border:none;
+  padding:12px 22px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+#error{
+  color:red;
+  font-weight:bold;
+}
+
+#adminContent{
+  display:none;
+}
+
 .card{
   background:white;
   border-radius:10px;
@@ -39,16 +77,26 @@ h1{
 
 <body>
 
-<h1>📊 Réponses MyMeToo</h1>
+<div id="login">
+  <h1>🔐 Admin</h1>
+  <p>Entre le mot de passe</p>
+  <input id="password" type="password" placeholder="Mot de passe">
+  <button onclick="login()">Entrer</button>
+  <p id="error"></p>
+</div>
 
-<div id="data"></div>
+<div id="adminContent">
+  <h1>📊 Réponses MyMeToo</h1>
+  <div id="data"></div>
+</div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// 🔥 TA CONFIG FIREBASE
+const ADMIN_PASSWORD = "UNIS2026";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
   authDomain: "mymetoo-formulaire.firebaseapp.com",
@@ -61,9 +109,22 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const container = document.getElementById("data");
+window.login = function(){
+  const pass = document.getElementById("password").value;
+
+  if(pass === ADMIN_PASSWORD){
+    document.getElementById("login").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    loadData();
+  } else {
+    document.getElementById("error").innerText = "Mot de passe incorrect";
+  }
+};
 
 async function loadData(){
+  const container = document.getElementById("data");
+  container.innerHTML = "";
+
   const q = query(collection(db, "reponses"), orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
 
@@ -88,8 +149,6 @@ async function loadData(){
     container.appendChild(div);
   });
 }
-
-loadData();
 
 </script>
 
