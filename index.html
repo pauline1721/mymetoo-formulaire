@@ -1,257 +1,617 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UNIS - MyMeToo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyMeToo - Ta voix compte</title>
 
-<style>
-body{
-  margin:0;
-  background:#000;
-  font-family:Arial,sans-serif;
-}
+  <style>
+    :root {
+      --violet: #2f176f;
+      --violet-soft: #8b68c7;
+      --violet-light: #f4ecfb;
+      --border: #ded4eb;
+      --white: #ffffff;
+    }
 
-.wrap{
-  position:relative;
-  width:100%;
-  max-width:1000px;
-  margin:auto;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-.bg{
-  width:100%;
-  display:block;
-}
+    body {
+      margin: 0;
+      padding: 0;
+      background: #e9d9f5;
+      font-family: "Georgia", "Times New Roman", serif;
+      color: var(--violet);
+    }
 
-/* zones cliquables */
-.zone{
-  position:absolute;
-  cursor:pointer;
-}
+    .page {
+      width: 100%;
+      max-width: 1050px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background: white;
+      padding: 24px 42px 22px;
+      border: 7px solid #d9c3ec;
+      position: relative;
+      overflow: hidden;
+    }
 
-.zone input{
-  opacity:0;
-  position:absolute;
-}
+    .leaf {
+      position: absolute;
+      width: 190px;
+      height: 250px;
+      opacity: 0.65;
+      top: 28px;
+      pointer-events: none;
+    }
 
-/* rond radio */
-.dot{
-  position:absolute;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  border:2px solid #aaa;
-  background:white;
-}
+    .leaf.left {
+      left: 18px;
+    }
 
-/* coche sélectionnée */
-input:checked + .dot{
-  background:#6f50b5;
-  border-color:#6f50b5;
-  box-shadow:0 0 0 3px white inset;
-}
+    .leaf.right {
+      right: 18px;
+      transform: scaleX(-1);
+    }
 
-/* carré checkbox */
-.square{
-  border-radius:4px;
-}
+    .leaf svg {
+      width: 100%;
+      height: 100%;
+    }
 
-/* textarea */
-textarea{
-  position:absolute;
-  left:7.8%;
-  top:83.8%;
-  width:84.5%;
-  height:3.5%;
-  border:1px solid transparent;
-  outline:none;
-  resize:none;
-  background:transparent;
-  color:#2d176b;
-  font-size:16px;
-  padding:8px;
-}
+    header {
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
 
-/* bouton invisible */
-button{
-  position:absolute;
-  left:5.5%;
-  top:97%;
-  width:17%;
-  height:3%;
-  opacity:0;
-  cursor:pointer;
-}
+    .logo {
+      width: 155px;
+      margin: 0 auto 2px;
+      display: block;
+    }
 
-#status{
-  position:absolute;
-  left:25%;
-  top:95.8%;
-  width:50%;
-  text-align:center;
-  color:#2d176b;
-  font-weight:bold;
-  font-size:14px;
-}
-</style>
+    .unis {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 0;
+      letter-spacing: 1px;
+    }
+
+    h1 {
+      font-size: 64px;
+      line-height: 0.95;
+      margin: 0;
+      font-weight: bold;
+      color: #26106a;
+    }
+
+    .subtitle {
+      font-size: 34px;
+      font-weight: bold;
+      margin: 12px 0 16px;
+    }
+
+    .heart {
+      font-family: Arial, sans-serif;
+      font-weight: normal;
+      color: #7b4ec4;
+    }
+
+    .intro {
+      background: #f5effb;
+      border: 2px solid var(--border);
+      border-radius: 13px;
+      text-align: center;
+      padding: 13px 20px;
+      font-family: Arial, sans-serif;
+      font-size: 21px;
+      line-height: 1.5;
+      margin: 0 auto 17px;
+      max-width: 890px;
+      position: relative;
+    }
+
+    .intro strong {
+      font-weight: 800;
+    }
+
+    .intro .small-heart {
+      position: absolute;
+      right: 28px;
+      top: 38px;
+      font-size: 42px;
+      color: #6d42b5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 18px;
+    }
+
+    .card {
+      border: 2px solid #eeeaf3;
+      border-radius: 12px;
+      padding: 15px 22px;
+      min-height: 135px;
+      position: relative;
+      background: #fff;
+    }
+
+    .card.full {
+      grid-column: 1 / -1;
+    }
+
+    .title {
+      font-size: 25px;
+      font-weight: bold;
+      margin-bottom: 13px;
+    }
+
+    .options {
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.55;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 7px 0;
+      cursor: pointer;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+      appearance: none;
+      width: 23px;
+      height: 23px;
+      border: 3px solid #8b68c7;
+      background: white;
+      flex-shrink: 0;
+    }
+
+    input[type="radio"] {
+      border-radius: 50%;
+    }
+
+    input[type="checkbox"] {
+      border-radius: 1px;
+    }
+
+    input:checked {
+      background:
+        radial-gradient(circle, #6d42b5 45%, transparent 48%);
+    }
+
+    input[type="checkbox"]:checked {
+      background:
+        linear-gradient(45deg, transparent 45%, #6d42b5 46%, #6d42b5 58%, transparent 59%),
+        linear-gradient(-45deg, transparent 35%, #6d42b5 36%, #6d42b5 52%, transparent 53%);
+    }
+
+    .icon {
+      position: absolute;
+      right: 25px;
+      bottom: 25px;
+      width: 95px;
+      height: 95px;
+      color: #8b68c7;
+      opacity: 0.95;
+    }
+
+    .icon.small {
+      width: 80px;
+      height: 80px;
+    }
+
+    .justice {
+      min-height: 155px;
+    }
+
+    .justice .icon {
+      right: 55px;
+      bottom: 20px;
+      width: 125px;
+      height: 125px;
+    }
+
+    .question6 {
+      min-height: 185px;
+    }
+
+    .question6 .icon {
+      right: 105px;
+      bottom: 18px;
+      width: 145px;
+      height: 145px;
+    }
+
+    .question7 {
+      min-height: 155px;
+      padding-bottom: 16px;
+    }
+
+    .question7 .title {
+      margin-bottom: 4px;
+    }
+
+    .hint {
+      font-family: Arial, sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 62px;
+      border-radius: 9px;
+      border: 2px solid #c5b5e4;
+      resize: none;
+      padding: 12px;
+      font-size: 18px;
+      outline: none;
+      color: var(--violet);
+      font-family: Arial, sans-serif;
+    }
+
+    .pen {
+      position: absolute;
+      right: 33px;
+      bottom: 29px;
+      width: 45px;
+      height: 45px;
+      color: #8b68c7;
+    }
+
+    .consent {
+      grid-column: 1 / -1;
+      border: 2px solid #eeeaf3;
+      border-radius: 10px;
+      padding: 15px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-family: Georgia, serif;
+      font-size: 21px;
+      font-weight: bold;
+      line-height: 1.35;
+      position: relative;
+    }
+
+    .consent input {
+      margin-right: 10px;
+    }
+
+    .share {
+      position: absolute;
+      right: 55px;
+      width: 62px;
+      height: 62px;
+      color: #8b68c7;
+    }
+
+    .bottom-box {
+      grid-column: 1 / -1;
+      background: #f5eafa;
+      border-radius: 9px;
+      min-height: 88px;
+      display: grid;
+      grid-template-columns: 160px 1fr 120px;
+      align-items: center;
+      padding: 12px 35px;
+      margin-top: -3px;
+      font-family: Arial, sans-serif;
+    }
+
+    .envelope {
+      width: 90px;
+      height: 70px;
+      color: #5d35aa;
+    }
+
+    .bottom-text {
+      font-size: 20px;
+      line-height: 1.35;
+    }
+
+    .bottom-text strong {
+      font-family: Georgia, serif;
+      font-size: 23px;
+    }
+
+    .big-heart {
+      font-size: 56px;
+      color: #6d42b5;
+      text-align: right;
+    }
+
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-family: Arial, sans-serif;
+      color: #7555b8;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    button {
+      background: linear-gradient(90deg, #5a22aa, #8a4bd8);
+      color: white;
+      border: none;
+      border-radius: 8px 8px 0 0;
+      font-size: 20px;
+      font-weight: bold;
+      padding: 12px 50px;
+      cursor: pointer;
+    }
+
+    .thanks {
+      flex: 1;
+      text-align: center;
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      .page {
+        border: none;
+        max-width: none;
+        width: 100%;
+      }
+
+      button {
+        display: none;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        padding: 18px 16px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card.full,
+      .consent,
+      .bottom-box {
+        grid-column: auto;
+      }
+
+      h1 {
+        font-size: 46px;
+      }
+
+      .subtitle {
+        font-size: 25px;
+      }
+
+      .leaf {
+        width: 120px;
+        opacity: 0.35;
+      }
+
+      .bottom-box {
+        grid-template-columns: 80px 1fr 60px;
+        padding: 12px;
+      }
+
+      .icon {
+        opacity: 0.25;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <main class="page">
 
-<div class="wrap">
-<img src="formulaire-mymetoo.png" class="bg">
+    <div class="leaf left">
+      <svg viewBox="0 0 200 260" fill="none" stroke="currentColor">
+        <path d="M35 235 C60 165 75 95 155 25" stroke="#8b68c7" stroke-width="3"/>
+        <path d="M60 175 C20 165 15 130 55 130 C80 130 78 155 60 175Z" fill="#efe6f8" stroke="#8b68c7" stroke-width="2"/>
+        <path d="M80 135 C35 125 42 88 85 92 C112 94 105 122 80 135Z" fill="#efe6f8" stroke="#8b68c7" stroke-width="2"/>
+        <path d="M105 95 C65 80 78 45 118 55 C145 62 130 90 105 95Z" fill="#efe6f8" stroke="#8b68c7" stroke-width="2"/>
+        <path d="M135 58 C105 30 130 5 165 18 C178 40 158 55 135 58Z" fill="#efe6f8" stroke="#8b68c7" stroke-width="2"/>
+        <path d="M52 208 C22 220 10 195 35 185 C55 178 65 195 52 208Z" fill="#efe6f8" stroke="#8b68c7" stroke-width="2"/>
+        <path d="M145 30 C170 15 185 22 190 34" stroke="#8b68c7" stroke-width="2"/>
+        <circle cx="185" cy="40" r="3" fill="#8b68c7"/>
+        <circle cx="170" cy="28" r="3" fill="#8b68c7"/>
+      </svg>
+    </div>
 
-<form id="formulaire">
+    <div class="leaf right">
+      <svg viewBox="0 0 200 260" fill="none" stroke="currentColor">
+        <path d="M35 235 C60 165 75 95 155 25" stroke="#8b68c7" stroke-width="3"/>
+        <path d="M60 175 C20 165 15 130 55 130 C80 130 78 155 60 175Z" fill="#efe6f8" stroke="#8b68c7" stroke-width="2"/>
+        <path d="M80 135 C35 125 42 88 85 92 C112 94 105 122 80 135Z" fill="#efe6f8" stroke="#8b68c7" stroke-width="2"/>
+        <path d="M105 95 C65 80 78 45 118 55 C145 62 130 90 105 95Z" fill="#efe6f8" stroke="#8b68c7" stroke-width="2"/>
+        <path d="M135 58 C105 30 130 5 165 18 C178 40 158 55 135 58Z" fill="#efe6f8" stroke="#8b68c7" stroke-width="2"/>
+        <path d="M52 208 C22 220 10 195 35 185 C55 178 65 195 52 208Z" fill="#efe6f8" stroke="#8b68c7" stroke-width="2"/>
+        <path d="M145 30 C170 15 185 22 190 34" stroke="#8b68c7" stroke-width="2"/>
+        <circle cx="185" cy="40" r="3" fill="#8b68c7"/>
+        <circle cx="170" cy="28" r="3" fill="#8b68c7"/>
+      </svg>
+    </div>
 
-<!-- AGE -->
-<label class="zone" style="left:7%;top:30%;width:36%;height:2%;">
-<input type="radio" name="age" value="Moins de 18 ans">
-<span class="dot"></span>
-</label>
+    <header>
+      <img src="logoUNIS.png" alt="UNIS" class="logo" />
+      <div class="unis">UNIS</div>
+      <h1>MyMeToo*</h1>
+      <div class="subtitle">Ta voix, même silencieuse, compte <span class="heart">♡</span></div>
+    </header>
 
-<label class="zone" style="left:7%;top:32.2%;width:36%;height:2%;">
-<input type="radio" name="age" value="18 / 35 ans">
-<span class="dot"></span>
-</label>
+    <section class="intro">
+      Ici, tu n’as pas besoin de tout raconter.<br>
+      <strong>Simplement d’exister.</strong><br>
+      Juste de déposer ce que tu peux.
+      <span class="small-heart">♡</span>
+    </section>
 
-<label class="zone" style="left:7%;top:34.5%;width:36%;height:2%;">
-<input type="radio" name="age" value="Plus de 35 ans">
-<span class="dot"></span>
-</label>
+    <section class="grid">
 
-<label class="zone" style="left:7%;top:36.8%;width:36%;height:2%;">
-<input type="radio" name="age" value="Je préfère ne pas répondre">
-<span class="dot"></span>
-</label>
+      <div class="card">
+        <div class="title">1. Quel est ton âge ?</div>
+        <div class="options">
+          <label><input type="radio" name="age">Moins de 18 ans</label>
+          <label><input type="radio" name="age">18 / 35 ans</label>
+          <label><input type="radio" name="age">Plus de 35 ans</label>
+          <label><input type="radio" name="age">Je préfère ne pas répondre</label>
+        </div>
 
-<!-- GENRE -->
-<label class="zone" style="left:55%;top:30.5%;width:34%;height:2%;">
-<input type="radio" name="genre" value="Une femme">
-<span class="dot"></span>
-</label>
+        <svg class="icon small" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3">
+          <path d="M25 75h50M30 75V45h40v30M25 55h50M35 45V30h30v15M42 30V18M58 30V18"/>
+          <path d="M50 18 C43 25 57 25 50 18Z"/>
+          <path d="M78 60 C85 50 98 62 80 78 C62 62 75 50 78 60Z"/>
+        </svg>
+      </div>
 
-<label class="zone" style="left:55%;top:33.3%;width:34%;height:2%;">
-<input type="radio" name="genre" value="Un homme">
-<span class="dot"></span>
-</label>
+      <div class="card">
+        <div class="title">2. Quel est ton genre ?</div>
+        <div class="options">
+          <label><input type="radio" name="genre">Une femme</label>
+          <label><input type="radio" name="genre">Un homme</label>
+          <label><input type="radio" name="genre">Je préfère ne pas répondre</label>
+        </div>
 
-<label class="zone" style="left:55%;top:36.1%;width:34%;height:2%;">
-<input type="radio" name="genre" value="Je préfère ne pas répondre">
-<span class="dot"></span>
-</label>
+        <svg class="icon" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3">
+          <circle cx="52" cy="25" r="17"/>
+          <path d="M28 85 C28 58 38 45 52 45 C66 45 76 58 76 85"/>
+          <path d="M77 65 C84 55 97 67 79 83 C61 67 74 55 77 65Z"/>
+        </svg>
+      </div>
 
-<!-- JUSTICE -->
-<label class="zone" style="left:7%;top:45.5%;width:60%;height:2%;">
-<input type="radio" name="justice" value="Non, jamais">
-<span class="dot"></span>
-</label>
+      <div class="card full justice">
+        <div class="title">3. Ton vécu a-t-il été porté devant la justice ?</div>
+        <div class="options">
+          <label><input type="radio" name="justice">Non, jamais</label>
+          <label><input type="radio" name="justice">Oui, j’ai porté plainte ou engagé<br>une démarche officielle</label>
+        </div>
 
-<label class="zone" style="left:7%;top:48.5%;width:60%;height:3%;">
-<input type="radio" name="justice" value="Oui, plainte">
-<span class="dot"></span>
-</label>
+        <svg class="icon" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3">
+          <path d="M60 20v75M35 95h50M48 20h24M25 35h70M30 35l-18 42M30 35l18 42M12 77h36M90 35l-18 42M90 35l18 42M72 77h36"/>
+          <path d="M12 77 C18 88 42 88 48 77"/>
+          <path d="M72 77 C78 88 102 88 108 77"/>
+          <circle cx="60" cy="17" r="6"/>
+          <path d="M95 85 C102 75 115 87 97 103 C79 87 92 75 95 85Z"/>
+        </svg>
+      </div>
 
-<!-- PAROLE -->
-<label class="zone" style="left:7%;top:57%;width:38%;height:2%;">
-<input type="radio" name="parole" value="Non">
-<span class="dot"></span>
-</label>
+      <div class="card">
+        <div class="title">4. As-tu déjà parlé de ce que tu as vécu<br>(hors justice) ?</div>
+        <div class="options">
+          <label><input type="radio" name="parle">Non, je n’en ai jamais parlé.</label>
+          <label><input type="radio" name="parle">Oui, à un proche (famille, ami, ...)</label>
+          <label><input type="radio" name="parle">Oui, à un professionnel<br>(médecin, psychologue, ...)</label>
+        </div>
 
-<label class="zone" style="left:7%;top:59.7%;width:38%;height:2%;">
-<input type="radio" name="parole" value="Proche">
-<span class="dot"></span>
-</label>
+        <svg class="icon small" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3">
+          <path d="M20 30 Q20 15 45 15 Q75 15 78 43 Q80 67 55 72 L35 85 L38 68 Q20 62 20 30Z"/>
+          <circle cx="38" cy="43" r="3" fill="currentColor"/>
+          <circle cx="50" cy="43" r="3" fill="currentColor"/>
+          <circle cx="62" cy="43" r="3" fill="currentColor"/>
+          <path d="M78 70 C85 60 98 72 80 88 C62 72 75 60 78 70Z"/>
+        </svg>
+      </div>
 
-<label class="zone" style="left:7%;top:62.3%;width:38%;height:3%;">
-<input type="radio" name="parole" value="Professionnel">
-<span class="dot"></span>
-</label>
+      <div class="card">
+        <div class="title">5. Aujourd’hui, te sens-tu écouté(e) ?</div>
+        <div class="options">
+          <label><input type="radio" name="ecoute">Oui</label>
+          <label><input type="radio" name="ecoute">Un peu</label>
+          <label><input type="radio" name="ecoute">Non</label>
+          <label><input type="radio" name="ecoute">Je ne sais pas</label>
+        </div>
 
-<!-- ECOUTE -->
-<label class="zone" style="left:55%;top:56%;width:34%;height:2%;">
-<input type="radio" name="ecoute" value="Oui">
-<span class="dot"></span>
-</label>
+        <svg class="icon small" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3">
+          <path d="M45 80 C25 75 25 40 38 25 C55 5 85 20 78 50 C74 67 60 63 58 75 C56 83 50 84 45 80Z"/>
+          <path d="M45 32 C60 18 75 34 67 52 C63 61 52 55 51 66"/>
+          <path d="M45 45 C55 35 65 43 60 54"/>
+          <path d="M78 70 C85 60 98 72 80 88 C62 72 75 60 78 70Z"/>
+        </svg>
+      </div>
 
-<label class="zone" style="left:55%;top:58.7%;width:34%;height:2%;">
-<input type="radio" name="ecoute" value="Un peu">
-<span class="dot"></span>
-</label>
+      <div class="card full question6">
+        <div class="title">6. Que souhaites-tu exprimer par ta voix silencieuse ?</div>
+        <div class="hint">(Tu peux cocher une ou plusieurs réponses.)</div>
+        <div class="options">
+          <label><input type="checkbox">Je suis là, même sans mots.</label>
+          <label><input type="checkbox">Je veux être reconnu(e) sans devoir tout raconter.</label>
+          <label><input type="checkbox">Je cherche à me reconstruire intérieurement.</label>
+          <label><input type="checkbox">Je veux aider d’autres personnes en partageant mon vécu.</label>
+        </div>
 
-<label class="zone" style="left:55%;top:61.3%;width:34%;height:2%;">
-<input type="radio" name="ecoute" value="Non">
-<span class="dot"></span>
-</label>
+        <svg class="icon" viewBox="0 0 140 140" fill="none" stroke="currentColor" stroke-width="3">
+          <path d="M67 112 C20 70 35 25 67 45 C99 25 114 70 67 112Z"/>
+          <path d="M75 92 C90 70 92 50 82 43"/>
+          <path d="M35 25l-8-17M70 20V5M100 25l9-17"/>
+          <path d="M108 96 C115 86 128 98 110 114 C92 98 105 86 108 96Z"/>
+        </svg>
+      </div>
 
-<label class="zone" style="left:55%;top:64%;width:34%;height:2%;">
-<input type="radio" name="ecoute" value="NSP">
-<span class="dot"></span>
-</label>
+      <div class="card full question7">
+        <div class="title">7. Si tu souhaites laisser quelques mots anonymes, cet espace est pour toi.</div>
+        <div class="hint">Aucun jugement. Juste un espace sûr pour déposer ce que tu veux.</div>
+        <textarea aria-label="Message anonyme"></textarea>
 
-<!-- CHECKBOX -->
-<label class="zone" style="left:7%;top:72%;width:60%;height:2%;">
-<input type="checkbox" name="expression">
-<span class="dot square"></span>
-</label>
+        <svg class="pen" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4">
+          <path d="M20 78l8-28 43-43 20 20-43 43-28 8Z"/>
+          <path d="M63 15l20 20M28 50l22 22"/>
+        </svg>
+      </div>
 
-<label class="zone" style="left:7%;top:74.3%;width:60%;height:2%;">
-<input type="checkbox" name="expression">
-<span class="dot square"></span>
-</label>
+      <div class="consent">
+        <input type="checkbox">
+        <div>
+          Si mes mots peuvent aider d’autres personnes, j’autorise le partage anonyme<br>
+          de mon message écrit, sans mon nom ni aucune information personnelle.
+        </div>
 
-<label class="zone" style="left:7%;top:76.6%;width:60%;height:2%;">
-<input type="checkbox" name="expression">
-<span class="dot square"></span>
-</label>
+        <svg class="share" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4">
+          <circle cx="25" cy="50" r="9"/>
+          <circle cx="70" cy="25" r="9"/>
+          <circle cx="70" cy="75" r="9"/>
+          <path d="M33 46l29-17M33 54l29 17"/>
+        </svg>
+      </div>
 
-<label class="zone" style="left:7%;top:78.8%;width:60%;height:2%;">
-<input type="checkbox" name="expression">
-<span class="dot square"></span>
-</label>
+      <div class="bottom-box">
+        <svg class="envelope" viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="4">
+          <rect x="10" y="18" width="90" height="58" rx="3"/>
+          <path d="M10 22l45 35 45-35"/>
+          <path d="M10 76l32-28M100 76L68 48"/>
+          <path d="M94 60 C101 50 114 62 96 78 C78 62 91 50 94 60Z"/>
+        </svg>
 
-<!-- MESSAGE -->
-<textarea id="message"></textarea>
+        <div class="bottom-text">
+          <strong>Ici, chaque réponse compte.</strong><br>
+          Chaque silence aussi.<br>
+          Quand tu es prêt(e), clique sur “Envoyer”.
+        </div>
 
-<!-- AUTORISATION -->
-<label class="zone" style="left:7%;top:88.5%;width:84%;height:4%;">
-<input type="checkbox" name="autorisation">
-<span class="dot square"></span>
-</label>
+        <div class="big-heart">♡</div>
+      </div>
 
-<button type="submit"></button>
-<div id="status"></div>
+    </section>
 
-</form>
-</div>
+    <div class="footer-row">
+      <button type="button">✈ Envoyer</button>
+      <div class="thanks">♡ &nbsp; Merci d’être là. Tu n’es pas seul(e). &nbsp; ♡</div>
+      <div></div>
+    </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCPaxlstCCC1J_gWCSAI2cNt23yu8iLaK0",
-  authDomain: "mymetoo-formulaire.firebaseapp.com",
-  projectId: "mymetoo-formulaire",
-  storageBucket: "mymetoo-formulaire.firebasestorage.app",
-  messagingSenderId: "1084270329845",
-  appId: "1:1084270329845:web:337a6172a4817f0db2eabc"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-document.getElementById("formulaire").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-
-  await addDoc(collection(db,"reponses"),{
-    message: document.getElementById("message").value,
-    date: new Date()
-  });
-
-  document.getElementById("status").innerText = "Envoyé ❤️";
-});
-</script>
-
+  </main>
 </body>
 </html>
