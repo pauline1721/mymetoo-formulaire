@@ -60,6 +60,8 @@ button:hover{
 
 #adminContent{
   display:none;
+  max-width:1100px;
+  margin:0 auto;
 }
 
 .stats{
@@ -79,20 +81,28 @@ button:hover{
 
 .stat strong{
   display:block;
-  font-size:28px;
+  font-size:30px;
   color:#5b23ad;
+}
+
+#data{
+  max-width:900px;
+  margin:0 auto;
 }
 
 .card{
   background:white;
   border-radius:12px;
-  padding:15px;
-  margin-bottom:15px;
+  padding:22px;
+  margin-bottom:18px;
   box-shadow:0 5px 15px rgba(0,0,0,0.05);
+  font-size:16px;
+  line-height:1.5;
+  color:#24106b;
 }
 
 .field{
-  margin:6px 0;
+  margin:8px 0;
 }
 
 .label{
@@ -102,14 +112,24 @@ button:hover{
 
 .message{
   background:#f7effb;
-  padding:10px;
+  padding:12px;
   border-radius:8px;
-  margin-top:8px;
+  margin-top:12px;
+  font-size:17px;
 }
 
 .logout{
   display:block;
   margin:0 auto 20px;
+}
+
+.empty{
+  text-align:center;
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  color:#5b23ad;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -214,6 +234,10 @@ async function loadData(){
 
   const q = query(collection(db, "reponses"), orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
+
+  if(snapshot.empty){
+    container.innerHTML = `<div class="empty">Aucune réponse pour le moment.</div>`;
+  }
 
   snapshot.forEach(doc => {
     const d = doc.data();
