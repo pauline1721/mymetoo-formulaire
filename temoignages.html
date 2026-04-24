@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Témoignages - MyMeToo</title>
+
+<style>
+body{
+  font-family:Arial, sans-serif;
+  background:#f4effa;
+  margin:0;
+  padding:20px;
+  color:#24106b;
+}
+
+h1{
+  text-align:center;
+  color:#5b23ad;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  text-align:center;
+  margin-bottom:30px;
+  font-size:18px;
+}
+
+.container{
+  max-width:800px;
+  margin:0 auto;
+}
+
+.card{
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+  font-size:17px;
+  line-height:1.5;
+}
+
+.date{
+  margin-top:10px;
+  font-size:13px;
+  color:#888;
+}
+
+.empty{
+  text-align:center;
+  padding:30px;
+  background:white;
+  border-radius:12px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>💬 Témoignages anonymes</h1>
+<div class="subtitle">
+Ta voix compte. Tu n’es pas seul(e).
+</div>
+
+<div class="container" id="data"></div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
+  authDomain: "mymetoo-formulaire.firebaseapp.com",
+  projectId: "mymetoo-formulaire",
+  storageBucket: "mymetoo-formulaire.firebasestorage.app",
+  messagingSenderId: "1084270329845",
+  appId: "1:1084270329845:web:337a6172a4817f0db2eabc"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function loadMessages(){
+  const container = document.getElementById("data");
+  container.innerHTML = "";
+
+  const q = query(collection(db, "reponses"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+
+  let count = 0;
+
+  snapshot.forEach(doc => {
+    const d = doc.data();
+
+    if(d.partageAutorise && d.message){
+      count++;
+
+      const div = document.createElement("div");
+      div.className = "card";
+
+      div.innerHTML = `
+        ${d.message}
+        <div class="date">${d.createdAt?.toDate().toLocaleDateString()}</div>
+      `;
+
+      container.appendChild(div);
+    }
+  });
+
+  if(count === 0){
+    container.innerHTML = `<div class="empty">Aucun témoignage pour le moment.</div>`;
+  }
+}
+
+loadMessages();
+
+</script>
+
+</body>
+</html>
