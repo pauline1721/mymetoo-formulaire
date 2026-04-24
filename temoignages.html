@@ -21,7 +21,6 @@ body{
   background:var(--fond);
   font-family:Arial, sans-serif;
   color:var(--violet);
-  padding:0;
 }
 
 .page{
@@ -33,16 +32,38 @@ body{
   border:7px solid var(--border);
   border-radius:0 0 18px 18px;
   padding:18px 40px 30px;
+
+  position:relative;
+  overflow:hidden;
+}
+
+/* 🌿 FEUILLES */
+.leaf{
+  position:absolute;
+  width:320px;
+  top:-20px;
+  opacity:.6;
+  z-index:1;
+}
+
+.leaf.left{
+  left:-10px;
+}
+
+.leaf.right{
+  right:-10px;
 }
 
 .header{
   text-align:center;
+  position:relative;
+  z-index:2;
 }
 
 .logo{
   width:170px;
   display:block;
-  margin:0 auto 0;
+  margin:0 auto;
 }
 
 .unis{
@@ -56,7 +77,6 @@ h1{
   font-size:60px;
   line-height:.9;
   margin:5px 0 8px;
-  color:var(--violet);
 }
 
 .subtitle{
@@ -67,6 +87,8 @@ h1{
 }
 
 .intro{
+  position:relative;
+  z-index:2;
   max-width:850px;
   margin:0 auto 25px;
   background:var(--soft);
@@ -81,6 +103,8 @@ h1{
 .container{
   max-width:850px;
   margin:0 auto;
+  position:relative;
+  z-index:2;
 }
 
 .card{
@@ -144,25 +168,12 @@ h1{
 }
 
 @media(max-width:800px){
-  .page{
-    padding:12px;
-  }
-
-  .logo{
-    width:130px;
-  }
-
-  h1{
-    font-size:46px;
-  }
-
-  .subtitle{
-    font-size:24px;
-  }
-
-  .message{
-    font-size:19px;
-  }
+  .page{padding:12px}
+  .logo{width:130px}
+  h1{font-size:46px}
+  .subtitle{font-size:24px}
+  .message{font-size:19px}
+  .leaf{width:180px; opacity:.3}
 }
 </style>
 </head>
@@ -171,27 +182,31 @@ h1{
 
 <main class="page">
 
-  <div class="header">
-    <img src="logoUNIS.png" class="logo" alt="UNIS">
-    <div class="unis">UNIS</div>
-    <h1>MyMeToo*</h1>
-    <div class="subtitle">Les voix silencieuses</div>
-  </div>
+<!-- 🌿 FEUILLES -->
+<img src="feuille-gauche.png" class="leaf left" alt="">
+<img src="feuille-droite.png" class="leaf right" alt="">
 
-  <div class="intro">
-    Ici, seules les paroles partagées volontairement apparaissent.<br>
-    Chaque témoignage reste anonyme. Chaque voix compte.
-  </div>
+<div class="header">
+  <img src="logoUNIS.png" class="logo" alt="UNIS">
+  <div class="unis">UNIS</div>
+  <h1>MyMeToo*</h1>
+  <div class="subtitle">Les voix silencieuses</div>
+</div>
 
-  <div class="container" id="list"></div>
+<div class="intro">
+  Ici, seules les paroles partagées volontairement apparaissent.<br>
+  Chaque témoignage reste anonyme. Chaque voix compte.
+</div>
 
-  <div id="empty" class="empty" style="display:none;">
-    Aucun témoignage pour le moment 💜
-  </div>
+<div class="container" id="list"></div>
 
-  <div class="footer">
-    ♡ Merci d’être là. Tu n’es pas seul(e). ♡
-  </div>
+<div id="empty" class="empty" style="display:none;">
+  Aucun témoignage pour le moment 💜
+</div>
+
+<div class="footer">
+  ♡ Merci d’être là. Tu n’es pas seul(e). ♡
+</div>
 
 </main>
 
@@ -234,7 +249,7 @@ async function load(){
     div.className = "card";
 
     div.innerHTML = `
-      <div class="meta">${d.age || "Âge non renseigné"} • ${d.genre || "Genre non renseigné"}</div>
+      <div class="meta">${d.age || ""} • ${d.genre || ""}</div>
       <div class="message">${d.message}</div>
       <div class="date">${date}</div>
     `;
