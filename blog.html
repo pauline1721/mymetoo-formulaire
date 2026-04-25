@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog sécurisé - MyMeToo</title>
+
+<style>
+:root{
+  --violet:#24106b;
+  --violet2:#6f42bd;
+  --fond:#e8d7f3;
+  --soft:#f7effb;
+  --border:#d8c2eb;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--fond);
+  font-family:Arial, sans-serif;
+  color:var(--violet);
+}
+
+.page{
+  width:100%;
+  max-width:1030px;
+  min-height:100vh;
+  margin:0 auto;
+  background:white;
+  border:7px solid var(--border);
+  border-radius:0 0 18px 18px;
+  padding:18px 40px 30px;
+  position:relative;
+  overflow:hidden;
+}
+
+.leaf{
+  position:absolute;
+  width:480px;
+  top:30px;
+  opacity:.6;
+  z-index:1;
+}
+
+.leaf.left{left:0}
+.leaf.right{right:0}
+
+.header{
+  text-align:center;
+  position:relative;
+  z-index:2;
+}
+
+.logo{
+  width:170px;
+  display:block;
+  margin:0 auto;
+}
+
+.unis{
+  font-family:Georgia, serif;
+  font-weight:bold;
+  font-size:24px;
+}
+
+h1{
+  font-family:Georgia, serif;
+  font-size:60px;
+  line-height:.9;
+  margin:5px 0 8px;
+}
+
+.subtitle{
+  font-family:Georgia, serif;
+  font-size:30px;
+  font-weight:bold;
+  margin-bottom:18px;
+}
+
+.box{
+  max-width:850px;
+  margin:0 auto 20px;
+  background:var(--soft);
+  border:2px solid #ded2ec;
+  border-radius:12px;
+  padding:18px;
+  position:relative;
+  z-index:2;
+}
+
+input, textarea{
+  width:100%;
+  border:2px solid #d8c2eb;
+  border-radius:10px;
+  padding:12px;
+  font-size:16px;
+  margin-top:10px;
+}
+
+textarea{
+  min-height:110px;
+  resize:vertical;
+}
+
+button{
+  margin-top:12px;
+  background:linear-gradient(90deg,#5b23ad,#7e45d1);
+  color:white;
+  border:none;
+  padding:11px 18px;
+  border-radius:9px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button.secondary{
+  background:#6f42bd;
+}
+
+.status{
+  margin-top:10px;
+  font-weight:bold;
+  color:#5b23ad;
+}
+
+#blogContent{
+  display:none;
+}
+
+.post{
+  max-width:850px;
+  margin:0 auto 16px;
+  background:white;
+  border:2px solid #eeeaf3;
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.04);
+  position:relative;
+  z-index:2;
+}
+
+.meta{
+  color:#6f42bd;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.message{
+  background:#f7effb;
+  border-radius:12px;
+  padding:15px;
+  font-size:18px;
+  line-height:1.45;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+
+.date{
+  text-align:right;
+  margin-top:8px;
+  color:#8b78a8;
+  font-size:13px;
+}
+
+.footer{
+  text-align:center;
+  margin-top:30px;
+  color:#6e4cb0;
+  font-weight:bold;
+}
+
+@media(max-width:800px){
+  .page{padding:12px}
+  .logo{width:130px}
+  h1{font-size:46px}
+  .subtitle{font-size:24px}
+  .leaf{width:180px; opacity:.3}
+}
+</style>
+</head>
+
+<body>
+
+<main class="page">
+
+<img src="feuille-gauche.png" class="leaf left" alt="">
+<img src="feuille-droite.png" class="leaf right" alt="">
+
+<div class="header">
+  <img src="logoUNIS.png" class="logo" alt="UNIS">
+  <div class="unis">UNIS</div>
+  <h1>MyMeToo*</h1>
+  <div class="subtitle">Blog sécurisé</div>
+</div>
+
+<div id="loginBox" class="box">
+  <h2>Connexion au blog</h2>
+  <p>Connecte-toi avec le compte créé depuis le formulaire.</p>
+
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Mot de passe">
+
+  <button onclick="login()">Se connecter</button>
+
+  <p>
+    Pas encore de compte ?
+    <br>
+    <a href="index.html">Remplir le formulaire MyMeToo</a>
+  </p>
+
+  <div id="loginStatus" class="status"></div>
+</div>
+
+<div id="blogContent">
+
+  <div class="box">
+    <h2>Écrire dans le blog</h2>
+    <textarea id="postMessage" placeholder="Écris ton message ici..."></textarea>
+    <button onclick="publishPost()">Publier anonymement</button>
+    <button class="secondary" onclick="logout()">Se déconnecter</button>
+    <div id="postStatus" class="status"></div>
+  </div>
+
+  <div id="posts"></div>
+
+</div>
+
+<div class="footer">
+  ♡ Un espace privé pour échanger avec respect. ♡
+</div>
+
+</main>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
+  authDomain: "mymetoo-formulaire.firebaseapp.com",
+  projectId: "mymetoo-formulaire",
+  storageBucket: "mymetoo-formulaire.firebasestorage.app",
+  messagingSenderId: "1084270329845",
+  appId: "1:1084270329845:web:337a6172a4817f0db2eabc"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentPseudo = "Anonyme";
+
+window.login = async function(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const status = document.getElementById("loginStatus");
+
+  status.textContent = "";
+
+  try{
+    await signInWithEmailAndPassword(auth, email, password);
+  }catch(e){
+    status.textContent = "Email ou mot de passe incorrect.";
+  }
+};
+
+window.logout = async function(){
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, async user => {
+  if(user){
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("blogContent").style.display = "block";
+
+    const profileRef = doc(db, "blogUsers", user.uid);
+    const profileSnap = await getDoc(profileRef);
+
+    if(profileSnap.exists()){
+      currentPseudo = profileSnap.data().pseudo || "Anonyme";
+    }
+
+    loadPosts();
+  }else{
+    document.getElementById("loginBox").style.display = "block";
+    document.getElementById("blogContent").style.display = "none";
+  }
+});
+
+window.publishPost = async function(){
+  const message = document.getElementById("postMessage").value.trim();
+  const status = document.getElementById("postStatus");
+  const user = auth.currentUser;
+
+  if(!user){
+    status.textContent = "Tu dois être connecté(e).";
+    return;
+  }
+
+  if(!message){
+    status.textContent = "Merci d’écrire un message avant de publier.";
+    return;
+  }
+
+  status.textContent = "Publication en cours...";
+
+  try{
+    await addDoc(collection(db, "blogPosts"), {
+      uid: user.uid,
+      pseudo: currentPseudo,
+      message: message,
+      visible: true,
+      createdAt: serverTimestamp()
+    });
+
+    document.getElementById("postMessage").value = "";
+    status.textContent = "Message publié 💜";
+    loadPosts();
+
+  }catch(e){
+    console.error(e);
+    status.textContent = "Erreur lors de la publication.";
+  }
+};
+
+async function loadPosts(){
+  const container = document.getElementById("posts");
+  container.innerHTML = "";
+
+  const q = query(collection(db, "blogPosts"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+
+  snap.forEach(docSnap => {
+    const p = docSnap.data();
+
+    if(p.visible === false) return;
+
+    const date = p.createdAt?.toDate().toLocaleDateString("fr-FR") || "";
+
+    const div = document.createElement("div");
+    div.className = "post";
+
+    div.innerHTML = `
+      <div class="meta">${p.pseudo || "Anonyme"}</div>
+      <div class="message">${p.message || ""}</div>
+      <div class="date">${date}</div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+</script>
+
+</body>
+</html>
