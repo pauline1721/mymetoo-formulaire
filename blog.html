@@ -114,6 +114,10 @@ button.secondary{
   background:#6f42bd;
 }
 
+button.danger{
+  background:#d94b6a;
+}
+
 .status{
   margin-top:10px;
   font-weight:bold;
@@ -266,6 +270,7 @@ button.secondary{
   margin-bottom:10px;
   color:#5b23ad;
   font-weight:bold;
+  flex-wrap:wrap;
 }
 
 .private-list{
@@ -435,7 +440,10 @@ button.secondary{
   <div id="privatePanel" class="private-panel">
     <div class="private-header">
       <span id="privateTitle">Messages privés</span>
-      <button class="close-private" onclick="closePrivateChat()">Fermer</button>
+      <div>
+        <button class="danger" onclick="hideCurrentPrivateConversation()">Supprimer cette conversation</button>
+        <button class="close-private" onclick="closePrivateChat()">Fermer</button>
+      </div>
     </div>
 
     <div id="privateList" class="private-list">
@@ -475,7 +483,9 @@ import {
   doc,
   getDoc,
   updateDoc,
-  setDoc
+  setDoc,
+  arrayUnion,
+  arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -560,6 +570,7 @@ onAuthStateChanged(auth, async user => {
 });
 
 async function loadMembers(){
+  const user = auth.currentUser;
   const container = document.getElementById("membersList");
   container.innerHTML="";
 
@@ -569,7 +580,10 @@ async function loadMembers(){
 
   snap.forEach(d=>{
     const u = d.data();
+    const uid = d.id;
 
+    if(!user) return;
+    if(uid === user.uid) return;
     if(!u.online) return;
 
     const lastSeenTime = u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : 0;
@@ -580,13 +594,13 @@ async function loadMembers(){
     const div = document.createElement("div");
     div.className="member";
     div.innerText = u.pseudo || "Anonyme";
-    div.onclick = ()=> openPrivateChat(d.id,u.pseudo || "Anonyme");
+    div.onclick = ()=> openPrivateChat(uid,u.pseudo || "Anonyme");
 
     container.appendChild(div);
   });
 
   if(count === 0){
-    container.innerHTML = `<div class="member">Aucun membre en ligne</div>`;
+    container.innerHTML = `<div class="member">Aucun autre membre en ligne</div>`;
   }
 }
 
@@ -661,6 +675,7 @@ async function loadPrivateConversations(){
 
     if(!Array.isArray(data.participants)) return;
     if(!data.participants.includes(user.uid)) return;
+    if(Array.isArray(data.hiddenFor) && data.hiddenFor.includes(user.uid)) return;
 
     const otherUid = data.participants.find(uid => uid !== user.uid);
     const otherPseudo =
@@ -713,15 +728,22 @@ window.openPrivateChat = async function(uid,pseudo){
   const user = auth.currentUser;
   if(!user) return;
 
+  if(uid === user.uid){
+    document.getElementById("privateStatus").textContent = "Tu ne peux pas t’envoyer un message à toi-même.";
+    return;
+  }
+
   currentPrivateUser = {uid,pseudo};
   const chatId = getChatId(user.uid,uid);
 
   await setDoc(doc(db,"privateMessages",chatId),{
-    unreadFor:""
+    unreadFor:"",
+    hiddenFor:arrayRemove(user.uid)
   }, { merge:true });
 
   document.getElementById("privatePanel").style.display="block";
   document.getElementById("privateTitle").innerText="Discussion avec "+pseudo;
+  document.getElementById("privateStatus").textContent = "";
 
   await loadPrivateMessages();
   await loadPrivateConversations();
@@ -732,6 +754,42 @@ window.openPrivateChat = async function(uid,pseudo){
 window.closePrivateChat = function(){
   document.getElementById("privatePanel").style.display="none";
   currentPrivateUser=null;
+};
+
+window.hideCurrentPrivateConversation = async function(){
+  const user = auth.currentUser;
+  const status = document.getElementById("privateStatus");
+
+  if(!user || !currentPrivateUser){
+    status.textContent = "Sélectionne d’abord une conversation à supprimer.";
+    return;
+  }
+
+  const ok = confirm("Supprimer cette conversation de ta liste ?");
+  if(!ok) return;
+
+  const chatId = getChatId(user.uid,currentPrivateUser.uid);
+
+  try{
+    await setDoc(doc(db,"privateMessages",chatId),{
+      hiddenFor:arrayUnion(user.uid),
+      unreadFor:""
+    }, { merge:true });
+
+    currentPrivateUser = null;
+    document.getElementById("privateTitle").innerText = "Messages privés";
+    document.getElementById("privateMessages").innerHTML = "Conversation supprimée de ta liste.";
+    document.getElementById("privateText").value = "";
+    status.textContent = "";
+
+    await loadPrivateConversations();
+    renderPrivateConversations();
+    await checkPrivateNotifications();
+
+  }catch(error){
+    console.error(error);
+    status.textContent = "Erreur : suppression impossible.";
+  }
 };
 
 window.sendPrivateMessage = async function(){
@@ -749,6 +807,14 @@ window.sendPrivateMessage = async function(){
   }
 
   const user = auth.currentUser;
+
+  if(!user) return;
+
+  if(currentPrivateUser.uid === user.uid){
+    status.textContent = "Tu ne peux pas t’envoyer un message à toi-même.";
+    return;
+  }
+
   const chatId = getChatId(user.uid,currentPrivateUser.uid);
   const chatRef = doc(db,"privateMessages",chatId);
 
@@ -761,6 +827,7 @@ window.sendPrivateMessage = async function(){
       },
       lastMessage:text,
       unreadFor:currentPrivateUser.uid,
+      hiddenFor:arrayRemove(currentPrivateUser.uid),
       updatedAt:serverTimestamp()
     }, { merge:true });
 
@@ -822,6 +889,8 @@ async function checkPrivateNotifications(){
 
   snap.forEach(d=>{
     const data = d.data();
+
+    if(Array.isArray(data.hiddenFor) && data.hiddenFor.includes(user.uid)) return;
 
     if(data.unreadFor === user.uid){
       count++;
