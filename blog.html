@@ -350,6 +350,11 @@ button.danger{background:#d94b6a}
   color:white;
 }
 
+.window-btn.report{
+  background:#ffb347;
+  color:#24106b;
+}
+
 .private-messages{
   background:white;
   padding:12px;
@@ -377,6 +382,63 @@ button.danger{background:#d94b6a}
 .private-write textarea{
   min-height:60px;
   background:white;
+}
+
+.profile-window{
+  display:none;
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:360px;
+  max-width:calc(100vw - 30px);
+  background:white;
+  border:2px solid #ded2ec;
+  border-radius:18px;
+  box-shadow:0 12px 40px rgba(0,0,0,.22);
+  z-index:10000;
+  overflow:hidden;
+}
+
+.profile-top{
+  background:#6f42bd;
+  color:white;
+  padding:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+}
+
+.profile-content{
+  padding:18px;
+  background:#fbf8ff;
+}
+
+.profile-field{
+  background:white;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:10px;
+  border:1px solid #eeeaf3;
+}
+
+.profile-field strong{
+  color:#6f42bd;
+}
+
+.profile-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.profile-close{
+  margin:0;
+  padding:5px 9px;
+  border-radius:8px;
+  background:white;
+  color:#6f42bd;
 }
 
 .footer{
@@ -491,6 +553,7 @@ button.danger{background:#d94b6a}
   <div class="private-chat-top">
     <span id="privateTitle">Discussion privée</span>
     <div class="window-actions">
+      <button class="window-btn report" onclick="reportPrivateConversation()">⚠️</button>
       <button class="window-btn" onclick="minimizePrivateChat()">—</button>
       <button class="window-btn delete" onclick="hideCurrentPrivateConversation()">✕</button>
     </div>
@@ -502,6 +565,26 @@ button.danger{background:#d94b6a}
     <textarea id="privateText" placeholder="Écris ton message privé ici..."></textarea>
     <button onclick="sendPrivateMessage()">Envoyer en privé</button>
     <div id="privateStatus" class="status"></div>
+  </div>
+</div>
+
+<div id="profileWindow" class="profile-window">
+  <div class="profile-top">
+    <span id="profileTitle">Profil</span>
+    <button class="profile-close" onclick="closeProfile()">✕</button>
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-field"><strong>Pseudo :</strong> <span id="profilePseudo"></span></div>
+    <div class="profile-field"><strong>Genre :</strong> <span id="profileGenre"></span></div>
+    <div class="profile-field"><strong>Âge :</strong> <span id="profileAge"></span></div>
+
+    <div class="profile-actions">
+      <button onclick="messageProfileUser()">💬 Envoyer un message privé</button>
+      <button class="danger" onclick="reportProfileUser()">⚠️ Signaler ce profil</button>
+    </div>
+
+    <div id="profileStatus" class="status"></div>
   </div>
 </div>
 <script type="module">
@@ -539,6 +622,7 @@ const db = getFirestore(app);
 
 let currentPseudo = "Anonyme";
 let currentPrivateUser = null;
+let currentProfileUser = null;
 let privateConversations = [];
 
 let unsubscribePublicMessages = null;
@@ -652,21 +736,10 @@ function listenMessages(){
       const div = document.createElement("div");
       div.className = "msg";
 
-      const meta = document.createElement("div");
-      meta.className = "msg-meta";
-      meta.textContent = m.pseudo || "Anonyme";
-
-      const text = document.createElement("div");
-      text.textContent = m.message || "";
-
-      const reportBtn = document.createElement("button");
-      reportBtn.className = "danger";
-      reportBtn.textContent = "⚠️ Signaler";
-      reportBtn.onclick = () => reportMessage(d.id);
-
-      div.appendChild(meta);
-      div.appendChild(text);
-      div.appendChild(reportBtn);
+      div.innerHTML = `
+        <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
+        <div>${m.message || ""}</div>
+      `;
 
       container.appendChild(div);
     });
@@ -674,42 +747,6 @@ function listenMessages(){
     container.scrollTop = container.scrollHeight;
   });
 }
-
-window.reportMessage = async function(messageId){
-  const user = auth.currentUser;
-  if(!user) return;
-
-  const ok = confirm("Signaler ce message à l’administrateur ?");
-  if(!ok) return;
-
-  try{
-    const messageSnap = await getDoc(doc(db,"blogMessages",messageId));
-
-    if(!messageSnap.exists()){
-      alert("Message introuvable.");
-      return;
-    }
-
-    const m = messageSnap.data();
-
-    await addDoc(collection(db,"reports"),{
-      type:"blogMessage",
-      messageId:messageId,
-      message:m.message || "",
-      pseudo:m.pseudo || "Anonyme",
-      authorUid:m.uid || "",
-      reportedBy:user.uid,
-      createdAt:serverTimestamp(),
-      status:"pending"
-    });
-
-    alert("Message signalé ✅");
-
-  }catch(error){
-    console.error(error);
-    alert("Erreur lors du signalement.");
-  }
-};
 
 function listenMembers(){
   const container = document.getElementById("membersList");
@@ -739,7 +776,7 @@ function listenMembers(){
       const div = document.createElement("div");
       div.className = "member";
       div.innerText = u.pseudo || "Anonyme";
-      div.onclick = () => openPrivateChat(uid, u.pseudo || "Anonyme");
+      div.onclick = () => openProfile(uid, u);
 
       container.appendChild(div);
     });
@@ -749,6 +786,77 @@ function listenMembers(){
     }
   });
 }
+
+window.openProfile = function(uid, data){
+  currentProfileUser = {
+    uid: uid,
+    pseudo: data.pseudo || "Anonyme",
+    genre: data.genre || data.gender || "Non renseigné",
+    age: data.age || data.trancheAge || data.ageRange || "Non renseigné"
+  };
+
+  document.getElementById("profileTitle").innerText = "Profil de " + currentProfileUser.pseudo;
+  document.getElementById("profilePseudo").innerText = currentProfileUser.pseudo;
+  document.getElementById("profileGenre").innerText = currentProfileUser.genre;
+  document.getElementById("profileAge").innerText = currentProfileUser.age;
+  document.getElementById("profileStatus").textContent = "";
+  document.getElementById("profileWindow").style.display = "block";
+};
+
+window.closeProfile = function(){
+  document.getElementById("profileWindow").style.display = "none";
+  currentProfileUser = null;
+};
+
+window.messageProfileUser = function(){
+  if(!currentProfileUser) return;
+
+  const user = auth.currentUser;
+  if(!user) return;
+
+  if(currentProfileUser.uid === user.uid){
+    document.getElementById("profileStatus").textContent = "Tu ne peux pas t’envoyer un message à toi-même.";
+    return;
+  }
+
+  const uid = currentProfileUser.uid;
+  const pseudo = currentProfileUser.pseudo;
+
+  closeProfile();
+  openPrivateChat(uid, pseudo);
+};
+
+window.reportProfileUser = async function(){
+  const user = auth.currentUser;
+  const status = document.getElementById("profileStatus");
+
+  if(!user || !currentProfileUser){
+    status.textContent = "Aucun profil sélectionné.";
+    return;
+  }
+
+  const ok = confirm("Signaler ce profil à l’administrateur ?");
+  if(!ok) return;
+
+  try{
+    await addDoc(collection(db,"reports"),{
+      type:"profile",
+      reportedUserUid:currentProfileUser.uid,
+      reportedUserPseudo:currentProfileUser.pseudo,
+      reportedUserGenre:currentProfileUser.genre,
+      reportedUserAge:currentProfileUser.age,
+      reportedBy:user.uid,
+      createdAt:serverTimestamp(),
+      status:"pending"
+    });
+
+    status.textContent = "Profil signalé ✅";
+
+  }catch(error){
+    console.error(error);
+    status.textContent = "Erreur lors du signalement.";
+  }
+};
 
 function listenPrivateConversations(){
   if(unsubscribePrivateConversations) unsubscribePrivateConversations();
@@ -919,6 +1027,39 @@ function listenPrivateChat(chatId){
     container.scrollTop = container.scrollHeight;
   });
 }
+
+window.reportPrivateConversation = async function(){
+  const user = auth.currentUser;
+  const status = document.getElementById("privateStatus");
+
+  if(!user || !currentPrivateUser){
+    status.textContent = "Aucune discussion privée sélectionnée.";
+    return;
+  }
+
+  const ok = confirm("Signaler cette discussion privée à l’administrateur ?");
+  if(!ok) return;
+
+  const chatId = getChatId(user.uid,currentPrivateUser.uid);
+
+  try{
+    await addDoc(collection(db,"reports"),{
+      type:"privateConversation",
+      chatId:chatId,
+      reportedUserUid:currentPrivateUser.uid,
+      reportedUserPseudo:currentPrivateUser.pseudo,
+      reportedBy:user.uid,
+      createdAt:serverTimestamp(),
+      status:"pending"
+    });
+
+    status.textContent = "Discussion signalée ✅";
+
+  }catch(error){
+    console.error(error);
+    status.textContent = "Erreur lors du signalement.";
+  }
+};
 
 window.minimizePrivateChat = function(){
   document.getElementById("privateChatWindow").style.display="none";
