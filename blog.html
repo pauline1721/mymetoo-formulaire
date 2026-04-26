@@ -268,6 +268,51 @@ button.secondary{
   font-weight:bold;
 }
 
+.private-list{
+  background:white;
+  border:2px solid #eeeaf3;
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:12px;
+  max-height:230px;
+  overflow-y:auto;
+}
+
+.private-conversation{
+  background:#f7effb;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:8px;
+  cursor:pointer;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+
+.private-conversation:hover{
+  background:#efe4f8;
+}
+
+.private-conversation .name{
+  font-weight:bold;
+  color:#6f42bd;
+}
+
+.private-conversation .preview{
+  margin-top:5px;
+  font-size:14px;
+}
+
+.private-conversation .new{
+  display:inline-block;
+  background:#d94b6a;
+  color:white;
+  border-radius:999px;
+  padding:2px 8px;
+  font-size:12px;
+  margin-left:8px;
+}
+
 .private-messages{
   background:white;
   border:2px solid #eeeaf3;
@@ -393,8 +438,12 @@ button.secondary{
       <button class="close-private" onclick="closePrivateChat()">Fermer</button>
     </div>
 
+    <div id="privateList" class="private-list">
+      Aucune conversation privée pour le moment.
+    </div>
+
     <div id="privateMessages" class="private-messages">
-      Clique sur un membre en ligne à gauche pour commencer une discussion privée.
+      Sélectionne une conversation ou clique sur un membre en ligne pour commencer.
     </div>
 
     <div class="private-write">
@@ -444,6 +493,7 @@ const db = getFirestore(app);
 
 let currentPseudo = "Anonyme";
 let currentPrivateUser = null;
+let privateConversations = [];
 
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
@@ -500,6 +550,7 @@ onAuthStateChanged(auth, async user => {
 
     await loadMembers();
     await loadMessages();
+    await loadPrivateConversations();
     await checkPrivateNotifications();
 
   }else{
@@ -590,10 +641,73 @@ function getChatId(uid1,uid2){
   return uid1 < uid2 ? uid1+"_"+uid2 : uid2+"_"+uid1;
 }
 
-window.openPrivatePanel = function(){
+window.openPrivatePanel = async function(){
   document.getElementById("privatePanel").style.display="block";
   document.getElementById("privateTitle").innerText="Messages privés";
+  await loadPrivateConversations();
+  renderPrivateConversations();
 };
+
+async function loadPrivateConversations(){
+  const user = auth.currentUser;
+  if(!user) return;
+
+  const snap = await getDocs(collection(db,"privateMessages"));
+  privateConversations = [];
+
+  snap.forEach(d=>{
+    const data = d.data();
+    const chatId = d.id;
+
+    if(!Array.isArray(data.participants)) return;
+    if(!data.participants.includes(user.uid)) return;
+
+    const otherUid = data.participants.find(uid => uid !== user.uid);
+    const otherPseudo =
+      data.participantPseudos?.[otherUid] ||
+      "Utilisateur";
+
+    const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate().getTime() : 0;
+
+    privateConversations.push({
+      chatId,
+      otherUid,
+      otherPseudo,
+      lastMessage:data.lastMessage || "",
+      unread:data.unreadFor === user.uid,
+      updatedAt
+    });
+  });
+
+  privateConversations.sort((a,b)=> b.updatedAt - a.updatedAt);
+}
+
+function renderPrivateConversations(){
+  const container = document.getElementById("privateList");
+  container.innerHTML = "";
+
+  if(privateConversations.length === 0){
+    container.innerHTML = "Aucune conversation privée pour le moment.";
+    return;
+  }
+
+  privateConversations.forEach(conv=>{
+    const div = document.createElement("div");
+    div.className = "private-conversation";
+
+    div.innerHTML = `
+      <div class="name">
+        ${conv.otherPseudo}
+        ${conv.unread ? `<span class="new">Nouveau</span>` : ""}
+      </div>
+      <div class="preview">${conv.lastMessage || "Conversation privée"}</div>
+    `;
+
+    div.onclick = () => openPrivateChat(conv.otherUid, conv.otherPseudo);
+
+    container.appendChild(div);
+  });
+}
 
 window.openPrivateChat = async function(uid,pseudo){
   const user = auth.currentUser;
@@ -610,6 +724,8 @@ window.openPrivateChat = async function(uid,pseudo){
   document.getElementById("privateTitle").innerText="Discussion avec "+pseudo;
 
   await loadPrivateMessages();
+  await loadPrivateConversations();
+  renderPrivateConversations();
   await checkPrivateNotifications();
 };
 
@@ -623,7 +739,7 @@ window.sendPrivateMessage = async function(){
   const status = document.getElementById("privateStatus");
 
   if(!currentPrivateUser){
-    status.textContent = "Clique d’abord sur un membre en ligne.";
+    status.textContent = "Clique d’abord sur un membre en ligne ou une conversation.";
     return;
   }
 
@@ -660,6 +776,8 @@ window.sendPrivateMessage = async function(){
     status.textContent = "";
 
     await loadPrivateMessages();
+    await loadPrivateConversations();
+    renderPrivateConversations();
     await checkPrivateNotifications();
 
   }catch(error){
@@ -736,13 +854,19 @@ async function checkNewMessages(){
   lastMessageCount = count;
 }
 
-setInterval(()=>{
+setInterval(async ()=>{
   if(auth.currentUser){
-    loadMessages();
-    loadMembers();
-    loadPrivateMessages();
-    checkNewMessages();
-    checkPrivateNotifications();
+    await loadMessages();
+    await loadMembers();
+    await loadPrivateConversations();
+    renderPrivateConversations();
+
+    if(currentPrivateUser){
+      await loadPrivateMessages();
+    }
+
+    await checkNewMessages();
+    await checkPrivateNotifications();
   }
 },4000);
 
