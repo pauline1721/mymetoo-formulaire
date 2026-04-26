@@ -100,7 +100,7 @@ input, textarea{
 }
 
 textarea{
-  min-height:110px;
+  min-height:100px;
   resize:vertical;
 }
 
@@ -165,6 +165,43 @@ button.secondary{
   font-size:13px;
 }
 
+.reply-box{
+  margin-top:14px;
+  background:#f7effb;
+  border-radius:12px;
+  padding:14px;
+}
+
+.reply-box textarea{
+  min-height:70px;
+}
+
+.reply{
+  background:#fbf8ff;
+  border-left:4px solid #6f42bd;
+  border-radius:8px;
+  padding:10px 12px;
+  margin-top:10px;
+  font-size:15px;
+  line-height:1.45;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+
+.reply small{
+  display:block;
+  margin-top:6px;
+  color:#8b78a8;
+  font-size:12px;
+}
+
+.replies-title{
+  margin-top:16px;
+  font-weight:bold;
+  color:#6f42bd;
+}
+
 .footer{
   text-align:center;
   margin-top:30px;
@@ -206,8 +243,7 @@ button.secondary{
   <button onclick="login()">Se connecter</button>
 
   <p>
-    Pas encore de compte ?
-    <br>
+    Pas encore de compte ?<br>
     <a href="index.html">Remplir le formulaire MyMeToo</a>
   </p>
 
@@ -218,8 +254,9 @@ button.secondary{
 
   <div class="box">
     <h2>Écrire dans le blog</h2>
+    <p id="welcomePseudo"></p>
     <textarea id="postMessage" placeholder="Écris ton message ici..."></textarea>
-    <button onclick="publishPost()">Publier anonymement</button>
+    <button onclick="publishPost()">Publier</button>
     <button class="secondary" onclick="logout()">Se déconnecter</button>
     <div id="postStatus" class="status"></div>
   </div>
@@ -254,6 +291,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentPseudo = "Anonyme";
+let currentUserActive = true;
 
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
@@ -275,15 +313,29 @@ window.logout = async function(){
 
 onAuthStateChanged(auth, async user => {
   if(user){
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("blogContent").style.display = "block";
-
     const profileRef = doc(db, "blogUsers", user.uid);
     const profileSnap = await getDoc(profileRef);
 
-    if(profileSnap.exists()){
-      currentPseudo = profileSnap.data().pseudo || "Anonyme";
+    if(!profileSnap.exists()){
+      await signOut(auth);
+      document.getElementById("loginStatus").textContent = "Compte blog introuvable.";
+      return;
     }
+
+    const profile = profileSnap.data();
+
+    if(profile.active === false){
+      await signOut(auth);
+      document.getElementById("loginStatus").textContent = "Ce compte a été désactivé.";
+      return;
+    }
+
+    currentPseudo = profile.pseudo || "Anonyme";
+    currentUserActive = true;
+
+    document.getElementById("welcomePseudo").textContent = "Connecté(e) en tant que : " + currentPseudo;
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("blogContent").style.display = "block";
 
     loadPosts();
   }else{
@@ -297,7 +349,7 @@ window.publishPost = async function(){
   const status = document.getElementById("postStatus");
   const user = auth.currentUser;
 
-  if(!user){
+  if(!user || !currentUserActive){
     status.textContent = "Tu dois être connecté(e).";
     return;
   }
@@ -328,6 +380,80 @@ window.publishPost = async function(){
   }
 };
 
+window.publishReply = async function(postId){
+  const user = auth.currentUser;
+  const textarea = document.getElementById("reply-text-" + postId);
+  const status = document.getElementById("reply-status-" + postId);
+  const message = textarea.value.trim();
+
+  if(!user || !currentUserActive){
+    status.textContent = "Tu dois être connecté(e).";
+    return;
+  }
+
+  if(!message){
+    status.textContent = "Merci d’écrire une réponse.";
+    return;
+  }
+
+  status.textContent = "Envoi en cours...";
+
+  try{
+    await addDoc(collection(db, "blogPosts", postId, "replies"), {
+      uid: user.uid,
+      pseudo: currentPseudo,
+      message: message,
+      visible: true,
+      createdAt: serverTimestamp()
+    });
+
+    textarea.value = "";
+    status.textContent = "Réponse publiée 💜";
+    loadPosts();
+
+  }catch(e){
+    console.error(e);
+    status.textContent = "Erreur lors de l’envoi.";
+  }
+};
+
+async function loadReplies(postId, container){
+  container.innerHTML = "";
+
+  const q = query(collection(db, "blogPosts", postId, "replies"), orderBy("createdAt", "asc"));
+  const snap = await getDocs(q);
+
+  let count = 0;
+
+  snap.forEach(replySnap => {
+    const r = replySnap.data();
+
+    if(r.visible === false) return;
+
+    count++;
+
+    const date = r.createdAt?.toDate().toLocaleDateString("fr-FR") || "";
+
+    const div = document.createElement("div");
+    div.className = "reply";
+
+    div.innerHTML = `
+      <strong>${r.pseudo || "Anonyme"}</strong><br>
+      ${r.message || ""}
+      <small>${date}</small>
+    `;
+
+    container.appendChild(div);
+  });
+
+  if(count > 0){
+    const title = document.createElement("div");
+    title.className = "replies-title";
+    title.textContent = count === 1 ? "1 réponse" : count + " réponses";
+    container.prepend(title);
+  }
+}
+
 async function loadPosts(){
   const container = document.getElementById("posts");
   container.innerHTML = "";
@@ -335,10 +461,11 @@ async function loadPosts(){
   const q = query(collection(db, "blogPosts"), orderBy("createdAt", "desc"));
   const snap = await getDocs(q);
 
-  snap.forEach(docSnap => {
+  for(const docSnap of snap.docs){
     const p = docSnap.data();
+    const postId = docSnap.id;
 
-    if(p.visible === false) return;
+    if(p.visible === false) continue;
 
     const date = p.createdAt?.toDate().toLocaleDateString("fr-FR") || "";
 
@@ -349,10 +476,20 @@ async function loadPosts(){
       <div class="meta">${p.pseudo || "Anonyme"}</div>
       <div class="message">${p.message || ""}</div>
       <div class="date">${date}</div>
+
+      <div class="reply-box">
+        <textarea id="reply-text-${postId}" placeholder="Répondre à ce message..."></textarea>
+        <button onclick="publishReply('${postId}')">Répondre</button>
+        <div id="reply-status-${postId}" class="status"></div>
+      </div>
+
+      <div id="replies-${postId}"></div>
     `;
 
     container.appendChild(div);
-  });
+
+    await loadReplies(postId, document.getElementById("replies-" + postId));
+  }
 }
 
 </script>
