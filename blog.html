@@ -158,6 +158,11 @@ button.secondary{
   color:#5b23ad;
 }
 
+.member::before{
+  content:"● ";
+  color:#2fbb62;
+}
+
 .chat-panel{
   background:#f7effb;
   border:2px solid #ded2ec;
@@ -288,7 +293,7 @@ button.secondary{
   <div class="chat-layout">
 
     <aside class="members-panel">
-      <h2>Membres du blog</h2>
+      <h2>En ligne</h2>
       <div id="membersList"></div>
     </aside>
 
@@ -332,7 +337,8 @@ import {
   orderBy,
   serverTimestamp,
   doc,
-  getDoc
+  getDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -350,6 +356,7 @@ const db = getFirestore(app);
 
 let currentPseudo = "Anonyme";
 let currentUserActive = true;
+let presenceInterval = null;
 
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
@@ -365,7 +372,33 @@ window.login = async function(){
   }
 };
 
+async function setOnline(user){
+  if(!user) return;
+
+  await updateDoc(doc(db, "blogUsers", user.uid), {
+    online: true,
+    lastSeen: serverTimestamp()
+  });
+}
+
+async function setOffline(user){
+  if(!user) return;
+
+  await updateDoc(doc(db, "blogUsers", user.uid), {
+    online: false,
+    lastSeen: serverTimestamp()
+  });
+}
+
 window.logout = async function(){
+  const user = auth.currentUser;
+
+  try{
+    await setOffline(user);
+  }catch(e){
+    console.error(e);
+  }
+
   await signOut(auth);
 };
 
@@ -391,6 +424,19 @@ onAuthStateChanged(auth, async user => {
     currentPseudo = profile.pseudo || "Anonyme";
     currentUserActive = true;
 
+    await setOnline(user);
+
+    if(presenceInterval){
+      clearInterval(presenceInterval);
+    }
+
+    presenceInterval = setInterval(async () => {
+      if(auth.currentUser){
+        await setOnline(auth.currentUser);
+        await loadMembers();
+      }
+    }, 30000);
+
     document.getElementById("welcomePseudo").textContent = "Connecté(e) : " + currentPseudo;
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("blogContent").style.display = "block";
@@ -399,6 +445,11 @@ onAuthStateChanged(auth, async user => {
     await loadMessages();
 
   }else{
+    if(presenceInterval){
+      clearInterval(presenceInterval);
+      presenceInterval = null;
+    }
+
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("blogContent").style.display = "none";
   }
@@ -409,11 +460,21 @@ async function loadMembers(){
   container.innerHTML = "";
 
   const snap = await getDocs(collection(db, "blogUsers"));
+  const now = Date.now();
+  let count = 0;
 
   snap.forEach(userDoc => {
     const u = userDoc.data();
 
     if(u.active === false) return;
+    if(u.online !== true) return;
+
+    const lastSeenTime = u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : 0;
+    const isRecentlySeen = now - lastSeenTime < 120000;
+
+    if(!isRecentlySeen) return;
+
+    count++;
 
     const div = document.createElement("div");
     div.className = "member";
@@ -421,6 +482,10 @@ async function loadMembers(){
 
     container.appendChild(div);
   });
+
+  if(count === 0){
+    container.innerHTML = `<div class="member">Aucun membre en ligne</div>`;
+  }
 }
 
 window.sendMessage = async function(){
@@ -452,7 +517,9 @@ window.sendMessage = async function(){
 
     textarea.value = "";
     status.textContent = "";
+    await setOnline(user);
     await loadMessages();
+    await loadMembers();
 
   }catch(e){
     console.error(e);
@@ -492,8 +559,16 @@ async function loadMessages(){
 setInterval(() => {
   if(auth.currentUser){
     loadMessages();
+    loadMembers();
   }
 }, 10000);
+
+window.addEventListener("beforeunload", () => {
+  const user = auth.currentUser;
+  if(user){
+    setOffline(user);
+  }
+});
 
 </script>
 
