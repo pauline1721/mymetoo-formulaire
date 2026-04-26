@@ -25,13 +25,13 @@ body{
 
 .page{
   width:100%;
-  max-width:1030px;
+  max-width:1200px;
   min-height:100vh;
   margin:0 auto;
   background:white;
   border:7px solid var(--border);
   border-radius:0 0 18px 18px;
-  padding:18px 40px 30px;
+  padding:18px 30px 30px;
   position:relative;
   overflow:hidden;
 }
@@ -40,7 +40,7 @@ body{
   position:absolute;
   width:480px;
   top:30px;
-  opacity:.6;
+  opacity:.45;
   z-index:1;
 }
 
@@ -54,7 +54,7 @@ body{
 }
 
 .logo{
-  width:170px;
+  width:160px;
   display:block;
   margin:0 auto;
 }
@@ -62,25 +62,25 @@ body{
 .unis{
   font-family:Georgia, serif;
   font-weight:bold;
-  font-size:24px;
+  font-size:23px;
 }
 
 h1{
   font-family:Georgia, serif;
-  font-size:60px;
+  font-size:56px;
   line-height:.9;
   margin:5px 0 8px;
 }
 
 .subtitle{
   font-family:Georgia, serif;
-  font-size:30px;
+  font-size:28px;
   font-weight:bold;
   margin-bottom:18px;
 }
 
 .box{
-  max-width:850px;
+  max-width:430px;
   margin:0 auto 20px;
   background:var(--soft);
   border:2px solid #ded2ec;
@@ -97,11 +97,6 @@ input, textarea{
   padding:12px;
   font-size:16px;
   margin-top:10px;
-}
-
-textarea{
-  min-height:100px;
-  resize:vertical;
 }
 
 button{
@@ -127,79 +122,104 @@ button.secondary{
 
 #blogContent{
   display:none;
-}
-
-.post{
-  max-width:850px;
-  margin:0 auto 16px;
-  background:white;
-  border:2px solid #eeeaf3;
-  border-radius:14px;
-  padding:20px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.04);
   position:relative;
   z-index:2;
 }
 
-.meta{
-  color:#6f42bd;
+.chat-layout{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  gap:18px;
+  max-width:1050px;
+  margin:0 auto;
+}
+
+.members-panel{
+  background:#f7effb;
+  border:2px solid #ded2ec;
+  border-radius:14px;
+  padding:15px;
+  height:600px;
+  overflow-y:auto;
+}
+
+.members-panel h2{
+  margin-top:0;
+  color:#5b23ad;
+  font-size:22px;
+}
+
+.member{
+  background:white;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:8px;
   font-weight:bold;
+  color:#5b23ad;
+}
+
+.chat-panel{
+  background:#f7effb;
+  border:2px solid #ded2ec;
+  border-radius:14px;
+  padding:15px;
+  height:600px;
+  display:flex;
+  flex-direction:column;
+}
+
+.chat-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
   margin-bottom:10px;
 }
 
-.message{
-  background:#f7effb;
+.chat-top strong{
+  color:#5b23ad;
+}
+
+.messages{
+  flex:1;
+  overflow-y:auto;
+  background:white;
   border-radius:12px;
   padding:15px;
-  font-size:18px;
-  line-height:1.45;
-  word-wrap:break-word;
-  overflow-wrap:break-word;
-  word-break:break-word;
+  border:2px solid #eeeaf3;
 }
 
-.date{
-  text-align:right;
-  margin-top:8px;
-  color:#8b78a8;
-  font-size:13px;
-}
-
-.reply-box{
-  margin-top:14px;
+.msg{
   background:#f7effb;
   border-radius:12px;
-  padding:14px;
-}
-
-.reply-box textarea{
-  min-height:70px;
-}
-
-.reply{
-  background:#fbf8ff;
-  border-left:4px solid #6f42bd;
-  border-radius:8px;
-  padding:10px 12px;
-  margin-top:10px;
-  font-size:15px;
-  line-height:1.45;
+  padding:12px;
+  margin-bottom:12px;
   word-wrap:break-word;
   overflow-wrap:break-word;
   word-break:break-word;
 }
 
-.reply small{
-  display:block;
-  margin-top:6px;
-  color:#8b78a8;
-  font-size:12px;
-}
-
-.replies-title{
-  margin-top:16px;
+.msg-meta{
   font-weight:bold;
   color:#6f42bd;
+  margin-bottom:6px;
+}
+
+.msg-date{
+  color:#8b78a8;
+  font-size:12px;
+  margin-top:6px;
+  text-align:right;
+}
+
+.write-box{
+  margin-top:12px;
+}
+
+.write-box textarea{
+  min-height:75px;
+  resize:vertical;
+  background:white;
 }
 
 .footer{
@@ -214,7 +234,20 @@ button.secondary{
   .logo{width:130px}
   h1{font-size:46px}
   .subtitle{font-size:24px}
-  .leaf{width:180px; opacity:.3}
+  .leaf{width:180px; opacity:.25}
+
+  .chat-layout{
+    grid-template-columns:1fr;
+  }
+
+  .members-panel{
+    height:auto;
+    max-height:180px;
+  }
+
+  .chat-panel{
+    height:620px;
+  }
 }
 </style>
 </head>
@@ -252,16 +285,31 @@ button.secondary{
 
 <div id="blogContent">
 
-  <div class="box">
-    <h2>Écrire dans le blog</h2>
-    <p id="welcomePseudo"></p>
-    <textarea id="postMessage" placeholder="Écris ton message ici..."></textarea>
-    <button onclick="publishPost()">Publier</button>
-    <button class="secondary" onclick="logout()">Se déconnecter</button>
-    <div id="postStatus" class="status"></div>
-  </div>
+  <div class="chat-layout">
 
-  <div id="posts"></div>
+    <aside class="members-panel">
+      <h2>Membres du blog</h2>
+      <div id="membersList"></div>
+    </aside>
+
+    <section class="chat-panel">
+
+      <div class="chat-top">
+        <strong id="welcomePseudo">Connecté(e)</strong>
+        <button class="secondary" onclick="logout()">Se déconnecter</button>
+      </div>
+
+      <div id="messages" class="messages"></div>
+
+      <div class="write-box">
+        <textarea id="chatMessage" placeholder="Écris ton message ici..."></textarea>
+        <button onclick="sendMessage()">Envoyer</button>
+        <div id="messageStatus" class="status"></div>
+      </div>
+
+    </section>
+
+  </div>
 
 </div>
 
@@ -275,7 +323,17 @@ button.secondary{
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  serverTimestamp,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
@@ -333,83 +391,68 @@ onAuthStateChanged(auth, async user => {
     currentPseudo = profile.pseudo || "Anonyme";
     currentUserActive = true;
 
-    document.getElementById("welcomePseudo").textContent = "Connecté(e) en tant que : " + currentPseudo;
+    document.getElementById("welcomePseudo").textContent = "Connecté(e) : " + currentPseudo;
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("blogContent").style.display = "block";
 
-    loadPosts();
+    await loadMembers();
+    await loadMessages();
+
   }else{
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("blogContent").style.display = "none";
   }
 });
 
-window.publishPost = async function(){
-  const message = document.getElementById("postMessage").value.trim();
-  const status = document.getElementById("postStatus");
+async function loadMembers(){
+  const container = document.getElementById("membersList");
+  container.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "blogUsers"));
+
+  snap.forEach(userDoc => {
+    const u = userDoc.data();
+
+    if(u.active === false) return;
+
+    const div = document.createElement("div");
+    div.className = "member";
+    div.textContent = u.pseudo || "Anonyme";
+
+    container.appendChild(div);
+  });
+}
+
+window.sendMessage = async function(){
+  const textarea = document.getElementById("chatMessage");
+  const status = document.getElementById("messageStatus");
   const user = auth.currentUser;
+  const text = textarea.value.trim();
 
   if(!user || !currentUserActive){
     status.textContent = "Tu dois être connecté(e).";
     return;
   }
 
-  if(!message){
-    status.textContent = "Merci d’écrire un message avant de publier.";
-    return;
-  }
-
-  status.textContent = "Publication en cours...";
-
-  try{
-    await addDoc(collection(db, "blogPosts"), {
-      uid: user.uid,
-      pseudo: currentPseudo,
-      message: message,
-      visible: true,
-      createdAt: serverTimestamp()
-    });
-
-    document.getElementById("postMessage").value = "";
-    status.textContent = "Message publié 💜";
-    loadPosts();
-
-  }catch(e){
-    console.error(e);
-    status.textContent = "Erreur lors de la publication.";
-  }
-};
-
-window.publishReply = async function(postId){
-  const user = auth.currentUser;
-  const textarea = document.getElementById("reply-text-" + postId);
-  const status = document.getElementById("reply-status-" + postId);
-  const message = textarea.value.trim();
-
-  if(!user || !currentUserActive){
-    status.textContent = "Tu dois être connecté(e).";
-    return;
-  }
-
-  if(!message){
-    status.textContent = "Merci d’écrire une réponse.";
+  if(!text){
+    status.textContent = "Merci d’écrire un message.";
     return;
   }
 
   status.textContent = "Envoi en cours...";
 
   try{
-    await addDoc(collection(db, "blogPosts", postId, "replies"), {
+    await addDoc(collection(db, "blogMessages"), {
       uid: user.uid,
       pseudo: currentPseudo,
-      message: message,
+      message: text,
       visible: true,
       createdAt: serverTimestamp()
     });
 
     textarea.value = "";
-    status.textContent = "Réponse publiée 💜";
-    loadPosts();
+    status.textContent = "";
+    await loadMessages();
 
   }catch(e){
     console.error(e);
@@ -417,80 +460,40 @@ window.publishReply = async function(postId){
   }
 };
 
-async function loadReplies(postId, container){
+async function loadMessages(){
+  const container = document.getElementById("messages");
   container.innerHTML = "";
 
-  const q = query(collection(db, "blogPosts", postId, "replies"), orderBy("createdAt", "asc"));
+  const q = query(collection(db, "blogMessages"), orderBy("createdAt", "asc"));
   const snap = await getDocs(q);
 
-  let count = 0;
+  snap.forEach(msgDoc => {
+    const m = msgDoc.data();
 
-  snap.forEach(replySnap => {
-    const r = replySnap.data();
+    if(m.visible === false) return;
 
-    if(r.visible === false) return;
-
-    count++;
-
-    const date = r.createdAt?.toDate().toLocaleDateString("fr-FR") || "";
+    const date = m.createdAt?.toDate().toLocaleString("fr-FR") || "";
 
     const div = document.createElement("div");
-    div.className = "reply";
+    div.className = "msg";
 
     div.innerHTML = `
-      <strong>${r.pseudo || "Anonyme"}</strong><br>
-      ${r.message || ""}
-      <small>${date}</small>
+      <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
+      <div>${m.message || ""}</div>
+      <div class="msg-date">${date}</div>
     `;
 
     container.appendChild(div);
   });
 
-  if(count > 0){
-    const title = document.createElement("div");
-    title.className = "replies-title";
-    title.textContent = count === 1 ? "1 réponse" : count + " réponses";
-    container.prepend(title);
-  }
+  container.scrollTop = container.scrollHeight;
 }
 
-async function loadPosts(){
-  const container = document.getElementById("posts");
-  container.innerHTML = "";
-
-  const q = query(collection(db, "blogPosts"), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-
-  for(const docSnap of snap.docs){
-    const p = docSnap.data();
-    const postId = docSnap.id;
-
-    if(p.visible === false) continue;
-
-    const date = p.createdAt?.toDate().toLocaleDateString("fr-FR") || "";
-
-    const div = document.createElement("div");
-    div.className = "post";
-
-    div.innerHTML = `
-      <div class="meta">${p.pseudo || "Anonyme"}</div>
-      <div class="message">${p.message || ""}</div>
-      <div class="date">${date}</div>
-
-      <div class="reply-box">
-        <textarea id="reply-text-${postId}" placeholder="Répondre à ce message..."></textarea>
-        <button onclick="publishReply('${postId}')">Répondre</button>
-        <div id="reply-status-${postId}" class="status"></div>
-      </div>
-
-      <div id="replies-${postId}"></div>
-    `;
-
-    container.appendChild(div);
-
-    await loadReplies(postId, document.getElementById("replies-" + postId));
+setInterval(() => {
+  if(auth.currentUser){
+    loadMessages();
   }
-}
+}, 10000);
 
 </script>
 
