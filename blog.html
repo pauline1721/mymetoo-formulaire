@@ -542,6 +542,7 @@ let currentPseudo = "Anonyme";
 let currentPrivateUser = null;
 let privateConversations = [];
 let unsubscribePublicMessages = null;
+let unsubscribeMembers = null;
 
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
@@ -567,6 +568,11 @@ window.logout = async function(){
   if(unsubscribePublicMessages){
     unsubscribePublicMessages();
     unsubscribePublicMessages = null;
+  }
+
+  if(unsubscribeMembers){
+    unsubscribeMembers();
+    unsubscribeMembers = null;
   }
 
   await signOut(auth);
@@ -602,7 +608,8 @@ onAuthStateChanged(auth, async user => {
     document.getElementById("blogContent").style.display="block";
 
     listenMessages();
-    await loadMembers();
+    listenMembers();
+
     await loadPrivateConversations();
     await checkPrivateNotifications();
 
@@ -610,6 +617,11 @@ onAuthStateChanged(auth, async user => {
     if(unsubscribePublicMessages){
       unsubscribePublicMessages();
       unsubscribePublicMessages = null;
+    }
+
+    if(unsubscribeMembers){
+      unsubscribeMembers();
+      unsubscribeMembers = null;
     }
 
     document.getElementById("loginBox").style.display="block";
@@ -648,39 +660,46 @@ function listenMessages(){
   });
 }
 
-async function loadMembers(){
-  const user = auth.currentUser;
+function listenMembers(){
   const container = document.getElementById("membersList");
-  container.innerHTML="";
 
-  const snap = await getDocs(collection(db,"blogUsers"));
-  const now = Date.now();
-  let count = 0;
-
-  snap.forEach(d=>{
-    const u = d.data();
-    const uid = d.id;
-
-    if(!user) return;
-    if(uid === user.uid) return;
-    if(!u.online) return;
-
-    const lastSeenTime = u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : 0;
-    if(now - lastSeenTime > 120000) return;
-
-    count++;
-
-    const div = document.createElement("div");
-    div.className="member";
-    div.innerText = u.pseudo || "Anonyme";
-    div.onclick = ()=> openPrivateChat(uid,u.pseudo || "Anonyme");
-
-    container.appendChild(div);
-  });
-
-  if(count === 0){
-    container.innerHTML = `<div class="member">Aucun autre membre en ligne</div>`;
+  if(unsubscribeMembers){
+    unsubscribeMembers();
   }
+
+  unsubscribeMembers = onSnapshot(collection(db,"blogUsers"), snap => {
+    const user = auth.currentUser;
+    if(!user) return;
+
+    container.innerHTML = "";
+
+    const now = Date.now();
+    let count = 0;
+
+    snap.forEach(d=>{
+      const u = d.data();
+      const uid = d.id;
+
+      if(uid === user.uid) return;
+      if(!u.online) return;
+
+      const lastSeenTime = u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : 0;
+      if(now - lastSeenTime > 120000) return;
+
+      count++;
+
+      const div = document.createElement("div");
+      div.className = "member";
+      div.innerText = u.pseudo || "Anonyme";
+      div.onclick = () => openPrivateChat(uid, u.pseudo || "Anonyme");
+
+      container.appendChild(div);
+    });
+
+    if(count === 0){
+      container.innerHTML = `<div class="member">Aucun autre membre en ligne</div>`;
+    }
+  });
 }
 
 window.sendMessage = async function(){
@@ -842,7 +861,6 @@ window.hideCurrentPrivateConversation = async function(){
     await loadPrivateConversations();
     renderPrivateConversations();
     await checkPrivateNotifications();
-    await loadMembers();
 
   }catch(error){
     console.error(error);
@@ -960,7 +978,6 @@ async function checkPrivateNotifications(){
 
 setInterval(async ()=>{
   if(auth.currentUser){
-    await loadMembers();
     await loadPrivateConversations();
     renderPrivateConversations();
 
