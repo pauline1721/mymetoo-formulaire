@@ -110,13 +110,8 @@ button{
   cursor:pointer;
 }
 
-button.secondary{
-  background:#6f42bd;
-}
-
-button.danger{
-  background:#d94b6a;
-}
+button.secondary{background:#6f42bd}
+button.danger{background:#d94b6a}
 
 .status{
   margin-top:10px;
@@ -180,11 +175,7 @@ button.danger{
 }
 
 .member:hover{background:#efe4f8}
-
-.member::before{
-  content:"● ";
-  color:#2fbb62;
-}
+.member::before{content:"● "; color:#2fbb62}
 
 .private-badge{
   display:inline-block;
@@ -278,8 +269,7 @@ button.danger{
   border:2px solid #eeeaf3;
   border-radius:12px;
   padding:12px;
-  margin-bottom:12px;
-  max-height:230px;
+  max-height:260px;
   overflow-y:auto;
 }
 
@@ -294,9 +284,7 @@ button.danger{
   word-break:break-word;
 }
 
-.private-conversation:hover{
-  background:#efe4f8;
-}
+.private-conversation:hover{background:#efe4f8}
 
 .private-conversation .name{
   font-weight:bold;
@@ -318,12 +306,54 @@ button.danger{
   margin-left:8px;
 }
 
+.private-chat-window{
+  display:none;
+  position:fixed;
+  right:25px;
+  bottom:25px;
+  width:370px;
+  max-width:calc(100vw - 30px);
+  background:#fbf8ff;
+  border:2px solid #ded2ec;
+  border-radius:16px;
+  box-shadow:0 10px 35px rgba(0,0,0,.18);
+  z-index:9999;
+  overflow:hidden;
+}
+
+.private-chat-top{
+  background:#6f42bd;
+  color:white;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  font-weight:bold;
+}
+
+.window-actions{
+  display:flex;
+  gap:6px;
+}
+
+.window-btn{
+  margin:0;
+  padding:5px 9px;
+  border-radius:8px;
+  background:white;
+  color:#6f42bd;
+}
+
+.window-btn.delete{
+  background:#d94b6a;
+  color:white;
+}
+
 .private-messages{
   background:white;
-  border:2px solid #eeeaf3;
-  border-radius:12px;
   padding:12px;
-  height:220px;
+  height:260px;
   overflow-y:auto;
 }
 
@@ -337,19 +367,16 @@ button.danger{
   word-break:break-word;
 }
 
-.private-msg.mine{
-  background:#eadcf8;
+.private-msg.mine{background:#eadcf8}
+
+.private-write{
+  padding:12px;
+  background:#fbf8ff;
 }
 
 .private-write textarea{
   min-height:60px;
   background:white;
-}
-
-.close-private{
-  background:#d94b6a;
-  padding:8px 12px;
-  margin-top:0;
 }
 
 .footer{
@@ -368,7 +395,11 @@ button.danger{
   .chat-layout{grid-template-columns:1fr}
   .members-panel{height:auto;max-height:180px}
   .chat-panel{height:620px}
-  .private-messages{height:260px}
+  .private-chat-window{
+    right:10px;
+    bottom:10px;
+    width:calc(100vw - 20px);
+  }
 }
 </style>
 </head>
@@ -439,25 +470,12 @@ button.danger{
 
   <div id="privatePanel" class="private-panel">
     <div class="private-header">
-      <span id="privateTitle">Messages privés</span>
-      <div>
-        <button class="danger" onclick="hideCurrentPrivateConversation()">Supprimer cette conversation</button>
-        <button class="close-private" onclick="closePrivateChat()">Fermer</button>
-      </div>
+      <span>Messages privés</span>
+      <button class="secondary" onclick="closePrivatePanel()">Réduire la liste</button>
     </div>
 
     <div id="privateList" class="private-list">
       Aucune conversation privée pour le moment.
-    </div>
-
-    <div id="privateMessages" class="private-messages">
-      Sélectionne une conversation ou clique sur un membre en ligne pour commencer.
-    </div>
-
-    <div class="private-write">
-      <textarea id="privateText" placeholder="Écris ton message privé ici..."></textarea>
-      <button onclick="sendPrivateMessage()">Envoyer en privé</button>
-      <div id="privateStatus" class="status"></div>
     </div>
   </div>
 
@@ -468,6 +486,24 @@ button.danger{
 </div>
 
 </main>
+
+<div id="privateChatWindow" class="private-chat-window">
+  <div class="private-chat-top">
+    <span id="privateTitle">Discussion privée</span>
+    <div class="window-actions">
+      <button class="window-btn" onclick="minimizePrivateChat()">—</button>
+      <button class="window-btn delete" onclick="hideCurrentPrivateConversation()">✕</button>
+    </div>
+  </div>
+
+  <div id="privateMessages" class="private-messages"></div>
+
+  <div class="private-write">
+    <textarea id="privateText" placeholder="Écris ton message privé ici..."></textarea>
+    <button onclick="sendPrivateMessage()">Envoyer en privé</button>
+    <div id="privateStatus" class="status"></div>
+  </div>
+</div>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -657,9 +693,12 @@ function getChatId(uid1,uid2){
 
 window.openPrivatePanel = async function(){
   document.getElementById("privatePanel").style.display="block";
-  document.getElementById("privateTitle").innerText="Messages privés";
   await loadPrivateConversations();
   renderPrivateConversations();
+};
+
+window.closePrivatePanel = function(){
+  document.getElementById("privatePanel").style.display="none";
 };
 
 async function loadPrivateConversations(){
@@ -741,7 +780,7 @@ window.openPrivateChat = async function(uid,pseudo){
     hiddenFor:arrayRemove(user.uid)
   }, { merge:true });
 
-  document.getElementById("privatePanel").style.display="block";
+  document.getElementById("privateChatWindow").style.display="block";
   document.getElementById("privateTitle").innerText="Discussion avec "+pseudo;
   document.getElementById("privateStatus").textContent = "";
 
@@ -751,9 +790,8 @@ window.openPrivateChat = async function(uid,pseudo){
   await checkPrivateNotifications();
 };
 
-window.closePrivateChat = function(){
-  document.getElementById("privatePanel").style.display="none";
-  currentPrivateUser=null;
+window.minimizePrivateChat = function(){
+  document.getElementById("privateChatWindow").style.display="none";
 };
 
 window.hideCurrentPrivateConversation = async function(){
@@ -777,8 +815,8 @@ window.hideCurrentPrivateConversation = async function(){
     }, { merge:true });
 
     currentPrivateUser = null;
-    document.getElementById("privateTitle").innerText = "Messages privés";
-    document.getElementById("privateMessages").innerHTML = "Conversation supprimée de ta liste.";
+    document.getElementById("privateChatWindow").style.display="none";
+    document.getElementById("privateMessages").innerHTML = "";
     document.getElementById("privateText").value = "";
     status.textContent = "";
 
@@ -807,7 +845,6 @@ window.sendPrivateMessage = async function(){
   }
 
   const user = auth.currentUser;
-
   if(!user) return;
 
   if(currentPrivateUser.uid === user.uid){
@@ -930,7 +967,7 @@ setInterval(async ()=>{
     await loadPrivateConversations();
     renderPrivateConversations();
 
-    if(currentPrivateUser){
+    if(currentPrivateUser && document.getElementById("privateChatWindow").style.display === "block"){
       await loadPrivateMessages();
     }
 
