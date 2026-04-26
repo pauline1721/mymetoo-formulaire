@@ -815,14 +815,21 @@ window.hideCurrentPrivateConversation = async function(){
     }, { merge:true });
 
     currentPrivateUser = null;
+
     document.getElementById("privateChatWindow").style.display="none";
     document.getElementById("privateMessages").innerHTML = "";
     document.getElementById("privateText").value = "";
     status.textContent = "";
 
+    await updateDoc(doc(db,"blogUsers",user.uid),{
+      online:true,
+      lastSeen:serverTimestamp()
+    });
+
     await loadPrivateConversations();
     renderPrivateConversations();
     await checkPrivateNotifications();
+    await loadMembers();
 
   }catch(error){
     console.error(error);
