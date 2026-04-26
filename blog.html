@@ -602,11 +602,9 @@ window.openPrivateChat = async function(uid,pseudo){
   currentPrivateUser = {uid,pseudo};
   const chatId = getChatId(user.uid,uid);
 
-  try{
-    await updateDoc(doc(db,"privateMessages",chatId),{
-      unreadFor:""
-    });
-  }catch(e){}
+  await setDoc(doc(db,"privateMessages",chatId),{
+    unreadFor:""
+  }, { merge:true });
 
   document.getElementById("privatePanel").style.display="block";
   document.getElementById("privateTitle").innerText="Discussion avec "+pseudo;
@@ -636,26 +634,38 @@ window.sendPrivateMessage = async function(){
 
   const user = auth.currentUser;
   const chatId = getChatId(user.uid,currentPrivateUser.uid);
+  const chatRef = doc(db,"privateMessages",chatId);
 
-  await setDoc(doc(db,"privateMessages",chatId),{
-    participants:[user.uid,currentPrivateUser.uid],
-    lastMessage:text,
-    unreadFor:currentPrivateUser.uid,
-    updatedAt:serverTimestamp()
-  }, { merge:true });
+  try{
+    await setDoc(chatRef,{
+      participants:[user.uid,currentPrivateUser.uid],
+      participantPseudos:{
+        [user.uid]:currentPseudo,
+        [currentPrivateUser.uid]:currentPrivateUser.pseudo
+      },
+      lastMessage:text,
+      unreadFor:currentPrivateUser.uid,
+      updatedAt:serverTimestamp()
+    }, { merge:true });
 
-  await addDoc(collection(db,"privateMessages",chatId,"messages"),{
-    from:user.uid,
-    to:currentPrivateUser.uid,
-    pseudo:currentPseudo,
-    message:text,
-    createdAt:serverTimestamp()
-  });
+    await addDoc(collection(db,"privateMessages",chatId,"messages"),{
+      from:user.uid,
+      to:currentPrivateUser.uid,
+      pseudo:currentPseudo,
+      message:text,
+      createdAt:serverTimestamp()
+    });
 
-  document.getElementById("privateText").value="";
-  status.textContent = "";
-  await loadPrivateMessages();
-  await checkPrivateNotifications();
+    document.getElementById("privateText").value="";
+    status.textContent = "";
+
+    await loadPrivateMessages();
+    await checkPrivateNotifications();
+
+  }catch(error){
+    console.error(error);
+    status.textContent = "Erreur : le message privé n’a pas pu être envoyé.";
+  }
 };
 
 async function loadPrivateMessages(){
