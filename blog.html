@@ -126,6 +126,21 @@ button.secondary{
   z-index:2;
 }
 
+.visual-notification{
+  display:none;
+  max-width:1050px;
+  margin:0 auto 15px;
+  background:#fff5f7;
+  color:#d94b6a;
+  border:2px solid #d94b6a;
+  border-radius:12px;
+  padding:12px;
+  font-weight:bold;
+  text-align:center;
+  position:relative;
+  z-index:3;
+}
+
 .chat-layout{
   display:grid;
   grid-template-columns:260px 1fr;
@@ -160,13 +175,21 @@ button.secondary{
   transition:.2s;
 }
 
-.member:hover{
-  background:#efe4f8;
-}
+.member:hover{background:#efe4f8}
 
 .member::before{
   content:"● ";
   color:#2fbb62;
+}
+
+.private-badge{
+  display:inline-block;
+  background:#d94b6a;
+  color:white;
+  border-radius:999px;
+  padding:2px 7px;
+  font-size:12px;
+  margin-left:6px;
 }
 
 .chat-panel{
@@ -188,9 +211,7 @@ button.secondary{
   flex-wrap:wrap;
 }
 
-.chat-top strong{
-  color:#5b23ad;
-}
+.chat-top strong{color:#5b23ad}
 
 .messages{
   flex:1;
@@ -217,9 +238,7 @@ button.secondary{
   margin-bottom:6px;
 }
 
-.write-box{
-  margin-top:12px;
-}
+.write-box{margin-top:12px}
 
 .write-box textarea{
   min-height:75px;
@@ -281,21 +300,6 @@ button.secondary{
   background:#d94b6a;
   padding:8px 12px;
   margin-top:0;
-}
-
-.visual-notification{
-  display:none;
-  max-width:1050px;
-  margin:0 auto 15px;
-  background:#fff5f7;
-  color:#d94b6a;
-  border:2px solid #d94b6a;
-  border-radius:12px;
-  padding:12px;
-  font-weight:bold;
-  text-align:center;
-  position:relative;
-  z-index:3;
 }
 
 .footer{
@@ -366,7 +370,7 @@ button.secondary{
       <div class="chat-top">
         <strong id="welcomePseudo">Connecté(e)</strong>
         <div>
-          <button onclick="openPrivatePanel()">💬 Messages privés</button>
+          <button id="btnPrivate" onclick="openPrivatePanel()">💬 Messages privés</button>
           <button class="secondary" onclick="logout()">Se déconnecter</button>
         </div>
       </div>
@@ -407,7 +411,6 @@ button.secondary{
 </div>
 
 </main>
-
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -422,13 +425,17 @@ import {
   serverTimestamp,
   doc,
   getDoc,
-  updateDoc
+  updateDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
   authDomain: "mymetoo-formulaire.firebaseapp.com",
   projectId: "mymetoo-formulaire",
+  storageBucket: "mymetoo-formulaire.firebasestorage.app",
+  messagingSenderId: "1084270329845",
+  appId: "1:1084270329845:web:337a6172a4817f0db2eabc"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -439,47 +446,61 @@ let currentPseudo = "Anonyme";
 let currentPrivateUser = null;
 
 window.login = async function(){
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
 
   try{
     await signInWithEmailAndPassword(auth, email, password);
   }catch{
-    document.getElementById("loginStatus").textContent = "Erreur connexion";
+    document.getElementById("loginStatus").textContent = "Email ou mot de passe incorrect.";
   }
 };
 
 window.logout = async function(){
   const user = auth.currentUser;
+
   if(user){
-    await updateDoc(doc(db,"blogUsers",user.uid),{online:false});
+    await updateDoc(doc(db,"blogUsers",user.uid),{
+      online:false,
+      lastSeen:serverTimestamp()
+    });
   }
+
   await signOut(auth);
 };
 
 onAuthStateChanged(auth, async user => {
   if(user){
     const snap = await getDoc(doc(db,"blogUsers",user.uid));
+
+    if(!snap.exists()){
+      await signOut(auth);
+      document.getElementById("loginStatus").textContent = "Compte blog introuvable.";
+      return;
+    }
+
     const data = snap.data();
 
     if(data.active === false){
       await signOut(auth);
+      document.getElementById("loginStatus").textContent = "Ce compte a été désactivé.";
       return;
     }
 
-    currentPseudo = data.pseudo;
+    currentPseudo = data.pseudo || "Anonyme";
 
     await updateDoc(doc(db,"blogUsers",user.uid),{
       online:true,
       lastSeen:serverTimestamp()
     });
 
-    document.getElementById("welcomePseudo").innerText = currentPseudo;
+    document.getElementById("welcomePseudo").innerText = "Connecté(e) : " + currentPseudo;
     document.getElementById("loginBox").style.display="none";
     document.getElementById("blogContent").style.display="block";
 
-    loadMembers();
-    loadMessages();
+    await loadMembers();
+    await loadMessages();
+    await checkPrivateNotifications();
 
   }else{
     document.getElementById("loginBox").style.display="block";
@@ -492,30 +513,49 @@ async function loadMembers(){
   container.innerHTML="";
 
   const snap = await getDocs(collection(db,"blogUsers"));
+  const now = Date.now();
+  let count = 0;
 
   snap.forEach(d=>{
     const u = d.data();
+
     if(!u.online) return;
+
+    const lastSeenTime = u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : 0;
+    if(now - lastSeenTime > 120000) return;
+
+    count++;
 
     const div = document.createElement("div");
     div.className="member";
-    div.innerText = u.pseudo;
-
-    div.onclick = ()=> openPrivateChat(d.id,u.pseudo);
+    div.innerText = u.pseudo || "Anonyme";
+    div.onclick = ()=> openPrivateChat(d.id,u.pseudo || "Anonyme");
 
     container.appendChild(div);
   });
+
+  if(count === 0){
+    container.innerHTML = `<div class="member">Aucun membre en ligne</div>`;
+  }
 }
 
 window.sendMessage = async function(){
   const text = document.getElementById("chatMessage").value.trim();
-  if(!text) return;
+  const user = auth.currentUser;
+
+  if(!text || !user) return;
 
   await addDoc(collection(db,"blogMessages"),{
+    uid:user.uid,
     pseudo:currentPseudo,
     message:text,
     createdAt:serverTimestamp(),
     visible:true
+  });
+
+  await updateDoc(doc(db,"blogUsers",user.uid),{
+    online:true,
+    lastSeen:serverTimestamp()
   });
 
   document.getElementById("chatMessage").value="";
@@ -536,8 +576,8 @@ async function loadMessages(){
     div.className="msg";
 
     div.innerHTML=`
-      <div class="msg-meta">${m.pseudo}</div>
-      <div>${m.message}</div>
+      <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
+      <div>${m.message || ""}</div>
     `;
 
     container.appendChild(div);
@@ -555,13 +595,24 @@ window.openPrivatePanel = function(){
   document.getElementById("privateTitle").innerText="Messages privés";
 };
 
-window.openPrivateChat = function(uid,pseudo){
+window.openPrivateChat = async function(uid,pseudo){
+  const user = auth.currentUser;
+  if(!user) return;
+
   currentPrivateUser = {uid,pseudo};
+  const chatId = getChatId(user.uid,uid);
+
+  try{
+    await updateDoc(doc(db,"privateMessages",chatId),{
+      unreadFor:""
+    });
+  }catch(e){}
 
   document.getElementById("privatePanel").style.display="block";
   document.getElementById("privateTitle").innerText="Discussion avec "+pseudo;
 
-  loadPrivateMessages();
+  await loadPrivateMessages();
+  await checkPrivateNotifications();
 };
 
 window.closePrivateChat = function(){
@@ -586,6 +637,13 @@ window.sendPrivateMessage = async function(){
   const user = auth.currentUser;
   const chatId = getChatId(user.uid,currentPrivateUser.uid);
 
+  await setDoc(doc(db,"privateMessages",chatId),{
+    participants:[user.uid,currentPrivateUser.uid],
+    lastMessage:text,
+    unreadFor:currentPrivateUser.uid,
+    updatedAt:serverTimestamp()
+  }, { merge:true });
+
   await addDoc(collection(db,"privateMessages",chatId,"messages"),{
     from:user.uid,
     to:currentPrivateUser.uid,
@@ -596,7 +654,8 @@ window.sendPrivateMessage = async function(){
 
   document.getElementById("privateText").value="";
   status.textContent = "";
-  loadPrivateMessages();
+  await loadPrivateMessages();
+  await checkPrivateNotifications();
 };
 
 async function loadPrivateMessages(){
@@ -618,13 +677,36 @@ async function loadPrivateMessages(){
 
     const div=document.createElement("div");
     div.className="private-msg "+(m.from===user.uid?"mine":"");
-
-    div.innerHTML=`${m.message}`;
+    div.innerHTML=`${m.message || ""}`;
 
     container.appendChild(div);
   });
 
   container.scrollTop = container.scrollHeight;
+}
+
+async function checkPrivateNotifications(){
+  const user = auth.currentUser;
+  if(!user) return;
+
+  const snap = await getDocs(collection(db,"privateMessages"));
+  let count = 0;
+
+  snap.forEach(d=>{
+    const data = d.data();
+
+    if(data.unreadFor === user.uid){
+      count++;
+    }
+  });
+
+  const btn = document.getElementById("btnPrivate");
+
+  if(count > 0){
+    btn.innerHTML = `💬 Messages privés <span class="private-badge">${count}</span>`;
+  }else{
+    btn.innerHTML = "💬 Messages privés";
+  }
 }
 
 let lastMessageCount = 0;
@@ -650,8 +732,20 @@ setInterval(()=>{
     loadMembers();
     loadPrivateMessages();
     checkNewMessages();
+    checkPrivateNotifications();
   }
 },4000);
+
+window.addEventListener("beforeunload", () => {
+  const user = auth.currentUser;
+
+  if(user){
+    updateDoc(doc(db,"blogUsers",user.uid),{
+      online:false,
+      lastSeen:serverTimestamp()
+    });
+  }
+});
 
 </script>
 
