@@ -489,6 +489,10 @@ async function loadData(){
       <div class="field"><span class="label">Écoute :</span> ${d.ecoute || ""}</div>
       <div class="field"><span class="label">Expression :</span> ${(d.expression || []).join(", ")}</div>
       <div class="field"><span class="label">Partage autorisé :</span> ${d.partageAutorise ? "Oui" : "Non"}</div>
+      <div class="field"><span class="label">Inscrit au blog :</span> ${d.blogAccessRequested ? "Oui" : "Non"}</div>
+      <div class="field"><span class="label">Pseudo blog :</span> ${d.blogPseudo || ""}</div>
+      <div class="field"><span class="label">UID blog :</span> ${d.blogUid || ""}</div>
+
       <div class="field"><span class="label">Affiché sur la page témoignages :</span> ${isVisible ? "Oui" : "Non"}</div>
       <div class="field"><span class="label">Date :</span> ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}</div>
       <div class="message"><span class="label">Message :</span><br>${d.message || "Aucun message"}</div>
