@@ -169,16 +169,6 @@ button.secondary{
   color:#2fbb62;
 }
 
-.private-badge{
-  display:inline-block;
-  background:#d94b6a;
-  color:white;
-  border-radius:999px;
-  padding:2px 7px;
-  font-size:12px;
-  margin-left:6px;
-}
-
 .chat-panel{
   background:#f7effb;
   border:2px solid #ded2ec;
@@ -195,6 +185,7 @@ button.secondary{
   align-items:center;
   gap:10px;
   margin-bottom:10px;
+  flex-wrap:wrap;
 }
 
 .chat-top strong{
@@ -226,13 +217,6 @@ button.secondary{
   margin-bottom:6px;
 }
 
-.msg-date{
-  color:#8b78a8;
-  font-size:12px;
-  margin-top:6px;
-  text-align:right;
-}
-
 .write-box{
   margin-top:12px;
 }
@@ -243,7 +227,6 @@ button.secondary{
   background:white;
 }
 
-/* MESSAGE PRIVÉ */
 .private-panel{
   max-width:1050px;
   margin:18px auto 0;
@@ -289,13 +272,6 @@ button.secondary{
   background:#eadcf8;
 }
 
-.private-msg small{
-  display:block;
-  color:#8b78a8;
-  font-size:12px;
-  margin-top:5px;
-}
-
 .private-write textarea{
   min-height:60px;
   background:white;
@@ -335,23 +311,10 @@ button.secondary{
   h1{font-size:46px}
   .subtitle{font-size:24px}
   .leaf{width:180px; opacity:.25}
-
-  .chat-layout{
-    grid-template-columns:1fr;
-  }
-
-  .members-panel{
-    height:auto;
-    max-height:180px;
-  }
-
-  .chat-panel{
-    height:620px;
-  }
-
-  .private-messages{
-    height:260px;
-  }
+  .chat-layout{grid-template-columns:1fr}
+  .members-panel{height:auto;max-height:180px}
+  .chat-panel{height:620px}
+  .private-messages{height:260px}
 }
 </style>
 </head>
@@ -402,7 +365,10 @@ button.secondary{
 
       <div class="chat-top">
         <strong id="welcomePseudo">Connecté(e)</strong>
-        <button class="secondary" onclick="logout()">Se déconnecter</button>
+        <div>
+          <button onclick="openPrivatePanel()">💬 Messages privés</button>
+          <button class="secondary" onclick="logout()">Se déconnecter</button>
+        </div>
       </div>
 
       <div id="messages" class="messages"></div>
@@ -419,11 +385,13 @@ button.secondary{
 
   <div id="privatePanel" class="private-panel">
     <div class="private-header">
-      <span id="privateTitle">Message privé</span>
+      <span id="privateTitle">Messages privés</span>
       <button class="close-private" onclick="closePrivateChat()">Fermer</button>
     </div>
 
-    <div id="privateMessages" class="private-messages"></div>
+    <div id="privateMessages" class="private-messages">
+      Clique sur un membre en ligne à gauche pour commencer une discussion privée.
+    </div>
 
     <div class="private-write">
       <textarea id="privateText" placeholder="Écris ton message privé ici..."></textarea>
@@ -439,6 +407,7 @@ button.secondary{
 </div>
 
 </main>
+
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -467,10 +436,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentPseudo = "Anonyme";
-let currentUserActive = true;
 let currentPrivateUser = null;
 
-// LOGIN
 window.login = async function(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -482,7 +449,6 @@ window.login = async function(){
   }
 };
 
-// LOGOUT
 window.logout = async function(){
   const user = auth.currentUser;
   if(user){
@@ -491,10 +457,8 @@ window.logout = async function(){
   await signOut(auth);
 };
 
-// AUTH STATE
 onAuthStateChanged(auth, async user => {
   if(user){
-
     const snap = await getDoc(doc(db,"blogUsers",user.uid));
     const data = snap.data();
 
@@ -511,7 +475,6 @@ onAuthStateChanged(auth, async user => {
     });
 
     document.getElementById("welcomePseudo").innerText = currentPseudo;
-
     document.getElementById("loginBox").style.display="none";
     document.getElementById("blogContent").style.display="block";
 
@@ -524,13 +487,11 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// MEMBRES EN LIGNE + CLICK POUR MP
 async function loadMembers(){
   const container = document.getElementById("membersList");
   container.innerHTML="";
 
   const snap = await getDocs(collection(db,"blogUsers"));
-  const now = Date.now();
 
   snap.forEach(d=>{
     const u = d.data();
@@ -546,7 +507,6 @@ async function loadMembers(){
   });
 }
 
-// CHAT GLOBAL
 window.sendMessage = async function(){
   const text = document.getElementById("chatMessage").value.trim();
   if(!text) return;
@@ -586,11 +546,14 @@ async function loadMessages(){
   container.scrollTop = container.scrollHeight;
 }
 
-// ====== MESSAGE PRIVÉ ======
-
 function getChatId(uid1,uid2){
   return uid1 < uid2 ? uid1+"_"+uid2 : uid2+"_"+uid1;
 }
+
+window.openPrivatePanel = function(){
+  document.getElementById("privatePanel").style.display="block";
+  document.getElementById("privateTitle").innerText="Messages privés";
+};
 
 window.openPrivateChat = function(uid,pseudo){
   currentPrivateUser = {uid,pseudo};
@@ -608,7 +571,17 @@ window.closePrivateChat = function(){
 
 window.sendPrivateMessage = async function(){
   const text = document.getElementById("privateText").value.trim();
-  if(!text) return;
+  const status = document.getElementById("privateStatus");
+
+  if(!currentPrivateUser){
+    status.textContent = "Clique d’abord sur un membre en ligne.";
+    return;
+  }
+
+  if(!text){
+    status.textContent = "Écris un message avant d’envoyer.";
+    return;
+  }
 
   const user = auth.currentUser;
   const chatId = getChatId(user.uid,currentPrivateUser.uid);
@@ -622,6 +595,7 @@ window.sendPrivateMessage = async function(){
   });
 
   document.getElementById("privateText").value="";
+  status.textContent = "";
   loadPrivateMessages();
 };
 
@@ -645,17 +619,13 @@ async function loadPrivateMessages(){
     const div=document.createElement("div");
     div.className="private-msg "+(m.from===user.uid?"mine":"");
 
-    div.innerHTML=`
-      ${m.message}
-    `;
+    div.innerHTML=`${m.message}`;
 
     container.appendChild(div);
   });
 
   container.scrollTop = container.scrollHeight;
 }
-
-// ====== NOTIFICATION VISUELLE ======
 
 let lastMessageCount = 0;
 
@@ -674,7 +644,6 @@ async function checkNewMessages(){
   lastMessageCount = count;
 }
 
-// REFRESH
 setInterval(()=>{
   if(auth.currentUser){
     loadMessages();
@@ -685,3 +654,6 @@ setInterval(()=>{
 },4000);
 
 </script>
+
+</body>
+</html>
