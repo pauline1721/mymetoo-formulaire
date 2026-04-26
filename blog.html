@@ -521,7 +521,8 @@ import {
   updateDoc,
   setDoc,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -540,6 +541,7 @@ const db = getFirestore(app);
 let currentPseudo = "Anonyme";
 let currentPrivateUser = null;
 let privateConversations = [];
+let unsubscribePublicMessages = null;
 
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
@@ -560,6 +562,11 @@ window.logout = async function(){
       online:false,
       lastSeen:serverTimestamp()
     });
+  }
+
+  if(unsubscribePublicMessages){
+    unsubscribePublicMessages();
+    unsubscribePublicMessages = null;
   }
 
   await signOut(auth);
@@ -594,16 +601,52 @@ onAuthStateChanged(auth, async user => {
     document.getElementById("loginBox").style.display="none";
     document.getElementById("blogContent").style.display="block";
 
+    listenMessages();
     await loadMembers();
-    await loadMessages();
     await loadPrivateConversations();
     await checkPrivateNotifications();
 
   }else{
+    if(unsubscribePublicMessages){
+      unsubscribePublicMessages();
+      unsubscribePublicMessages = null;
+    }
+
     document.getElementById("loginBox").style.display="block";
     document.getElementById("blogContent").style.display="none";
   }
 });
+
+function listenMessages(){
+  const container = document.getElementById("messages");
+
+  if(unsubscribePublicMessages){
+    unsubscribePublicMessages();
+  }
+
+  const q = query(collection(db,"blogMessages"), orderBy("createdAt","asc"));
+
+  unsubscribePublicMessages = onSnapshot(q, snap => {
+    container.innerHTML = "";
+
+    snap.forEach(d=>{
+      const m = d.data();
+      if(m.visible === false) return;
+
+      const div = document.createElement("div");
+      div.className = "msg";
+
+      div.innerHTML = `
+        <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
+        <div>${m.message || ""}</div>
+      `;
+
+      container.appendChild(div);
+    });
+
+    container.scrollTop = container.scrollHeight;
+  });
+}
 
 async function loadMembers(){
   const user = auth.currentUser;
@@ -660,32 +703,7 @@ window.sendMessage = async function(){
   });
 
   document.getElementById("chatMessage").value="";
-  loadMessages();
 };
-
-async function loadMessages(){
-  const container = document.getElementById("messages");
-  container.innerHTML="";
-
-  const snap = await getDocs(query(collection(db,"blogMessages"),orderBy("createdAt","asc")));
-
-  snap.forEach(d=>{
-    const m=d.data();
-    if(m.visible===false) return;
-
-    const div=document.createElement("div");
-    div.className="msg";
-
-    div.innerHTML=`
-      <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
-      <div>${m.message || ""}</div>
-    `;
-
-    container.appendChild(div);
-  });
-
-  container.scrollTop = container.scrollHeight;
-}
 
 function getChatId(uid1,uid2){
   return uid1 < uid2 ? uid1+"_"+uid2 : uid2+"_"+uid1;
@@ -717,10 +735,7 @@ async function loadPrivateConversations(){
     if(Array.isArray(data.hiddenFor) && data.hiddenFor.includes(user.uid)) return;
 
     const otherUid = data.participants.find(uid => uid !== user.uid);
-    const otherPseudo =
-      data.participantPseudos?.[otherUid] ||
-      "Utilisateur";
-
+    const otherPseudo = data.participantPseudos?.[otherUid] || "Utilisateur";
     const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate().getTime() : 0;
 
     privateConversations.push({
@@ -758,7 +773,6 @@ function renderPrivateConversations(){
     `;
 
     div.onclick = () => openPrivateChat(conv.otherUid, conv.otherPseudo);
-
     container.appendChild(div);
   });
 }
@@ -815,7 +829,6 @@ window.hideCurrentPrivateConversation = async function(){
     }, { merge:true });
 
     currentPrivateUser = null;
-
     document.getElementById("privateChatWindow").style.display="none";
     document.getElementById("privateMessages").innerHTML = "";
     document.getElementById("privateText").value = "";
@@ -853,11 +866,6 @@ window.sendPrivateMessage = async function(){
 
   const user = auth.currentUser;
   if(!user) return;
-
-  if(currentPrivateUser.uid === user.uid){
-    status.textContent = "Tu ne peux pas t’envoyer un message à toi-même.";
-    return;
-  }
 
   const chatId = getChatId(user.uid,currentPrivateUser.uid);
   const chatRef = doc(db,"privateMessages",chatId);
@@ -950,26 +958,8 @@ async function checkPrivateNotifications(){
   }
 }
 
-let lastMessageCount = 0;
-
-async function checkNewMessages(){
-  const snap = await getDocs(collection(db,"blogMessages"));
-  const count = snap.size;
-
-  if(count > lastMessageCount && lastMessageCount !== 0){
-    const notif = document.getElementById("visualNotification");
-    notif.innerText = "💬 Nouveau message reçu";
-    notif.style.display="block";
-
-    setTimeout(()=> notif.style.display="none",3000);
-  }
-
-  lastMessageCount = count;
-}
-
 setInterval(async ()=>{
   if(auth.currentUser){
-    await loadMessages();
     await loadMembers();
     await loadPrivateConversations();
     renderPrivateConversations();
@@ -978,7 +968,6 @@ setInterval(async ()=>{
       await loadPrivateMessages();
     }
 
-    await checkNewMessages();
     await checkPrivateNotifications();
   }
 },4000);
