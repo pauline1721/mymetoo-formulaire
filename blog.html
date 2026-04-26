@@ -652,10 +652,21 @@ function listenMessages(){
       const div = document.createElement("div");
       div.className = "msg";
 
-      div.innerHTML = `
-        <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
-        <div>${m.message || ""}</div>
-      `;
+      const meta = document.createElement("div");
+      meta.className = "msg-meta";
+      meta.textContent = m.pseudo || "Anonyme";
+
+      const text = document.createElement("div");
+      text.textContent = m.message || "";
+
+      const reportBtn = document.createElement("button");
+      reportBtn.className = "danger";
+      reportBtn.textContent = "⚠️ Signaler";
+      reportBtn.onclick = () => reportMessage(d.id);
+
+      div.appendChild(meta);
+      div.appendChild(text);
+      div.appendChild(reportBtn);
 
       container.appendChild(div);
     });
@@ -663,6 +674,42 @@ function listenMessages(){
     container.scrollTop = container.scrollHeight;
   });
 }
+
+window.reportMessage = async function(messageId){
+  const user = auth.currentUser;
+  if(!user) return;
+
+  const ok = confirm("Signaler ce message à l’administrateur ?");
+  if(!ok) return;
+
+  try{
+    const messageSnap = await getDoc(doc(db,"blogMessages",messageId));
+
+    if(!messageSnap.exists()){
+      alert("Message introuvable.");
+      return;
+    }
+
+    const m = messageSnap.data();
+
+    await addDoc(collection(db,"reports"),{
+      type:"blogMessage",
+      messageId:messageId,
+      message:m.message || "",
+      pseudo:m.pseudo || "Anonyme",
+      authorUid:m.uid || "",
+      reportedBy:user.uid,
+      createdAt:serverTimestamp(),
+      status:"pending"
+    });
+
+    alert("Message signalé ✅");
+
+  }catch(error){
+    console.error(error);
+    alert("Erreur lors du signalement.");
+  }
+};
 
 function listenMembers(){
   const container = document.getElementById("membersList");
@@ -864,7 +911,7 @@ function listenPrivateChat(chatId){
 
       const div = document.createElement("div");
       div.className = "private-msg " + (m.from === user.uid ? "mine" : "");
-      div.innerHTML = `${m.message || ""}`;
+      div.textContent = m.message || "";
 
       container.appendChild(div);
     });
