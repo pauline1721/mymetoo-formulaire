@@ -156,11 +156,27 @@ button.secondary{
   margin-bottom:8px;
   font-weight:bold;
   color:#5b23ad;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.member:hover{
+  background:#efe4f8;
 }
 
 .member::before{
   content:"● ";
   color:#2fbb62;
+}
+
+.private-badge{
+  display:inline-block;
+  background:#d94b6a;
+  color:white;
+  border-radius:999px;
+  padding:2px 7px;
+  font-size:12px;
+  margin-left:6px;
 }
 
 .chat-panel{
@@ -227,6 +243,85 @@ button.secondary{
   background:white;
 }
 
+/* MESSAGE PRIVÉ */
+.private-panel{
+  max-width:1050px;
+  margin:18px auto 0;
+  background:#fbf8ff;
+  border:2px solid #ded2ec;
+  border-radius:14px;
+  padding:15px;
+  display:none;
+  position:relative;
+  z-index:2;
+}
+
+.private-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+  color:#5b23ad;
+  font-weight:bold;
+}
+
+.private-messages{
+  background:white;
+  border:2px solid #eeeaf3;
+  border-radius:12px;
+  padding:12px;
+  height:220px;
+  overflow-y:auto;
+}
+
+.private-msg{
+  background:#f7effb;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:8px;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+
+.private-msg.mine{
+  background:#eadcf8;
+}
+
+.private-msg small{
+  display:block;
+  color:#8b78a8;
+  font-size:12px;
+  margin-top:5px;
+}
+
+.private-write textarea{
+  min-height:60px;
+  background:white;
+}
+
+.close-private{
+  background:#d94b6a;
+  padding:8px 12px;
+  margin-top:0;
+}
+
+.visual-notification{
+  display:none;
+  max-width:1050px;
+  margin:0 auto 15px;
+  background:#fff5f7;
+  color:#d94b6a;
+  border:2px solid #d94b6a;
+  border-radius:12px;
+  padding:12px;
+  font-weight:bold;
+  text-align:center;
+  position:relative;
+  z-index:3;
+}
+
 .footer{
   text-align:center;
   margin-top:30px;
@@ -252,6 +347,10 @@ button.secondary{
 
   .chat-panel{
     height:620px;
+  }
+
+  .private-messages{
+    height:260px;
   }
 }
 </style>
@@ -290,6 +389,8 @@ button.secondary{
 
 <div id="blogContent">
 
+  <div id="visualNotification" class="visual-notification"></div>
+
   <div class="chat-layout">
 
     <aside class="members-panel">
@@ -316,6 +417,21 @@ button.secondary{
 
   </div>
 
+  <div id="privatePanel" class="private-panel">
+    <div class="private-header">
+      <span id="privateTitle">Message privé</span>
+      <button class="close-private" onclick="closePrivateChat()">Fermer</button>
+    </div>
+
+    <div id="privateMessages" class="private-messages"></div>
+
+    <div class="private-write">
+      <textarea id="privateText" placeholder="Écris ton message privé ici..."></textarea>
+      <button onclick="sendPrivateMessage()">Envoyer en privé</button>
+      <div id="privateStatus" class="status"></div>
+    </div>
+  </div>
+
 </div>
 
 <div class="footer">
@@ -323,7 +439,6 @@ button.secondary{
 </div>
 
 </main>
-
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -345,9 +460,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
   authDomain: "mymetoo-formulaire.firebaseapp.com",
   projectId: "mymetoo-formulaire",
-  storageBucket: "mymetoo-formulaire.firebasestorage.app",
-  messagingSenderId: "1084270329845",
-  appId: "1:1084270329845:web:337a6172a4817f0db2eabc"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -356,198 +468,116 @@ const db = getFirestore(app);
 
 let currentPseudo = "Anonyme";
 let currentUserActive = true;
-let presenceInterval = null;
+let currentPrivateUser = null;
 
+// LOGIN
 window.login = async function(){
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const status = document.getElementById("loginStatus");
-
-  status.textContent = "";
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
   try{
     await signInWithEmailAndPassword(auth, email, password);
-  }catch(e){
-    status.textContent = "Email ou mot de passe incorrect.";
+  }catch{
+    document.getElementById("loginStatus").textContent = "Erreur connexion";
   }
 };
 
-async function setOnline(user){
-  if(!user) return;
-
-  await updateDoc(doc(db, "blogUsers", user.uid), {
-    online: true,
-    lastSeen: serverTimestamp()
-  });
-}
-
-async function setOffline(user){
-  if(!user) return;
-
-  await updateDoc(doc(db, "blogUsers", user.uid), {
-    online: false,
-    lastSeen: serverTimestamp()
-  });
-}
-
+// LOGOUT
 window.logout = async function(){
   const user = auth.currentUser;
-
-  try{
-    await setOffline(user);
-  }catch(e){
-    console.error(e);
+  if(user){
+    await updateDoc(doc(db,"blogUsers",user.uid),{online:false});
   }
-
   await signOut(auth);
 };
 
+// AUTH STATE
 onAuthStateChanged(auth, async user => {
   if(user){
-    const profileRef = doc(db, "blogUsers", user.uid);
-    const profileSnap = await getDoc(profileRef);
 
-    if(!profileSnap.exists()){
+    const snap = await getDoc(doc(db,"blogUsers",user.uid));
+    const data = snap.data();
+
+    if(data.active === false){
       await signOut(auth);
-      document.getElementById("loginStatus").textContent = "Compte blog introuvable.";
       return;
     }
 
-    const profile = profileSnap.data();
+    currentPseudo = data.pseudo;
 
-    if(profile.active === false){
-      await signOut(auth);
-      document.getElementById("loginStatus").textContent = "Ce compte a été désactivé.";
-      return;
-    }
+    await updateDoc(doc(db,"blogUsers",user.uid),{
+      online:true,
+      lastSeen:serverTimestamp()
+    });
 
-    currentPseudo = profile.pseudo || "Anonyme";
-    currentUserActive = true;
+    document.getElementById("welcomePseudo").innerText = currentPseudo;
 
-    await setOnline(user);
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("blogContent").style.display="block";
 
-    if(presenceInterval){
-      clearInterval(presenceInterval);
-    }
-
-    presenceInterval = setInterval(async () => {
-      if(auth.currentUser){
-        await setOnline(auth.currentUser);
-        await loadMembers();
-      }
-    }, 30000);
-
-    document.getElementById("welcomePseudo").textContent = "Connecté(e) : " + currentPseudo;
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("blogContent").style.display = "block";
-
-    await loadMembers();
-    await loadMessages();
+    loadMembers();
+    loadMessages();
 
   }else{
-    if(presenceInterval){
-      clearInterval(presenceInterval);
-      presenceInterval = null;
-    }
-
-    document.getElementById("loginBox").style.display = "block";
-    document.getElementById("blogContent").style.display = "none";
+    document.getElementById("loginBox").style.display="block";
+    document.getElementById("blogContent").style.display="none";
   }
 });
 
+// MEMBRES EN LIGNE + CLICK POUR MP
 async function loadMembers(){
   const container = document.getElementById("membersList");
-  container.innerHTML = "";
+  container.innerHTML="";
 
-  const snap = await getDocs(collection(db, "blogUsers"));
+  const snap = await getDocs(collection(db,"blogUsers"));
   const now = Date.now();
-  let count = 0;
 
-  snap.forEach(userDoc => {
-    const u = userDoc.data();
-
-    if(u.active === false) return;
-    if(u.online !== true) return;
-
-    const lastSeenTime = u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : 0;
-    const isRecentlySeen = now - lastSeenTime < 120000;
-
-    if(!isRecentlySeen) return;
-
-    count++;
+  snap.forEach(d=>{
+    const u = d.data();
+    if(!u.online) return;
 
     const div = document.createElement("div");
-    div.className = "member";
-    div.textContent = u.pseudo || "Anonyme";
+    div.className="member";
+    div.innerText = u.pseudo;
+
+    div.onclick = ()=> openPrivateChat(d.id,u.pseudo);
 
     container.appendChild(div);
   });
-
-  if(count === 0){
-    container.innerHTML = `<div class="member">Aucun membre en ligne</div>`;
-  }
 }
 
+// CHAT GLOBAL
 window.sendMessage = async function(){
-  const textarea = document.getElementById("chatMessage");
-  const status = document.getElementById("messageStatus");
-  const user = auth.currentUser;
-  const text = textarea.value.trim();
+  const text = document.getElementById("chatMessage").value.trim();
+  if(!text) return;
 
-  if(!user || !currentUserActive){
-    status.textContent = "Tu dois être connecté(e).";
-    return;
-  }
+  await addDoc(collection(db,"blogMessages"),{
+    pseudo:currentPseudo,
+    message:text,
+    createdAt:serverTimestamp(),
+    visible:true
+  });
 
-  if(!text){
-    status.textContent = "Merci d’écrire un message.";
-    return;
-  }
-
-  status.textContent = "Envoi en cours...";
-
-  try{
-    await addDoc(collection(db, "blogMessages"), {
-      uid: user.uid,
-      pseudo: currentPseudo,
-      message: text,
-      visible: true,
-      createdAt: serverTimestamp()
-    });
-
-    textarea.value = "";
-    status.textContent = "";
-    await setOnline(user);
-    await loadMessages();
-    await loadMembers();
-
-  }catch(e){
-    console.error(e);
-    status.textContent = "Erreur lors de l’envoi.";
-  }
+  document.getElementById("chatMessage").value="";
+  loadMessages();
 };
 
 async function loadMessages(){
   const container = document.getElementById("messages");
-  container.innerHTML = "";
+  container.innerHTML="";
 
-  const q = query(collection(db, "blogMessages"), orderBy("createdAt", "asc"));
-  const snap = await getDocs(q);
+  const snap = await getDocs(query(collection(db,"blogMessages"),orderBy("createdAt","asc")));
 
-  snap.forEach(msgDoc => {
-    const m = msgDoc.data();
+  snap.forEach(d=>{
+    const m=d.data();
+    if(m.visible===false) return;
 
-    if(m.visible === false) return;
+    const div=document.createElement("div");
+    div.className="msg";
 
-    const date = m.createdAt?.toDate().toLocaleString("fr-FR") || "";
-
-    const div = document.createElement("div");
-    div.className = "msg";
-
-    div.innerHTML = `
-      <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
-      <div>${m.message || ""}</div>
-      <div class="msg-date">${date}</div>
+    div.innerHTML=`
+      <div class="msg-meta">${m.pseudo}</div>
+      <div>${m.message}</div>
     `;
 
     container.appendChild(div);
@@ -556,21 +586,102 @@ async function loadMessages(){
   container.scrollTop = container.scrollHeight;
 }
 
-setInterval(() => {
+// ====== MESSAGE PRIVÉ ======
+
+function getChatId(uid1,uid2){
+  return uid1 < uid2 ? uid1+"_"+uid2 : uid2+"_"+uid1;
+}
+
+window.openPrivateChat = function(uid,pseudo){
+  currentPrivateUser = {uid,pseudo};
+
+  document.getElementById("privatePanel").style.display="block";
+  document.getElementById("privateTitle").innerText="Discussion avec "+pseudo;
+
+  loadPrivateMessages();
+};
+
+window.closePrivateChat = function(){
+  document.getElementById("privatePanel").style.display="none";
+  currentPrivateUser=null;
+};
+
+window.sendPrivateMessage = async function(){
+  const text = document.getElementById("privateText").value.trim();
+  if(!text) return;
+
+  const user = auth.currentUser;
+  const chatId = getChatId(user.uid,currentPrivateUser.uid);
+
+  await addDoc(collection(db,"privateMessages",chatId,"messages"),{
+    from:user.uid,
+    to:currentPrivateUser.uid,
+    pseudo:currentPseudo,
+    message:text,
+    createdAt:serverTimestamp()
+  });
+
+  document.getElementById("privateText").value="";
+  loadPrivateMessages();
+};
+
+async function loadPrivateMessages(){
+  if(!currentPrivateUser) return;
+
+  const user = auth.currentUser;
+  const chatId = getChatId(user.uid,currentPrivateUser.uid);
+
+  const container = document.getElementById("privateMessages");
+  container.innerHTML="";
+
+  const snap = await getDocs(query(
+    collection(db,"privateMessages",chatId,"messages"),
+    orderBy("createdAt","asc")
+  ));
+
+  snap.forEach(d=>{
+    const m=d.data();
+
+    const div=document.createElement("div");
+    div.className="private-msg "+(m.from===user.uid?"mine":"");
+
+    div.innerHTML=`
+      ${m.message}
+    `;
+
+    container.appendChild(div);
+  });
+
+  container.scrollTop = container.scrollHeight;
+}
+
+// ====== NOTIFICATION VISUELLE ======
+
+let lastMessageCount = 0;
+
+async function checkNewMessages(){
+  const snap = await getDocs(collection(db,"blogMessages"));
+  const count = snap.size;
+
+  if(count > lastMessageCount && lastMessageCount !== 0){
+    const notif = document.getElementById("visualNotification");
+    notif.innerText = "💬 Nouveau message reçu";
+    notif.style.display="block";
+
+    setTimeout(()=> notif.style.display="none",3000);
+  }
+
+  lastMessageCount = count;
+}
+
+// REFRESH
+setInterval(()=>{
   if(auth.currentUser){
     loadMessages();
     loadMembers();
+    loadPrivateMessages();
+    checkNewMessages();
   }
-}, 10000);
-
-window.addEventListener("beforeunload", () => {
-  const user = auth.currentUser;
-  if(user){
-    setOffline(user);
-  }
-});
+},4000);
 
 </script>
-
-</body>
-</html>
