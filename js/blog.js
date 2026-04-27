@@ -21,6 +21,9 @@ import {
   doc,
   getDoc,
   updateDoc,
+  setDoc,
+  arrayUnion,
+  arrayRemove,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -47,7 +50,19 @@ const storage = getStorage(app);
 
 let currentPseudo = "Anonyme";
 let currentUserData = null;
+let currentPrivateUser = null;
+let currentReportMode = null;
+let currentReportTarget = null;
+
 let presenceInterval = null;
+let unsubscribeMembers = null;
+let unsubscribePublicMessages = null;
+let unsubscribePrivateList = null;
+let unsubscribePrivateChat = null;
+
+function getChatId(uid1, uid2){
+  return uid1 < uid2 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
+}
 
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
@@ -75,10 +90,11 @@ window.logout = async function(){
     });
   }
 
-  if(presenceInterval){
-    clearInterval(presenceInterval);
-    presenceInterval = null;
-  }
+  if(presenceInterval) clearInterval(presenceInterval);
+  if(unsubscribeMembers) unsubscribeMembers();
+  if(unsubscribePublicMessages) unsubscribePublicMessages();
+  if(unsubscribePrivateList) unsubscribePrivateList();
+  if(unsubscribePrivateChat) unsubscribePrivateChat();
 
   await signOut(auth);
 };
@@ -124,9 +140,7 @@ onAuthStateChanged(auth, async user => {
       lastSeen:serverTimestamp()
     });
 
-    if(presenceInterval){
-      clearInterval(presenceInterval);
-    }
+    if(presenceInterval) clearInterval(presenceInterval);
 
     presenceInterval = setInterval(async () => {
       if(auth.currentUser){
@@ -143,12 +157,10 @@ onAuthStateChanged(auth, async user => {
 
     loadMembers();
     loadPublicMessages();
+    loadPrivateConversations();
 
   }else{
-    if(presenceInterval){
-      clearInterval(presenceInterval);
-      presenceInterval = null;
-    }
+    if(presenceInterval) clearInterval(presenceInterval);
 
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("blogContent").style.display = "none";
@@ -180,7 +192,6 @@ window.openMyProfile = function(){
   document.getElementById("profileView").style.display = "block";
   document.getElementById("profileEdit").style.display = "none";
   document.getElementById("profileUpdateStatus").textContent = "";
-
   document.getElementById("myProfileModal").style.display = "block";
 };
 
@@ -220,10 +231,7 @@ window.updateProfile = async function(){
 
     if(email && email !== user.email){
       await updateEmail(user,email);
-
-      await updateDoc(doc(db,"blogUsers",user.uid),{
-        email:email
-      });
+      await updateDoc(doc(db,"blogUsers",user.uid),{ email:email });
     }
 
     currentUserData.age = age;
@@ -234,12 +242,9 @@ window.updateProfile = async function(){
 
   }catch(error){
     console.error(error);
-
-    if(error.code === "auth/requires-recent-login"){
-      status.textContent = "Reconnecte-toi pour modifier ton email.";
-    }else{
-      status.textContent = "Erreur lors de la mise à jour.";
-    }
+    status.textContent = error.code === "auth/requires-recent-login"
+      ? "Reconnecte-toi pour modifier ton email."
+      : "Erreur lors de la mise à jour.";
   }
 };
 
@@ -258,7 +263,6 @@ window.togglePasswordVisibility = function(id){
 
 window.changePassword = async function(){
   const user = auth.currentUser;
-
   const oldPass = document.getElementById("oldPassword").value;
   const newPass = document.getElementById("newPassword").value;
   const confirmPass = document.getElementById("confirmNewPassword").value;
@@ -285,7 +289,6 @@ window.changePassword = async function(){
     await updatePassword(user, newPass);
 
     status.textContent = "Mot de passe modifié ✅";
-
     document.getElementById("oldPassword").value = "";
     document.getElementById("newPassword").value = "";
     document.getElementById("confirmNewPassword").value = "";
@@ -298,11 +301,12 @@ window.changePassword = async function(){
 function loadMembers(){
   const container = document.getElementById("membersList");
 
-  onSnapshot(collection(db,"blogUsers"), snap => {
+  if(unsubscribeMembers) unsubscribeMembers();
+
+  unsubscribeMembers = onSnapshot(collection(db,"blogUsers"), snap => {
     if(!auth.currentUser) return;
 
     container.innerHTML = "";
-
     let count = 0;
     const now = Date.now();
 
@@ -315,7 +319,6 @@ function loadMembers(){
       if(data.online !== true) return;
 
       const lastSeenTime = data.lastSeen?.toDate ? data.lastSeen.toDate().getTime() : 0;
-
       if(!lastSeenTime) return;
       if(now - lastSeenTime > 120000) return;
 
@@ -324,7 +327,6 @@ function loadMembers(){
       const div = document.createElement("div");
       div.className = "member";
       div.innerText = data.pseudo || "Anonyme";
-
       div.onclick = function(){
         openMemberProfile(uid, data);
       };
@@ -342,20 +344,11 @@ window.openMemberProfile = function(uid, data){
   const modal = document.getElementById("memberProfileModal");
 
   if(modal){
-    document.getElementById("memberProfileTitle").innerText =
-      "Profil de " + (data.pseudo || "Anonyme");
-
-    document.getElementById("memberProfilePseudo").innerText =
-      data.pseudo || "Anonyme";
-
-    document.getElementById("memberProfileAge").innerText =
-      data.age || "Non renseigné";
-
-    document.getElementById("memberProfileGenre").innerText =
-      data.genre || "Non renseigné";
-
-    document.getElementById("memberProfileDepartement").innerText =
-      data.departement || "Non renseigné";
+    document.getElementById("memberProfileTitle").innerText = "Profil de " + (data.pseudo || "Anonyme");
+    document.getElementById("memberProfilePseudo").innerText = data.pseudo || "Anonyme";
+    document.getElementById("memberProfileAge").innerText = data.age || "Non renseigné";
+    document.getElementById("memberProfileGenre").innerText = data.genre || "Non renseigné";
+    document.getElementById("memberProfileDepartement").innerText = data.departement || "Non renseigné";
 
     modal.dataset.uid = uid;
     modal.dataset.pseudo = data.pseudo || "Anonyme";
@@ -365,16 +358,16 @@ window.openMemberProfile = function(uid, data){
 
 window.closeMemberProfile = function(){
   const modal = document.getElementById("memberProfileModal");
-  if(modal){
-    modal.style.display = "none";
-  }
+  if(modal) modal.style.display = "none";
 };
 
 function loadPublicMessages(){
   const container = document.getElementById("messages");
   const q = query(collection(db,"blogMessages"), orderBy("createdAt","asc"));
 
-  onSnapshot(q, snap => {
+  if(unsubscribePublicMessages) unsubscribePublicMessages();
+
+  unsubscribePublicMessages = onSnapshot(q, snap => {
     container.innerHTML = "";
 
     snap.forEach(docSnap => {
@@ -420,7 +413,6 @@ window.sendPublicImage = async function(){
   if(!file) return;
 
   const storageRef = ref(storage, "images/" + auth.currentUser.uid + "/" + Date.now() + "_" + file.name);
-
   await uploadBytes(storageRef, file);
   const url = await getDownloadURL(storageRef);
 
@@ -437,6 +429,50 @@ window.sendPublicImage = async function(){
   input.value = "";
 };
 
+function loadPrivateConversations(){
+  const user = auth.currentUser;
+  const list = document.getElementById("privateList");
+
+  if(!user || !list) return;
+  if(unsubscribePrivateList) unsubscribePrivateList();
+
+  unsubscribePrivateList = onSnapshot(collection(db,"privateMessages"), snap => {
+    list.innerHTML = "";
+    let count = 0;
+
+    snap.forEach(docSnap => {
+      const chat = docSnap.data();
+      const chatId = docSnap.id;
+
+      if(!Array.isArray(chat.participants)) return;
+      if(!chat.participants.includes(user.uid)) return;
+      if(Array.isArray(chat.hiddenFor) && chat.hiddenFor.includes(user.uid)) return;
+
+      const otherUid = chat.participants.find(id => id !== user.uid);
+      const otherPseudo = chat.participantPseudos?.[otherUid] || "Utilisateur";
+
+      count++;
+
+      const div = document.createElement("div");
+      div.className = "private-conversation";
+      div.innerHTML = `
+        <div class="name">${otherPseudo}</div>
+        <div class="preview">${chat.lastMessage || "Conversation privée"}</div>
+      `;
+
+      div.onclick = function(){
+        openPrivateChat(otherUid, otherPseudo);
+      };
+
+      list.appendChild(div);
+    });
+
+    if(count === 0){
+      list.innerHTML = "Aucune conversation privée pour le moment.";
+    }
+  });
+}
+
 window.openPrivatePanel = function(){
   const panel = document.getElementById("privatePanel");
   if(panel){
@@ -452,11 +488,211 @@ window.closePrivatePanel = function(){
 };
 
 window.messageMemberProfile = function(){
-  alert("Les messages privés seront remis juste après cette étape.");
+  const modal = document.getElementById("memberProfileModal");
+  const uid = modal.dataset.uid;
+  const pseudo = modal.dataset.pseudo || "Utilisateur";
+
+  closeMemberProfile();
+  openPrivateChat(uid, pseudo);
+};
+
+window.openPrivateChat = async function(uid, pseudo){
+  const user = auth.currentUser;
+  if(!user || !uid) return;
+
+  currentPrivateUser = { uid, pseudo };
+  const chatId = getChatId(user.uid, uid);
+
+  await setDoc(doc(db,"privateMessages",chatId),{
+    participants:[user.uid, uid],
+    participantPseudos:{
+      [user.uid]:currentPseudo,
+      [uid]:pseudo
+    },
+    hiddenFor:arrayRemove(user.uid),
+    unreadFor:"",
+    updatedAt:serverTimestamp()
+  }, { merge:true });
+
+  document.getElementById("privateTitle").innerText = "Discussion avec " + pseudo;
+  document.getElementById("privateChatWindow").style.display = "block";
+  document.getElementById("privateStatus").textContent = "";
+
+  listenPrivateChat(chatId);
+};
+
+function listenPrivateChat(chatId){
+  const container = document.getElementById("privateMessages");
+
+  if(unsubscribePrivateChat) unsubscribePrivateChat();
+
+  const q = query(collection(db,"privateMessages",chatId,"messages"), orderBy("createdAt","asc"));
+
+  unsubscribePrivateChat = onSnapshot(q, snap => {
+    container.innerHTML = "";
+
+    snap.forEach(docSnap => {
+      const m = docSnap.data();
+
+      const div = document.createElement("div");
+      div.className = "private-msg " + (m.from === auth.currentUser.uid ? "mine" : "");
+      div.textContent = m.message || "";
+
+      container.appendChild(div);
+    });
+
+    container.scrollTop = container.scrollHeight;
+  });
+}
+
+window.sendPrivateMessage = async function(){
+  const user = auth.currentUser;
+  const text = document.getElementById("privateText").value.trim();
+  const status = document.getElementById("privateStatus");
+
+  if(!user || !currentPrivateUser){
+    status.textContent = "Aucune conversation sélectionnée.";
+    return;
+  }
+
+  if(!text){
+    status.textContent = "Écris un message avant d’envoyer.";
+    return;
+  }
+
+  const chatId = getChatId(user.uid, currentPrivateUser.uid);
+  const chatRef = doc(db,"privateMessages",chatId);
+
+  await setDoc(chatRef,{
+    participants:[user.uid, currentPrivateUser.uid],
+    participantPseudos:{
+      [user.uid]:currentPseudo,
+      [currentPrivateUser.uid]:currentPrivateUser.pseudo
+    },
+    lastMessage:text,
+    unreadFor:currentPrivateUser.uid,
+    hiddenFor:arrayRemove(currentPrivateUser.uid),
+    updatedAt:serverTimestamp()
+  }, { merge:true });
+
+  await addDoc(collection(db,"privateMessages",chatId,"messages"),{
+    from:user.uid,
+    to:currentPrivateUser.uid,
+    pseudo:currentPseudo,
+    message:text,
+    type:"text",
+    createdAt:serverTimestamp()
+  });
+
+  document.getElementById("privateText").value = "";
+  status.textContent = "";
+};
+
+window.minimizePrivateChat = function(){
+  document.getElementById("privateChatWindow").style.display = "none";
+};
+
+window.hideCurrentPrivateConversation = async function(){
+  const user = auth.currentUser;
+  if(!user || !currentPrivateUser) return;
+
+  const ok = confirm("Supprimer cette conversation de ta liste ?");
+  if(!ok) return;
+
+  const chatId = getChatId(user.uid, currentPrivateUser.uid);
+
+  await setDoc(doc(db,"privateMessages",chatId),{
+    hiddenFor:arrayUnion(user.uid),
+    unreadFor:""
+  }, { merge:true });
+
+  document.getElementById("privateChatWindow").style.display = "none";
+  currentPrivateUser = null;
 };
 
 window.reportMemberProfile = function(){
-  alert("Le signalement sera remis juste après cette étape.");
+  const modal = document.getElementById("memberProfileModal");
+
+  currentReportMode = "profile";
+  currentReportTarget = {
+    uid:modal.dataset.uid,
+    pseudo:modal.dataset.pseudo
+  };
+
+  openReportModal("⚠️ Signaler ce profil", "Explique pourquoi tu signales ce profil :");
+};
+
+window.reportPrivateConversation = function(){
+  if(!currentPrivateUser) return;
+
+  currentReportMode = "privateConversation";
+  currentReportTarget = {
+    uid:currentPrivateUser.uid,
+    pseudo:currentPrivateUser.pseudo,
+    chatId:getChatId(auth.currentUser.uid, currentPrivateUser.uid)
+  };
+
+  openReportModal("⚠️ Signaler cette discussion", "Explique pourquoi tu signales cette discussion privée :");
+};
+
+function openReportModal(title, text){
+  document.getElementById("reportModalTitle").textContent = title;
+  document.getElementById("reportModalText").textContent = text;
+  document.getElementById("reportReason").value = "";
+  document.getElementById("reportModalStatus").textContent = "";
+  document.getElementById("reportModal").style.display = "flex";
+}
+
+window.closeReportModal = function(){
+  document.getElementById("reportModal").style.display = "none";
+  document.getElementById("reportReason").value = "";
+  document.getElementById("reportModalStatus").textContent = "";
+  currentReportMode = null;
+  currentReportTarget = null;
+};
+
+window.confirmReport = async function(){
+  const user = auth.currentUser;
+  const reason = document.getElementById("reportReason").value.trim();
+  const status = document.getElementById("reportModalStatus");
+
+  if(!user){
+    status.textContent = "Tu dois être connecté(e).";
+    return;
+  }
+
+  if(reason.length < 5){
+    status.textContent = "Merci d’expliquer la raison du signalement.";
+    return;
+  }
+
+  if(!currentReportMode || !currentReportTarget){
+    status.textContent = "Aucun signalement sélectionné.";
+    return;
+  }
+
+  const reportData = {
+    type:currentReportMode,
+    reportedUserUid:currentReportTarget.uid,
+    reportedUserPseudo:currentReportTarget.pseudo || "Utilisateur",
+    reportedBy:user.uid,
+    reportedByPseudo:currentPseudo,
+    reason:reason,
+    createdAt:serverTimestamp(),
+    status:"pending"
+  };
+
+  if(currentReportMode === "privateConversation"){
+    reportData.chatId = currentReportTarget.chatId;
+  }
+
+  await addDoc(collection(db,"reports"), reportData);
+
+  status.textContent = "Signalement envoyé ✅";
+
+  setTimeout(() => {
+    closeReportModal();
+  }, 700);
 };
 
 window.openHelpModal = function(){
