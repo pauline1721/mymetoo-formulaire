@@ -35,7 +35,7 @@ h1{font-family:Georgia,serif;font-size:56px;line-height:.9;margin:5px 0 8px}
 
 .side-menu{
   position:fixed;
-  left:-330px;
+  left:0;
   top:0;
   width:310px;
   max-width:88vw;
@@ -44,13 +44,14 @@ h1{font-family:Georgia,serif;font-size:56px;line-height:.9;margin:5px 0 8px}
   border-right:3px solid #ded2ec;
   box-shadow:8px 0 30px rgba(0,0,0,.18);
   z-index:30000;
+  transform:translateX(-105%);
   transition:.25s;
   display:flex;
   flex-direction:column;
 }
 
 .side-menu.open{
-  left:0;
+  transform:translateX(0);
 }
 
 .menu-top{
@@ -446,6 +447,40 @@ button.danger{background:#d94b6a}
   </div>
 
   <div class="menu-modal-content">
+
+    <div class="form-row">
+      <label>Pseudo</label>
+      <input id="profilePseudoEdit" type="text">
+    </div>
+
+    <div class="form-row">
+      <label>Tranche d’âge</label>
+      <select id="profileAgeEdit">
+        <option value="">Choisir</option>
+        <option value="Moins de 18 ans">Moins de 18 ans</option>
+        <option value="18 / 35 ans">18 / 35 ans</option>
+        <option value="Plus de 35 ans">Plus de 35 ans</option>
+        <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>Genre</label>
+      <select id="profileGenreEdit">
+        <option value="">Choisir</option>
+        <option value="Une femme">Une femme</option>
+        <option value="Un homme">Un homme</option>
+        <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>Département</label>
+      <input id="profileDepartementEdit" type="text" placeholder="Ex : Aisne (02)">
+    </div>
+
+    <hr>
+
     <div class="form-row">
       <label>Email</label>
       <input id="profileEmail" type="email">
@@ -456,7 +491,7 @@ button.danger{background:#d94b6a}
       <input id="profilePassword" type="password" placeholder="Laisser vide si inchangé">
     </div>
 
-    <button onclick="updateProfile()">Mettre à jour</button>
+    <button onclick="updateProfile()">Enregistrer les modifications</button>
     <div id="profileUpdateStatus" class="status"></div>
   </div>
 </div>
@@ -682,15 +717,16 @@ window.openMyProfile = function(){
   const user = auth.currentUser;
   if(!user) return;
 
+  document.getElementById("profilePseudoEdit").value = currentUserData?.pseudo || "";
+  document.getElementById("profileAgeEdit").value = currentUserData?.age || "";
+  document.getElementById("profileGenreEdit").value = currentUserData?.genre || "";
+  document.getElementById("profileDepartementEdit").value = currentUserData?.departement || "";
+
   document.getElementById("profileEmail").value = user.email || "";
   document.getElementById("profilePassword").value = "";
   document.getElementById("profileUpdateStatus").textContent = "";
 
   document.getElementById("myProfileModal").style.display = "block";
-};
-
-window.closeMyProfile = function(){
-  document.getElementById("myProfileModal").style.display = "none";
 };
 
 window.updateProfile = async function(){
@@ -702,14 +738,35 @@ window.updateProfile = async function(){
     return;
   }
 
+  const newPseudo = document.getElementById("profilePseudoEdit").value.trim();
+  const newAge = document.getElementById("profileAgeEdit").value;
+  const newGenre = document.getElementById("profileGenreEdit").value;
+  const newDepartement = document.getElementById("profileDepartementEdit").value.trim();
+
   const newEmail = document.getElementById("profileEmail").value.trim();
   const newPassword = document.getElementById("profilePassword").value.trim();
 
   try{
+    await updateDoc(doc(db,"blogUsers",user.uid),{
+      pseudo:newPseudo,
+      age:newAge,
+      genre:newGenre,
+      departement:newDepartement
+    });
+
+    currentUserData = {
+      ...currentUserData,
+      pseudo:newPseudo,
+      age:newAge,
+      genre:newGenre,
+      departement:newDepartement
+    };
+
+    currentPseudo = newPseudo || "Anonyme";
+    document.getElementById("welcomePseudo").innerText = "Connecté(e) : " + currentPseudo;
 
     if(newEmail && newEmail !== user.email){
       await updateEmail(user, newEmail);
-
       await updateDoc(doc(db,"blogUsers",user.uid),{
         email:newEmail
       });
@@ -717,7 +774,7 @@ window.updateProfile = async function(){
 
     if(newPassword){
       if(newPassword.length < 6){
-        status.textContent = "Mot de passe trop court.";
+        status.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
         return;
       }
 
@@ -727,11 +784,12 @@ window.updateProfile = async function(){
     status.textContent = "Profil mis à jour ✅";
 
   }catch(error){
+    console.error(error);
 
     if(error.code === "auth/requires-recent-login"){
-      status.textContent = "Reconnecte-toi pour modifier.";
+      status.textContent = "Reconnecte-toi pour modifier l’email ou le mot de passe.";
     }else if(error.code === "auth/email-already-in-use"){
-      status.textContent = "Email déjà utilisé.";
+      status.textContent = "Cet email est déjà utilisé.";
     }else{
       status.textContent = "Erreur lors de la mise à jour.";
     }
