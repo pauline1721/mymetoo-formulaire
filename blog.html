@@ -510,8 +510,11 @@ window.reportProfileUser = async function(){
     return;
   }
 
-  const ok = confirm("Signaler ce profil à l’administrateur ?");
-  if(!ok) return;
+  const reason = prompt("Pourquoi signales-tu ce profil ?");
+if(!reason || reason.trim().length < 5){
+  status.textContent = "Merci d’expliquer la raison du signalement.";
+  return;
+};
 
   try{
     await addDoc(collection(db,"reports"),{
@@ -521,6 +524,7 @@ window.reportProfileUser = async function(){
       reportedUserGenre:currentProfileUser.genre,
       reportedUserAge:currentProfileUser.age,
       reportedBy:user.uid,
+      reason: reason.trim(),
       createdAt:serverTimestamp(),
       status:"pending"
     });
