@@ -432,17 +432,19 @@ window.sendPublicImage = async function(){
 function loadPrivateConversations(){
   const user = auth.currentUser;
   const list = document.getElementById("privateList");
+  const btnPrivate = document.getElementById("btnPrivate");
 
   if(!user || !list) return;
   if(unsubscribePrivateList) unsubscribePrivateList();
 
   unsubscribePrivateList = onSnapshot(collection(db,"privateMessages"), snap => {
     list.innerHTML = "";
-    let count = 0;
+
+    let totalConversations = 0;
+    let unreadCount = 0;
 
     snap.forEach(docSnap => {
       const chat = docSnap.data();
-      const chatId = docSnap.id;
 
       if(!Array.isArray(chat.participants)) return;
       if(!chat.participants.includes(user.uid)) return;
@@ -451,12 +453,22 @@ function loadPrivateConversations(){
       const otherUid = chat.participants.find(id => id !== user.uid);
       const otherPseudo = chat.participantPseudos?.[otherUid] || "Utilisateur";
 
-      count++;
+      const isUnread = chat.unreadFor === user.uid;
+
+      totalConversations++;
+
+      if(isUnread){
+        unreadCount++;
+      }
 
       const div = document.createElement("div");
       div.className = "private-conversation";
+
       div.innerHTML = `
-        <div class="name">${otherPseudo}</div>
+        <div class="name">
+          ${otherPseudo}
+          ${isUnread ? `<span class="private-badge">Nouveau</span>` : ""}
+        </div>
         <div class="preview">${chat.lastMessage || "Conversation privée"}</div>
       `;
 
@@ -467,8 +479,14 @@ function loadPrivateConversations(){
       list.appendChild(div);
     });
 
-    if(count === 0){
+    if(totalConversations === 0){
       list.innerHTML = "Aucune conversation privée pour le moment.";
+    }
+
+    if(btnPrivate){
+      btnPrivate.innerHTML = unreadCount > 0
+        ? `💬 Messages privés <span class="private-badge">${unreadCount}</span>`
+        : "💬 Messages privés";
     }
   });
 }
