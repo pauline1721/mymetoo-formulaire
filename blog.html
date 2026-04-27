@@ -17,8 +17,113 @@ body{margin:0;background:var(--fond);font-family:Arial,sans-serif;color:var(--vi
 .unis{font-family:Georgia,serif;font-weight:bold;font-size:23px}
 h1{font-family:Georgia,serif;font-size:56px;line-height:.9;margin:5px 0 8px}
 .subtitle{font-family:Georgia,serif;font-size:28px;font-weight:bold;margin-bottom:18px}
+
+.menu-btn{
+  position:absolute;
+  left:20px;
+  top:20px;
+  z-index:50;
+  background:white;
+  color:#5b23ad;
+  border:2px solid #ded2ec;
+  border-radius:12px;
+  padding:9px 12px;
+  font-size:24px;
+  line-height:1;
+  box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.side-menu{
+  position:fixed;
+  left:-330px;
+  top:0;
+  width:310px;
+  max-width:88vw;
+  height:100vh;
+  background:#fbf8ff;
+  border-right:3px solid #ded2ec;
+  box-shadow:8px 0 30px rgba(0,0,0,.18);
+  z-index:30000;
+  transition:.25s;
+  display:flex;
+  flex-direction:column;
+}
+
+.side-menu.open{
+  left:0;
+}
+
+.menu-top{
+  background:#6f42bd;
+  color:white;
+  padding:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+}
+
+.menu-close{
+  margin:0;
+  padding:6px 10px;
+  background:white;
+  color:#6f42bd;
+  border-radius:8px;
+}
+
+.menu-content{
+  padding:15px;
+  overflow-y:auto;
+  flex:1;
+}
+
+.menu-item{
+  width:100%;
+  display:block;
+  text-align:left;
+  margin:8px 0;
+  border-radius:10px;
+  background:white;
+  color:#5b23ad;
+  border:2px solid #eeeaf3;
+  padding:12px;
+  font-weight:bold;
+}
+
+.menu-item:hover{
+  background:#efe4f8;
+}
+
+.menu-item.premium{
+  background:linear-gradient(90deg,#5b23ad,#7e45d1);
+  color:white;
+}
+
+.menu-bottom{
+  padding:15px;
+  border-top:1px solid #e5d9f2;
+}
+
+.menu-logout{
+  width:100%;
+  background:#d94b6a;
+  border-radius:10px;
+}
+
+.menu-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(36,16,107,.35);
+  z-index:29999;
+}
+
+.menu-overlay.open{
+  display:block;
+}
+
 .box{max-width:430px;margin:0 auto 20px;background:var(--soft);border:2px solid #ded2ec;border-radius:12px;padding:18px;position:relative;z-index:2}
-input,textarea{width:100%;border:2px solid #d8c2eb;border-radius:10px;padding:12px;font-size:16px;margin-top:10px}
+input,textarea,select{width:100%;border:2px solid #d8c2eb;border-radius:10px;padding:12px;font-size:16px;margin-top:10px;background:white;color:#24106b}
 button{margin-top:12px;background:linear-gradient(90deg,#5b23ad,#7e45d1);color:white;border:none;padding:11px 18px;border-radius:9px;font-weight:bold;cursor:pointer}
 button.secondary{background:#6f42bd}
 button.danger{background:#d94b6a}
@@ -62,13 +167,113 @@ button.danger{background:#d94b6a}
 .private-msg.mine{background:#eadcf8}
 .private-write{padding:12px;background:#fbf8ff}
 .private-write textarea{min-height:60px;background:white}
-.profile-window{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:360px;max-width:calc(100vw - 30px);background:white;border:2px solid #ded2ec;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.22);z-index:10000;overflow:hidden}
-.profile-top{background:#6f42bd;color:white;padding:14px;display:flex;justify-content:space-between;align-items:center;font-weight:bold}
-.profile-content{padding:18px;background:#fbf8ff}
-.profile-field{background:white;border-radius:10px;padding:10px;margin-bottom:10px;border:1px solid #eeeaf3}
+
+.profile-window,
+.menu-modal{
+  display:none;
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:420px;
+  max-width:calc(100vw - 30px);
+  max-height:90vh;
+  overflow-y:auto;
+  background:white;
+  border:2px solid #ded2ec;
+  border-radius:18px;
+  box-shadow:0 12px 40px rgba(0,0,0,.22);
+  z-index:31000;
+}
+
+.profile-top,
+.menu-modal-top{
+  background:#6f42bd;
+  color:white;
+  padding:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+}
+
+.profile-content,
+.menu-modal-content{
+  padding:18px;
+  background:#fbf8ff;
+}
+
+.profile-field{
+  background:white;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:10px;
+  border:1px solid #eeeaf3;
+}
+
 .profile-field strong{color:#6f42bd}
 .profile-actions{display:flex;flex-direction:column;gap:8px}
 .profile-close{margin:0;padding:5px 9px;border-radius:8px;background:white;color:#6f42bd}
+
+.form-row{
+  margin-bottom:10px;
+}
+
+.form-row label{
+  display:block;
+  font-weight:bold;
+  color:#5b23ad;
+  margin-bottom:4px;
+}
+
+.help-card{
+  background:white;
+  border:1px solid #eeeaf3;
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:10px;
+}
+
+.help-card strong{
+  color:#5b23ad;
+}
+
+.help-card a{
+  display:inline-block;
+  margin-top:8px;
+  background:#d94b6a;
+  color:white;
+  text-decoration:none;
+  padding:9px 12px;
+  border-radius:8px;
+  font-weight:bold;
+}
+
+.premium-box{
+  background:white;
+  border-radius:12px;
+  padding:14px;
+  border:2px solid #eeeaf3;
+}
+
+.premium-price{
+  font-size:28px;
+  font-weight:bold;
+  color:#5b23ad;
+  margin:10px 0;
+}
+
+.legal-links-menu a{
+  display:block;
+  background:white;
+  border:1px solid #eeeaf3;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:8px;
+  color:#5b23ad;
+  font-weight:bold;
+  text-decoration:none;
+}
 
 .report-modal{
   display:none;
@@ -126,13 +331,46 @@ button.danger{background:#d94b6a}
 }
 
 .footer{text-align:center;margin-top:30px;color:#6e4cb0;font-weight:bold}
-@media(max-width:800px){.page{padding:12px}.logo{width:130px}h1{font-size:46px}.subtitle{font-size:24px}.leaf{width:180px;opacity:.25}.chat-layout{grid-template-columns:1fr}.members-panel{height:auto;max-height:180px}.chat-panel{height:620px}.private-chat-window{right:10px;bottom:10px;width:calc(100vw - 20px)}}
+@media(max-width:800px){
+  .page{padding:12px}
+  .logo{width:130px}
+  h1{font-size:46px}
+  .subtitle{font-size:24px}
+  .leaf{width:180px;opacity:.25}
+  .chat-layout{grid-template-columns:1fr}
+  .members-panel{height:auto;max-height:180px}
+  .chat-panel{height:620px}
+  .private-chat-window{right:10px;bottom:10px;width:calc(100vw - 20px)}
+  .menu-btn{left:12px;top:12px}
+}
 </style>
 </head>
 
 <body>
 
+<div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
+
+<nav id="sideMenu" class="side-menu">
+  <div class="menu-top">
+    <span>Menu MyMeToo</span>
+    <button class="menu-close" onclick="closeMenu()">✕</button>
+  </div>
+
+  <div class="menu-content">
+    <button class="menu-item" onclick="openMyProfile()">👤 Mon profil</button>
+    <button class="menu-item" onclick="openHelpModal()">🚨 Aide / urgence</button>
+    <button class="menu-item premium" onclick="openPremiumModal()">⭐ Premium</button>
+    <button class="menu-item" onclick="openLegalModal()">⚖️ Légal</button>
+  </div>
+
+  <div class="menu-bottom">
+    <button class="menu-logout" onclick="logout()">Se déconnecter</button>
+  </div>
+</nav>
+
 <main class="page">
+
+<button class="menu-btn" onclick="openMenu()">☰</button>
 
 <img src="feuille-gauche.png" class="leaf left" alt="">
 <img src="feuille-droite.png" class="leaf right" alt="">
@@ -168,7 +406,6 @@ button.danger{background:#d94b6a}
         <strong id="welcomePseudo">Connecté(e)</strong>
         <div>
           <button id="btnPrivate" onclick="openPrivatePanel()">💬 Messages privés</button>
-          <button class="secondary" onclick="logout()">Se déconnecter</button>
         </div>
       </div>
 
@@ -199,80 +436,153 @@ button.danger{background:#d94b6a}
 
 <div class="footer">♡ Un espace privé pour échanger avec respect. ♡</div>
 </main>
-
-<div id="privateChatWindow" class="private-chat-window">
-  <div class="private-chat-top">
-    <span id="privateTitle">Discussion privée</span>
-    <div class="window-actions">
-      <button class="window-btn report" onclick="reportPrivateConversation()">⚠️</button>
-      <button class="window-btn" onclick="minimizePrivateChat()">—</button>
-      <button class="window-btn delete" onclick="hideCurrentPrivateConversation()">✕</button>
-    </div>
+<!-- =========================
+   PROFIL (MODIFIABLE)
+========================= -->
+<div id="myProfileModal" class="menu-modal">
+  <div class="menu-modal-top">
+    <span>👤 Mon profil</span>
+    <button class="profile-close" onclick="closeMyProfile()">✕</button>
   </div>
 
-  <div id="privateMessages" class="private-messages"></div>
-
-  <div class="private-write">
-    <textarea id="privateText" placeholder="Écris ton message privé ici..."></textarea>
-
-    <div class="file-row">
-      <input id="privateImageInput" type="file" accept="image/png,image/jpeg,image/webp">
-      <button onclick="sendPrivateImage()">📷 Envoyer photo</button>
+  <div class="menu-modal-content">
+    <div class="form-row">
+      <label>Email</label>
+      <input id="profileEmail" type="email">
     </div>
 
-    <button onclick="sendPrivateMessage()">Envoyer en privé</button>
-    <div id="privateStatus" class="status"></div>
-  </div>
-</div>
-
-<div id="profileWindow" class="profile-window">
-  <div class="profile-top">
-    <span id="profileTitle">Profil</span>
-    <button class="profile-close" onclick="closeProfile()">✕</button>
-  </div>
-  <div class="profile-content">
-    <div class="profile-field"><strong>Pseudo :</strong> <span id="profilePseudo"></span></div>
-    <div class="profile-field"><strong>Genre :</strong> <span id="profileGenre"></span></div>
-    <div class="profile-field"><strong>Âge :</strong> <span id="profileAge"></span></div>
-    <div class="profile-actions">
-      <button onclick="messageProfileUser()">💬 Envoyer un message privé</button>
-      <button class="danger" onclick="reportProfileUser()">⚠️ Signaler ce profil</button>
+    <div class="form-row">
+      <label>Nouveau mot de passe</label>
+      <input id="profilePassword" type="password" placeholder="Laisser vide si inchangé">
     </div>
-    <div id="profileStatus" class="status"></div>
+
+    <button onclick="updateProfile()">Mettre à jour</button>
+    <div id="profileUpdateStatus" class="status"></div>
   </div>
 </div>
 
-<div id="reportModal" class="report-modal">
-  <div class="report-modal-box">
-    <div class="report-modal-top">
-      <span id="reportModalTitle">⚠️ Signalement</span>
-      <button class="profile-close" onclick="closeReportModal()">✕</button>
+
+<!-- =========================
+   AIDE / URGENCE
+========================= -->
+<div id="helpModal" class="menu-modal">
+  <div class="menu-modal-top">
+    <span>🚨 Aide & Urgence</span>
+    <button class="profile-close" onclick="closeHelpModal()">✕</button>
+  </div>
+
+  <div class="menu-modal-content">
+
+    <div class="help-card">
+      <strong>Police / Gendarmerie</strong><br>
+      En cas de danger immédiat
+      <a href="tel:17">Appeler le 17</a>
     </div>
 
-    <div class="report-modal-content">
-      <p id="reportModalText">Explique la raison du signalement :</p>
-      <textarea id="reportReason" placeholder="Écris la raison ici..."></textarea>
-
-      <div class="report-modal-actions">
-        <button onclick="confirmReport()">Envoyer le signalement</button>
-        <button class="secondary" onclick="closeReportModal()">Annuler</button>
-      </div>
-
-      <div id="reportModalStatus" class="status"></div>
+    <div class="help-card">
+      <strong>SAMU</strong><br>
+      Urgence médicale
+      <a href="tel:15">Appeler le 15</a>
     </div>
+
+    <div class="help-card">
+      <strong>Pompiers</strong><br>
+      Accident / incendie
+      <a href="tel:18">Appeler le 18</a>
+    </div>
+
+    <div class="help-card">
+      <strong>Numéro d'urgence européen</strong>
+      <a href="tel:112">Appeler le 112</a>
+    </div>
+
+    <div class="help-card">
+      <strong>Violences femmes info</strong><br>
+      Écoute anonyme 24h/24
+      <a href="tel:3919">Appeler le 3919</a>
+    </div>
+
+    <div class="help-card">
+      <strong>Net Écoute (jeunes)</strong>
+      <a href="tel:3018">Appeler le 3018</a>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- =========================
+   PREMIUM
+========================= -->
+<div id="premiumModal" class="menu-modal">
+  <div class="menu-modal-top">
+    <span>⭐ Premium</span>
+    <button class="profile-close" onclick="closePremiumModal()">✕</button>
+  </div>
+
+  <div class="menu-modal-content">
+
+    <div class="premium-box">
+      <strong>Version Premium</strong>
+
+      <div class="premium-price">4,99€ / mois</div>
+
+      ✔ Messages privés illimités<br>
+      ✔ Accès prioritaire<br>
+      ✔ Badge profil Premium<br>
+      ✔ Soutien du projet 💜
+
+      <button style="margin-top:15px">Passer Premium</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- =========================
+   LEGAL
+========================= -->
+<div id="legalModal" class="menu-modal">
+  <div class="menu-modal-top">
+    <span>⚖️ Informations légales</span>
+    <button class="profile-close" onclick="closeLegalModal()">✕</button>
+  </div>
+
+  <div class="menu-modal-content">
+
+    <div class="legal-links-menu">
+      <a href="mentions-legales.html">Mentions légales</a>
+      <a href="confidentialite.html">Politique de confidentialité</a>
+      <a href="cgu.html">Conditions d'utilisation</a>
+    </div>
+
   </div>
 </div>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateEmail,
+  updatePassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
 import {
   getFirestore, collection, addDoc, query, orderBy, serverTimestamp,
   doc, getDoc, updateDoc, setDoc, arrayUnion, arrayRemove, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 import {
   getStorage, ref, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+
+/* =========================
+   FIREBASE INIT
+========================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
@@ -288,49 +598,18 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+
+/* =========================
+   VARIABLES
+========================= */
+
 let currentPseudo = "Anonyme";
-let currentPrivateUser = null;
-let currentProfileUser = null;
-let privateConversations = [];
+let currentUserData = null;
 
-let unsubscribePublicMessages = null;
-let unsubscribeMembers = null;
-let unsubscribePrivateConversations = null;
-let unsubscribePrivateChat = null;
-let presenceInterval = null;
 
-let reportMode = null;
-let reportTarget = null;
-
-function checkImage(file){
-  if(!file) return "Aucune image sélectionnée.";
-  const allowed = ["image/jpeg","image/png","image/webp"];
-  if(!allowed.includes(file.type)) return "Format accepté : JPG, PNG ou WEBP.";
-  if(file.size > 2 * 1024 * 1024) return "Image trop lourde : maximum 2 Mo.";
-  return "";
-}
-
-async function uploadImage(file, path){
-  const error = checkImage(file);
-  if(error) throw new Error(error);
-
-  const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
-  const storageRef = ref(storage, `${path}/${Date.now()}_${cleanName}`);
-
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
-}
-
-function renderImageIfExists(parent, imageUrl){
-  if(!imageUrl) return;
-
-  const img = document.createElement("img");
-  img.src = imageUrl;
-  img.className = "chat-img";
-  img.onclick = () => window.open(imageUrl, "_blank");
-
-  parent.appendChild(img);
-}
+/* =========================
+   LOGIN / LOGOUT
+========================= */
 
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
@@ -344,669 +623,151 @@ window.login = async function(){
 };
 
 window.logout = async function(){
-  const user = auth.currentUser;
-
-  if(user){
-    await updateDoc(doc(db,"blogUsers",user.uid),{
-      online:false,
-      lastSeen:serverTimestamp()
-    });
-  }
-
-  stopRealtime();
   await signOut(auth);
 };
 
-function stopRealtime(){
-  if(unsubscribePublicMessages) unsubscribePublicMessages();
-  if(unsubscribeMembers) unsubscribeMembers();
-  if(unsubscribePrivateConversations) unsubscribePrivateConversations();
-  if(unsubscribePrivateChat) unsubscribePrivateChat();
-  if(presenceInterval) clearInterval(presenceInterval);
 
-  unsubscribePublicMessages = null;
-  unsubscribeMembers = null;
-  unsubscribePrivateConversations = null;
-  unsubscribePrivateChat = null;
-  presenceInterval = null;
-}
+/* =========================
+   AUTH STATE
+========================= */
 
 onAuthStateChanged(auth, async user => {
   if(user){
+
     const snap = await getDoc(doc(db,"blogUsers",user.uid));
 
     if(!snap.exists()){
       await signOut(auth);
-      document.getElementById("loginStatus").textContent = "Compte blog introuvable.";
       return;
     }
 
     const data = snap.data();
-
-    if(data.banUntil && data.banUntil.toDate){
-      const banDate = data.banUntil.toDate();
-
-      if(banDate > new Date()){
-        await updateDoc(doc(db,"blogUsers",user.uid),{
-          online:false
-        });
-
-        await signOut(auth);
-        document.getElementById("loginStatus").textContent =
-          "Compte temporairement bloqué suite à plusieurs signalements validés.";
-        return;
-      }
-    }
-
-    if(data.active === false){
-      await signOut(auth);
-      document.getElementById("loginStatus").textContent = "Ce compte a été désactivé.";
-      return;
-    }
+    currentUserData = data;
 
     currentPseudo = data.pseudo || "Anonyme";
-
-    await updateDoc(doc(db,"blogUsers",user.uid),{
-      online:true,
-      lastSeen:serverTimestamp()
-    });
 
     document.getElementById("welcomePseudo").innerText = "Connecté(e) : " + currentPseudo;
     document.getElementById("loginBox").style.display="none";
     document.getElementById("blogContent").style.display="block";
 
-    listenMessages();
-    listenMembers();
-    listenPrivateConversations();
-
-    presenceInterval = setInterval(async ()=>{
-      if(auth.currentUser){
-        await updateDoc(doc(db,"blogUsers",auth.currentUser.uid),{
-          online:true,
-          lastSeen:serverTimestamp()
-        });
-      }
-    },10000);
-
   }else{
-    stopRealtime();
     document.getElementById("loginBox").style.display="block";
     document.getElementById("blogContent").style.display="none";
   }
 });
 
-function listenMessages(){
-  const container = document.getElementById("messages");
-  if(unsubscribePublicMessages) unsubscribePublicMessages();
 
-  const q = query(collection(db,"blogMessages"), orderBy("createdAt","asc"));
+/* =========================
+   MENU HAMBURGER
+========================= */
 
-  unsubscribePublicMessages = onSnapshot(q, snap => {
-    container.innerHTML = "";
-
-    snap.forEach(d=>{
-      const m = d.data();
-      if(m.visible === false) return;
-
-      const div = document.createElement("div");
-      div.className = "msg";
-
-      const meta = document.createElement("div");
-      meta.className = "msg-meta";
-      meta.textContent = m.pseudo || "Anonyme";
-
-      const text = document.createElement("div");
-      text.textContent = m.message || "";
-
-      div.appendChild(meta);
-      if(m.message) div.appendChild(text);
-      renderImageIfExists(div, m.imageUrl);
-
-      container.appendChild(div);
-    });
-
-    container.scrollTop = container.scrollHeight;
-  });
-}
-
-function listenMembers(){
-  const container = document.getElementById("membersList");
-  if(unsubscribeMembers) unsubscribeMembers();
-
-  unsubscribeMembers = onSnapshot(collection(db,"blogUsers"), snap => {
-    const user = auth.currentUser;
-    if(!user) return;
-
-    container.innerHTML = "";
-    let count = 0;
-
-    snap.forEach(d=>{
-      const u = d.data();
-      const uid = d.id;
-
-      if(uid === user.uid) return;
-      if(u.active === false) return;
-      if(u.online !== true) return;
-
-      count++;
-
-      const div = document.createElement("div");
-      div.className = "member";
-      div.innerText = u.pseudo || "Anonyme";
-      div.onclick = () => openProfile(uid, u);
-
-      container.appendChild(div);
-    });
-
-    if(count === 0){
-      container.innerHTML = `<div class="member">Aucun autre membre en ligne</div>`;
-    }
-  });
-}
-
-window.sendMessage = async function(){
-  const text = document.getElementById("chatMessage").value.trim();
-  const user = auth.currentUser;
-
-  if(!text || !user) return;
-
-  await addDoc(collection(db,"blogMessages"),{
-    uid:user.uid,
-    pseudo:currentPseudo,
-    message:text,
-    createdAt:serverTimestamp(),
-    visible:true,
-    type:"text"
-  });
-
-  await updateDoc(doc(db,"blogUsers",user.uid),{
-    online:true,
-    lastSeen:serverTimestamp()
-  });
-
-  document.getElementById("chatMessage").value="";
+window.openMenu = function(){
+  document.getElementById("sideMenu").classList.add("open");
+  document.getElementById("menuOverlay").classList.add("open");
 };
 
-window.sendPublicImage = async function(){
-  const user = auth.currentUser;
-  const status = document.getElementById("messageStatus");
-  const input = document.getElementById("publicImageInput");
-  const file = input.files[0];
-
-  if(!user) return;
-
-  status.textContent = "Envoi de la photo...";
-  try{
-    const url = await uploadImage(file, `blogImages/${user.uid}`);
-
-    await addDoc(collection(db,"blogMessages"),{
-      uid:user.uid,
-      pseudo:currentPseudo,
-      imageUrl:url,
-      message:"",
-      type:"image",
-      createdAt:serverTimestamp(),
-      visible:true
-    });
-
-    input.value = "";
-    status.textContent = "";
-  }catch(error){
-    console.error(error);
-    status.textContent = error.message || "Erreur lors de l’envoi de la photo.";
-  }
+window.closeMenu = function(){
+  document.getElementById("sideMenu").classList.remove("open");
+  document.getElementById("menuOverlay").classList.remove("open");
 };
 
-window.openProfile = function(uid, data){
-  currentProfileUser = {
-    uid,
-    pseudo:data.pseudo || "Anonyme",
-    genre:data.genre || data.gender || "Non renseigné",
-    age:data.age || data.trancheAge || data.ageRange || "Non renseigné"
-  };
 
-  document.getElementById("profileTitle").innerText = "Profil de " + currentProfileUser.pseudo;
-  document.getElementById("profilePseudo").innerText = currentProfileUser.pseudo;
-  document.getElementById("profileGenre").innerText = currentProfileUser.genre;
-  document.getElementById("profileAge").innerText = currentProfileUser.age;
-  document.getElementById("profileStatus").textContent = "";
-  document.getElementById("profileWindow").style.display = "block";
-};
+/* =========================
+   PROFIL (MODIF EMAIL / MDP)
+========================= */
 
-window.closeProfile = function(){
-  document.getElementById("profileWindow").style.display = "none";
-  currentProfileUser = null;
-};
-
-window.messageProfileUser = function(){
-  if(!currentProfileUser) return;
+window.openMyProfile = function(){
+  closeMenu();
 
   const user = auth.currentUser;
   if(!user) return;
 
-  if(currentProfileUser.uid === user.uid){
-    document.getElementById("profileStatus").textContent = "Tu ne peux pas t’envoyer un message à toi-même.";
-    return;
-  }
+  document.getElementById("profileEmail").value = user.email || "";
+  document.getElementById("profilePassword").value = "";
+  document.getElementById("profileUpdateStatus").textContent = "";
 
-  const uid = currentProfileUser.uid;
-  const pseudo = currentProfileUser.pseudo;
-
-  closeProfile();
-  openPrivateChat(uid, pseudo);
+  document.getElementById("myProfileModal").style.display = "block";
 };
 
-window.reportProfileUser = function(){
+window.closeMyProfile = function(){
+  document.getElementById("myProfileModal").style.display = "none";
+};
+
+window.updateProfile = async function(){
   const user = auth.currentUser;
-  const status = document.getElementById("profileStatus");
-
-  if(!user || !currentProfileUser){
-    status.textContent = "Aucun profil sélectionné.";
-    return;
-  }
-
-  reportMode = "profile";
-  reportTarget = {...currentProfileUser};
-
-  document.getElementById("reportModalTitle").textContent = "⚠️ Signaler ce profil";
-  document.getElementById("reportModalText").textContent = "Explique pourquoi tu signales ce profil :";
-  document.getElementById("reportReason").value = "";
-  document.getElementById("reportModalStatus").textContent = "";
-  document.getElementById("reportModal").style.display = "flex";
-};
-
-window.closeReportModal = function(){
-  document.getElementById("reportModal").style.display = "none";
-  document.getElementById("reportReason").value = "";
-  document.getElementById("reportModalStatus").textContent = "";
-  reportMode = null;
-  reportTarget = null;
-};
-
-window.confirmReport = async function(){
-  const user = auth.currentUser;
-  const reason = document.getElementById("reportReason").value.trim();
-  const status = document.getElementById("reportModalStatus");
+  const status = document.getElementById("profileUpdateStatus");
 
   if(!user){
     status.textContent = "Tu dois être connecté(e).";
     return;
   }
 
-  if(!reason || reason.length < 5){
-    status.textContent = "Merci d’expliquer la raison du signalement.";
-    return;
-  }
-
-  if(!reportMode || !reportTarget){
-    status.textContent = "Aucun signalement en cours.";
-    return;
-  }
+  const newEmail = document.getElementById("profileEmail").value.trim();
+  const newPassword = document.getElementById("profilePassword").value.trim();
 
   try{
-    if(reportMode === "profile"){
-      await addDoc(collection(db,"reports"),{
-        type:"profile",
-        reportedUserUid:reportTarget.uid,
-        reportedUserPseudo:reportTarget.pseudo,
-        reportedUserGenre:reportTarget.genre,
-        reportedUserAge:reportTarget.age,
-        reportedBy:user.uid,
-        reason:reason,
-        createdAt:serverTimestamp(),
-        status:"pending"
-      });
 
-      document.getElementById("profileStatus").textContent = "Profil signalé ✅";
+    if(newEmail && newEmail !== user.email){
+      await updateEmail(user, newEmail);
+
+      await updateDoc(doc(db,"blogUsers",user.uid),{
+        email:newEmail
+      });
     }
 
-    if(reportMode === "privateConversation"){
-      await addDoc(collection(db,"reports"),{
-        type:"privateConversation",
-        chatId:reportTarget.chatId,
-        reportedUserUid:reportTarget.uid,
-        reportedUserPseudo:reportTarget.pseudo,
-        reportedBy:user.uid,
-        reason:reason,
-        createdAt:serverTimestamp(),
-        status:"pending"
-      });
-
-      document.getElementById("privateStatus").textContent = "Discussion signalée ✅";
-    }
-
-    closeReportModal();
-
-  }catch(error){
-    console.error(error);
-    status.textContent = "Erreur lors du signalement.";
-  }
-};
-
-function listenPrivateConversations(){
-  if(unsubscribePrivateConversations) unsubscribePrivateConversations();
-
-  unsubscribePrivateConversations = onSnapshot(collection(db,"privateMessages"), snap => {
-    const user = auth.currentUser;
-    if(!user) return;
-
-    privateConversations = [];
-    let count = 0;
-
-    snap.forEach(d=>{
-      const data = d.data();
-      const chatId = d.id;
-
-      if(!Array.isArray(data.participants)) return;
-      if(!data.participants.includes(user.uid)) return;
-      if(Array.isArray(data.hiddenFor) && data.hiddenFor.includes(user.uid)) return;
-
-      if(data.unreadFor === user.uid) count++;
-
-      const otherUid = data.participants.find(uid => uid !== user.uid);
-      const otherPseudo = data.participantPseudos?.[otherUid] || "Utilisateur";
-      const updatedAt = data.updatedAt?.toDate ? data.updatedAt.toDate().getTime() : 0;
-
-      privateConversations.push({
-        chatId,
-        otherUid,
-        otherPseudo,
-        lastMessage:data.lastMessage || "",
-        unread:data.unreadFor === user.uid,
-        updatedAt
-      });
-    });
-
-    privateConversations.sort((a,b)=> b.updatedAt - a.updatedAt);
-    renderPrivateConversations();
-    renderPrivateBadge(count);
-  });
-}
-
-function renderPrivateBadge(count){
-  const btn = document.getElementById("btnPrivate");
-  btn.innerHTML = count > 0
-    ? `💬 Messages privés <span class="private-badge">${count}</span>`
-    : "💬 Messages privés";
-}
-
-function renderPrivateConversations(){
-  const container = document.getElementById("privateList");
-  if(!container) return;
-
-  container.innerHTML = "";
-
-  if(privateConversations.length === 0){
-    container.innerHTML = "Aucune conversation privée pour le moment.";
-    return;
-  }
-
-  privateConversations.forEach(conv=>{
-    const div = document.createElement("div");
-    div.className = "private-conversation";
-
-    div.innerHTML = `
-      <div class="name">${conv.otherPseudo}${conv.unread ? `<span class="new">Nouveau</span>` : ""}</div>
-      <div class="preview">${conv.lastMessage || "Conversation privée"}</div>
-    `;
-
-    div.onclick = () => openPrivateChat(conv.otherUid, conv.otherPseudo);
-    container.appendChild(div);
-  });
-}
-
-function getChatId(uid1,uid2){
-  return uid1 < uid2 ? uid1+"_"+uid2 : uid2+"_"+uid1;
-}
-
-window.openPrivatePanel = function(){
-  document.getElementById("privatePanel").style.display="block";
-  renderPrivateConversations();
-};
-
-window.closePrivatePanel = function(){
-  document.getElementById("privatePanel").style.display="none";
-};
-
-window.openPrivateChat = async function(uid,pseudo){
-  const user = auth.currentUser;
-  if(!user) return;
-
-  if(uid === user.uid){
-    document.getElementById("privateStatus").textContent = "Tu ne peux pas t’envoyer un message à toi-même.";
-    return;
-  }
-
-  currentPrivateUser = {uid,pseudo};
-  const chatId = getChatId(user.uid,uid);
-
-  await setDoc(doc(db,"privateMessages",chatId),{
-    unreadFor:"",
-    hiddenFor:arrayRemove(user.uid)
-  }, { merge:true });
-
-  document.getElementById("privateChatWindow").style.display="block";
-  document.getElementById("privateTitle").innerText="Discussion avec "+pseudo;
-  document.getElementById("privateStatus").textContent = "";
-
-  listenPrivateChat(chatId);
-};
-
-function listenPrivateChat(chatId){
-  if(unsubscribePrivateChat) unsubscribePrivateChat();
-
-  const q = query(collection(db,"privateMessages",chatId,"messages"), orderBy("createdAt","asc"));
-
-  unsubscribePrivateChat = onSnapshot(q, snap => {
-    const user = auth.currentUser;
-    const container = document.getElementById("privateMessages");
-
-    if(!user || !container) return;
-
-    container.innerHTML = "";
-
-    snap.forEach(d=>{
-      const m = d.data();
-
-      const div = document.createElement("div");
-      div.className = "private-msg " + (m.from === user.uid ? "mine" : "");
-
-      if(m.message){
-        const text = document.createElement("div");
-        text.textContent = m.message;
-        div.appendChild(text);
+    if(newPassword){
+      if(newPassword.length < 6){
+        status.textContent = "Mot de passe trop court.";
+        return;
       }
 
-      renderImageIfExists(div, m.imageUrl);
-      container.appendChild(div);
-    });
-
-    container.scrollTop = container.scrollHeight;
-  });
-}
-
-window.sendPrivateMessage = async function(){
-  const text = document.getElementById("privateText").value.trim();
-  const status = document.getElementById("privateStatus");
-
-  if(!currentPrivateUser){
-    status.textContent = "Clique d’abord sur un membre en ligne ou une conversation.";
-    return;
-  }
-
-  if(!text){
-    status.textContent = "Écris un message avant d’envoyer.";
-    return;
-  }
-
-  const user = auth.currentUser;
-  if(!user) return;
-
-  const chatId = getChatId(user.uid,currentPrivateUser.uid);
-  const chatRef = doc(db,"privateMessages",chatId);
-
-  try{
-    await setDoc(chatRef,{
-      participants:[user.uid,currentPrivateUser.uid],
-      participantPseudos:{
-        [user.uid]:currentPseudo,
-        [currentPrivateUser.uid]:currentPrivateUser.pseudo
-      },
-      lastMessage:text,
-      unreadFor:currentPrivateUser.uid,
-      hiddenFor:arrayRemove(currentPrivateUser.uid),
-      updatedAt:serverTimestamp()
-    }, { merge:true });
-
-    await addDoc(collection(db,"privateMessages",chatId,"messages"),{
-      from:user.uid,
-      to:currentPrivateUser.uid,
-      pseudo:currentPseudo,
-      message:text,
-      type:"text",
-      createdAt:serverTimestamp()
-    });
-
-    document.getElementById("privateText").value="";
-    status.textContent = "";
-  }catch(error){
-    console.error(error);
-    status.textContent = "Erreur : le message privé n’a pas pu être envoyé.";
-  }
-};
-
-window.sendPrivateImage = async function(){
-  const user = auth.currentUser;
-  const status = document.getElementById("privateStatus");
-  const input = document.getElementById("privateImageInput");
-  const file = input.files[0];
-
-  if(!user || !currentPrivateUser){
-    status.textContent = "Sélectionne d’abord une conversation.";
-    return;
-  }
-
-  const chatId = getChatId(user.uid,currentPrivateUser.uid);
-  const chatRef = doc(db,"privateMessages",chatId);
-
-  status.textContent = "Envoi de la photo...";
-  try{
-    const url = await uploadImage(file, `privateImages/${chatId}`);
-
-    await setDoc(chatRef,{
-      participants:[user.uid,currentPrivateUser.uid],
-      participantPseudos:{
-        [user.uid]:currentPseudo,
-        [currentPrivateUser.uid]:currentPrivateUser.pseudo
-      },
-      lastMessage:"📷 Photo",
-      unreadFor:currentPrivateUser.uid,
-      hiddenFor:arrayRemove(currentPrivateUser.uid),
-      updatedAt:serverTimestamp()
-    }, { merge:true });
-
-    await addDoc(collection(db,"privateMessages",chatId,"messages"),{
-      from:user.uid,
-      to:currentPrivateUser.uid,
-      pseudo:currentPseudo,
-      imageUrl:url,
-      message:"",
-      type:"image",
-      createdAt:serverTimestamp()
-    });
-
-    input.value = "";
-    status.textContent = "";
-  }catch(error){
-    console.error(error);
-    status.textContent = error.message || "Erreur lors de l’envoi de la photo.";
-  }
-};
-
-window.reportPrivateConversation = function(){
-  const user = auth.currentUser;
-  const status = document.getElementById("privateStatus");
-
-  if(!user || !currentPrivateUser){
-    status.textContent = "Aucune discussion privée sélectionnée.";
-    return;
-  }
-
-  const chatId = getChatId(user.uid,currentPrivateUser.uid);
-
-  reportMode = "privateConversation";
-  reportTarget = {
-    uid:currentPrivateUser.uid,
-    pseudo:currentPrivateUser.pseudo,
-    chatId:chatId
-  };
-
-  document.getElementById("reportModalTitle").textContent = "⚠️ Signaler cette discussion";
-  document.getElementById("reportModalText").textContent = "Explique pourquoi tu signales cette discussion privée :";
-  document.getElementById("reportReason").value = "";
-  document.getElementById("reportModalStatus").textContent = "";
-  document.getElementById("reportModal").style.display = "flex";
-};
-
-window.minimizePrivateChat = function(){
-  document.getElementById("privateChatWindow").style.display="none";
-};
-
-window.hideCurrentPrivateConversation = async function(){
-  const user = auth.currentUser;
-  const status = document.getElementById("privateStatus");
-
-  if(!user || !currentPrivateUser){
-    status.textContent = "Sélectionne d’abord une conversation à supprimer.";
-    return;
-  }
-
-  const ok = confirm("Supprimer cette conversation de ta liste ?");
-  if(!ok) return;
-
-  const chatId = getChatId(user.uid,currentPrivateUser.uid);
-
-  try{
-    await setDoc(doc(db,"privateMessages",chatId),{
-      hiddenFor:arrayUnion(user.uid),
-      unreadFor:""
-    }, { merge:true });
-
-    currentPrivateUser = null;
-
-    if(unsubscribePrivateChat){
-      unsubscribePrivateChat();
-      unsubscribePrivateChat = null;
+      await updatePassword(user, newPassword);
     }
 
-    document.getElementById("privateChatWindow").style.display="none";
-    document.getElementById("privateMessages").innerHTML = "";
-    document.getElementById("privateText").value = "";
-    document.getElementById("privateImageInput").value = "";
-    status.textContent = "";
+    status.textContent = "Profil mis à jour ✅";
 
-    await updateDoc(doc(db,"blogUsers",user.uid),{
-      online:true,
-      lastSeen:serverTimestamp()
-    });
   }catch(error){
-    console.error(error);
-    status.textContent = "Erreur : suppression impossible.";
+
+    if(error.code === "auth/requires-recent-login"){
+      status.textContent = "Reconnecte-toi pour modifier.";
+    }else if(error.code === "auth/email-already-in-use"){
+      status.textContent = "Email déjà utilisé.";
+    }else{
+      status.textContent = "Erreur lors de la mise à jour.";
+    }
   }
 };
 
-window.addEventListener("beforeunload", () => {
-  const user = auth.currentUser;
 
-  if(user){
-    updateDoc(doc(db,"blogUsers",user.uid),{
-      online:false,
-      lastSeen:serverTimestamp()
-    });
-  }
-});
+/* =========================
+   MODALES
+========================= */
+
+window.openHelpModal = function(){
+  closeMenu();
+  document.getElementById("helpModal").style.display = "block";
+};
+
+window.closeHelpModal = function(){
+  document.getElementById("helpModal").style.display = "none";
+};
+
+window.openPremiumModal = function(){
+  closeMenu();
+  document.getElementById("premiumModal").style.display = "block";
+};
+
+window.closePremiumModal = function(){
+  document.getElementById("premiumModal").style.display = "none";
+};
+
+window.openLegalModal = function(){
+  closeMenu();
+  document.getElementById("legalModal").style.display = "block";
+};
+
+window.closeLegalModal = function(){
+  document.getElementById("legalModal").style.display = "none";
+};
 
 </script>
-
-</body>
-</html>
