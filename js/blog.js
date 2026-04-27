@@ -520,17 +520,26 @@ window.openPrivateChat = async function(uid, pseudo){
 
   currentPrivateUser = { uid, pseudo };
   const chatId = getChatId(user.uid, uid);
+  const chatRef = doc(db,"privateMessages",chatId);
 
-  await setDoc(doc(db,"privateMessages",chatId),{
+  const snap = await getDoc(chatRef);
+  const existingChat = snap.exists() ? snap.data() : null;
+
+  const dataToSave = {
     participants:[user.uid, uid],
     participantPseudos:{
       [user.uid]:currentPseudo,
       [uid]:pseudo
     },
     hiddenFor:arrayRemove(user.uid),
-    unreadFor:"",
     updatedAt:serverTimestamp()
-  }, { merge:true });
+  };
+
+  if(existingChat && existingChat.unreadFor === user.uid){
+    dataToSave.unreadFor = "";
+  }
+
+  await setDoc(chatRef, dataToSave, { merge:true });
 
   document.getElementById("privateTitle").innerText = "Discussion avec " + pseudo;
   document.getElementById("privateChatWindow").style.display = "block";
