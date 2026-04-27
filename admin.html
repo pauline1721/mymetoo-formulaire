@@ -95,7 +95,9 @@ button:hover{
 }
 
 #data,
-#reportsData{
+#reportsData,
+#usersData,
+#messagesData{
   max-width:900px;
   margin:0 auto;
 }
@@ -142,6 +144,17 @@ button:hover{
   display:inline-block;
   background:#d94b6a;
   color:white;
+  padding:5px 10px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.badge-warning{
+  display:inline-block;
+  background:#ffb347;
+  color:#24106b;
   padding:5px 10px;
   border-radius:999px;
   font-size:13px;
@@ -224,12 +237,6 @@ button:hover{
   box-shadow:0 5px 15px rgba(0,0,0,0.05);
 }
 
-.report-card.done{
-  opacity:.65;
-  border-color:#6f42bd;
-  background:#f7effb;
-}
-
 .report-type{
   font-weight:bold;
   color:#d94b6a;
@@ -247,13 +254,28 @@ button:hover{
   word-break:break-word;
 }
 
+.report-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+
 .report-btn{
   background:#d94b6a;
   margin-right:8px;
 }
 
-.report-btn.done-btn{
-  background:#6f42bd;
+.accept-btn{
+  background:#2f9e44;
+}
+
+.refuse-btn{
+  background:#d94b6a;
+}
+
+.block-btn{
+  background:#24106b;
 }
 
 .logout{
@@ -290,7 +312,6 @@ button:hover{
 
   <button class="logout" onclick="logout()">Se déconnecter</button>
 
-  <!-- STATS -->
   <div class="stats">
     <div class="stat">
       <strong id="total">0</strong>
@@ -302,7 +323,7 @@ button:hover{
     </div>
     <div class="stat">
       <strong id="reportsCount">0</strong>
-      Signalements
+      Signalements à traiter
     </div>
     <div class="stat">
       <strong id="disabledCount">0</strong>
@@ -310,29 +331,26 @@ button:hover{
     </div>
   </div>
 
-  <!-- GRAPH -->
   <div class="chartBox">
     <h2>Formulaires envoyés par jour</h2>
     <canvas id="dailyChart"></canvas>
   </div>
 
-  <!-- SIGNALMENTS -->
-  <h2>🚨 Signalements</h2>
+  <h2>🚨 Signalements à traiter</h2>
   <div id="reportsData"></div>
 
-  <!-- UTILISATEURS -->
   <h2>👤 Utilisateurs du blog</h2>
   <div id="usersData"></div>
 
-  <!-- MESSAGES PUBLICS -->
   <h2>💬 Messages publics</h2>
   <div id="messagesData"></div>
 
-  <!-- TEMOIGNAGES -->
   <h2>📝 Témoignages</h2>
   <div id="data"></div>
 </div>
-  <script type="module">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { initializeAuth, browserSessionPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -343,7 +361,8 @@ import {
   query,
   orderBy,
   updateDoc,
-  doc
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const ADMIN_UID = "YBknFdtouzRiDzSj8b2KjncQ7sp2";
@@ -411,6 +430,37 @@ async function loadAllAdminData(){
    SIGNALMENTS
 ========================= */
 
+async function getValidatedReportCountForUser(uid){
+  if(!uid) return 0;
+
+  const snap = await getDocs(collection(db, "reports"));
+  let count = 0;
+
+  snap.forEach(item => {
+    const r = item.data();
+    const reportedUid = r.reportedUserUid || r.authorUid || "";
+
+    if(reportedUid === uid && r.adminDecision === "accepted"){
+      count++;
+    }
+  });
+
+  return count;
+}
+
+async function tempBlockUser24h(uid){
+  if(!uid) return;
+
+  const banUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  await updateDoc(doc(db, "blogUsers", uid), {
+    active:false,
+    tempBlocked:true,
+    banUntil:banUntil,
+    online:false
+  });
+}
+
 async function loadReports(){
   const container = document.getElementById("reportsData");
   container.innerHTML = "";
@@ -430,9 +480,10 @@ async function loadReports(){
     const r = item.data();
     const id = item.id;
     const dateObj = r.createdAt?.toDate ? r.createdAt.toDate() : null;
-    const done = r.status === "done";
 
-    if(!done) pendingCount++;
+    if(r.status === "done") return;
+
+    pendingCount++;
 
     let typeText = "Signalement";
 
@@ -443,12 +494,13 @@ async function loadReports(){
     const reportedUid = r.reportedUserUid || r.authorUid || "";
 
     const div = document.createElement("div");
-    div.className = done ? "report-card done" : "report-card";
+    div.className = "report-card";
 
     div.innerHTML = `
       <div class="report-type">🚨 ${typeText}</div>
 
       <div class="field"><span class="label">Statut :</span> ${r.status || "pending"}</div>
+      <div class="field"><span class="label">Décision admin :</span> ${r.adminDecision || "En attente"}</div>
       <div class="field"><span class="label">Signalé par UID :</span> ${r.reportedBy || ""}</div>
 
       <div class="field"><span class="label">Utilisateur signalé :</span> ${r.reportedUserPseudo || r.pseudo || ""}</div>
@@ -460,34 +512,113 @@ async function loadReports(){
       <div class="field"><span class="label">Chat ID :</span> ${r.chatId || ""}</div>
       <div class="field"><span class="label">Message ID :</span> ${r.messageId || ""}</div>
 
+      ${r.reason ? `<div class="report-message"><span class="label">Raison du signalement :</span><br>${r.reason}</div>` : ""}
       ${r.message ? `<div class="report-message"><span class="label">Message signalé :</span><br>${r.message}</div>` : ""}
 
       <div class="field"><span class="label">Date :</span> ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}</div>
 
-      <button class="report-btn done-btn" onclick="markReportDone('${id}')">
-        Marquer comme traité
-      </button>
-
-      ${reportedUid ? `
-        <button class="report-btn" onclick="disableUser('${reportedUid}')">
-          Bloquer l’utilisateur
+      <div class="report-actions">
+        <button class="accept-btn" onclick="acceptReport('${id}')">
+          Valider le signalement
         </button>
-      ` : ""}
+
+        <button class="refuse-btn" onclick="refuseReport('${id}')">
+          Refuser le signalement
+        </button>
+
+        <button class="hide-btn" onclick="markReportDone('${id}')">
+          Marquer comme traité
+        </button>
+
+        ${reportedUid ? `
+          <button class="block-btn" onclick="disableUser('${reportedUid}')">
+            Bloquer immédiatement
+          </button>
+        ` : ""}
+      </div>
     `;
 
     container.appendChild(div);
   });
 
+  if(pendingCount === 0){
+    container.innerHTML = `<div class="empty">Aucun signalement à traiter.</div>`;
+  }
+
   document.getElementById("reportsCount").innerText = pendingCount;
 }
+
+window.acceptReport = async function(reportId){
+  const ok = confirm("Valider ce signalement ?");
+  if(!ok) return;
+
+  try{
+    const reportSnap = await getDoc(doc(db, "reports", reportId));
+
+    if(!reportSnap.exists()){
+      alert("Signalement introuvable.");
+      return;
+    }
+
+    const r = reportSnap.data();
+    const reportedUid = r.reportedUserUid || r.authorUid || "";
+
+    await updateDoc(doc(db, "reports", reportId), {
+      adminDecision:"accepted",
+      status:"done",
+      treatedAt:new Date(),
+      treatedBy:ADMIN_UID
+    });
+
+    const validCount = await getValidatedReportCountForUser(reportedUid);
+
+    if(validCount >= 3){
+      await tempBlockUser24h(reportedUid);
+      alert("Signalement validé. L’utilisateur a atteint 3 signalements validés : compte bloqué 24h.");
+    }else{
+      alert("Signalement validé.");
+    }
+
+    await loadReports();
+    await loadUsers();
+
+  }catch(e){
+    alert("Erreur lors de la validation du signalement.");
+    console.error(e);
+  }
+};
+
+window.refuseReport = async function(reportId){
+  const ok = confirm("Refuser ce signalement ?");
+  if(!ok) return;
+
+  try{
+    await updateDoc(doc(db, "reports", reportId), {
+      adminDecision:"refused",
+      status:"done",
+      treatedAt:new Date(),
+      treatedBy:ADMIN_UID
+    });
+
+    await loadReports();
+
+  }catch(e){
+    alert("Erreur lors du refus du signalement.");
+    console.error(e);
+  }
+};
 
 window.markReportDone = async function(reportId){
   try{
     await updateDoc(doc(db, "reports", reportId), {
-      status: "done"
+      status:"done",
+      adminDecision:"treated_without_decision",
+      treatedAt:new Date(),
+      treatedBy:ADMIN_UID
     });
 
-    loadReports();
+    await loadReports();
+
   }catch(e){
     alert("Erreur lors du traitement du signalement.");
     console.error(e);
@@ -514,13 +645,16 @@ async function loadUsers(){
     return;
   }
 
-  snapshot.forEach(item => {
+  for(const item of snapshot.docs){
     const u = item.data();
     const uid = item.id;
     const active = u.active !== false;
+    const tempBlocked = u.tempBlocked === true;
+    const banUntil = u.banUntil?.toDate ? u.banUntil.toDate() : null;
     const lastSeenTime = u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : 0;
-    const online = u.online === true && (Date.now() - lastSeenTime < 120000);
+    const online = u.online === true && (Date.now() - lastSeenTime < 300000);
     const lastSeen = u.lastSeen?.toDate ? u.lastSeen.toDate().toLocaleString("fr-FR") : "";
+    const validatedReports = await getValidatedReportCountForUser(uid);
 
     usersCount++;
     if(!active) disabledCount++;
@@ -529,13 +663,15 @@ async function loadUsers(){
     div.className = active ? "card" : "card hidden-response";
 
     div.innerHTML = `
-      ${!active ? `<div class="badge-hidden">Compte désactivé</div>` : ""}
+      ${!active ? `<div class="badge-hidden">Compte bloqué</div>` : ""}
+      ${tempBlocked && banUntil ? `<div class="badge-warning">Blocage temporaire jusqu’au ${banUntil.toLocaleString("fr-FR")}</div>` : ""}
 
       <div class="field"><span class="label">Pseudo :</span> ${u.pseudo || "Anonyme"}</div>
       <div class="field"><span class="label">UID :</span> ${uid}</div>
       <div class="field"><span class="label">Genre :</span> ${u.genre || u.gender || "Non renseigné"}</div>
       <div class="field"><span class="label">Âge :</span> ${u.age || u.trancheAge || u.ageRange || "Non renseigné"}</div>
       <div class="field"><span class="label">Statut :</span> ${active ? "Actif" : "Bloqué"}</div>
+      <div class="field"><span class="label">Signalements validés :</span> ${validatedReports}</div>
       <div class="field"><span class="label">En ligne :</span> ${online ? "Oui" : "Non"}</div>
       <div class="field"><span class="label">Dernière activité :</span> ${lastSeen}</div>
 
@@ -545,7 +681,7 @@ async function loadUsers(){
     `;
 
     container.appendChild(div);
-  });
+  }
 
   document.getElementById("usersCount").innerText = usersCount;
   document.getElementById("disabledCount").innerText = disabledCount;
@@ -575,10 +711,12 @@ window.enableUser = async function(uid){
 
   try{
     await updateDoc(doc(db, "blogUsers", uid), {
-      active:true
+      active:true,
+      tempBlocked:false,
+      banUntil:null
     });
 
-    loadUsers();
+    await loadUsers();
   }catch(e){
     alert("Erreur : impossible de réactiver l’utilisateur.");
     console.error(e);
@@ -638,7 +776,7 @@ window.togglePublicMessageVisibility = async function(id, isVisible){
       visible: !isVisible
     });
 
-    loadPublicMessages();
+    await loadPublicMessages();
   }catch(e){
     alert("Erreur lors de la modification du message.");
     console.error(e);
@@ -655,7 +793,7 @@ window.toggleVisibility = async function(id, isVisible){
       visible: !isVisible
     });
 
-    loadData();
+    await loadData();
   }catch(e){
     alert("Erreur lors de la modification");
     console.error(e);
@@ -668,7 +806,7 @@ window.toggleReplyVisibility = async function(parentId, replyId, isVisible){
       visible: !isVisible
     });
 
-    loadData();
+    await loadData();
   }catch(e){
     alert("Erreur lors de la modification de la réponse");
     console.error(e);
@@ -680,6 +818,8 @@ function renderDailyChart(daysData){
   const values = labels.map(day => daysData[day]);
 
   const ctx = document.getElementById("dailyChart");
+
+  if(!ctx) return;
 
   if(dailyChart){
     dailyChart.destroy();
@@ -757,9 +897,6 @@ async function loadData(){
   container.innerHTML = "";
 
   let total = 0;
-  let partages = 0;
-  let femmes = 0;
-  let hommes = 0;
   let daysData = {};
 
   const q = query(collection(db, "reponses"), orderBy("createdAt", "desc"));
@@ -776,20 +913,13 @@ async function loadData(){
 
     total++;
 
-   let dateObj = null;
+    let dateObj = null;
 
-   if(d.createdAt && d.createdAt.toDate){
-   dateObj = d.createdAt.toDate();
-   const dayKey = dateObj.toLocaleDateString("fr-FR");
-   daysData[dayKey] = (daysData[dayKey] || 0) + 1;
-   }
-
-    if(d.partageAutorise && d.message && isVisible){
-      partages++;
+    if(d.createdAt && d.createdAt.toDate){
+      dateObj = d.createdAt.toDate();
+      const dayKey = dateObj.toLocaleDateString("fr-FR");
+      daysData[dayKey] = (daysData[dayKey] || 0) + 1;
     }
-
-    if(d.genre === "Une femme") femmes++;
-    if(d.genre === "Un homme") hommes++;
 
     const div = document.createElement("div");
     div.className = isVisible ? "card" : "card hidden-response";
@@ -825,11 +955,10 @@ async function loadData(){
   }
 
   document.getElementById("total").innerText = total;
-  document.getElementById("partages").innerText = partages;
-  document.getElementById("femmes").innerText = femmes;
-  document.getElementById("hommes").innerText = hommes;
-
   renderDailyChart(daysData);
 }
 
 </script>
+
+</body>
+</html>
