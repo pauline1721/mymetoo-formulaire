@@ -52,11 +52,16 @@ let presenceInterval = null;
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+  const status = document.getElementById("loginStatus");
+
+  status.textContent = "Connexion en cours...";
 
   try{
     await signInWithEmailAndPassword(auth, email, password);
-  }catch{
-    document.getElementById("loginStatus").textContent = "Email ou mot de passe incorrect.";
+    status.textContent = "Connexion réussie ✅";
+  }catch(error){
+    console.error(error);
+    status.textContent = "Email ou mot de passe incorrect.";
   }
 };
 
@@ -334,11 +339,9 @@ function loadMembers(){
 }
 
 window.openMemberProfile = function(uid, data){
-
   const modal = document.getElementById("memberProfileModal");
 
   if(modal){
-
     document.getElementById("memberProfileTitle").innerText =
       "Profil de " + (data.pseudo || "Anonyme");
 
@@ -356,10 +359,8 @@ window.openMemberProfile = function(uid, data){
 
     modal.dataset.uid = uid;
     modal.dataset.pseudo = data.pseudo || "Anonyme";
-
     modal.style.display = "block";
   }
-
 };
 
 window.closeMemberProfile = function(){
@@ -368,3 +369,130 @@ window.closeMemberProfile = function(){
     modal.style.display = "none";
   }
 };
+
+function loadPublicMessages(){
+  const container = document.getElementById("messages");
+  const q = query(collection(db,"blogMessages"), orderBy("createdAt","asc"));
+
+  onSnapshot(q, snap => {
+    container.innerHTML = "";
+
+    snap.forEach(docSnap => {
+      const m = docSnap.data();
+      if(m.visible === false) return;
+
+      const div = document.createElement("div");
+      div.className = "msg";
+
+      div.innerHTML = `
+        <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
+        ${m.message || ""}
+        ${m.imageUrl ? `<img src="${m.imageUrl}" class="chat-img">` : ""}
+      `;
+
+      container.appendChild(div);
+    });
+
+    container.scrollTop = container.scrollHeight;
+  });
+}
+
+window.sendMessage = async function(){
+  const text = document.getElementById("chatMessage").value.trim();
+  if(!text) return;
+
+  await addDoc(collection(db,"blogMessages"),{
+    uid:auth.currentUser.uid,
+    pseudo:currentPseudo,
+    message:text,
+    type:"text",
+    visible:true,
+    createdAt:serverTimestamp()
+  });
+
+  document.getElementById("chatMessage").value = "";
+};
+
+window.sendPublicImage = async function(){
+  const input = document.getElementById("publicImageInput");
+  const file = input.files[0];
+
+  if(!file) return;
+
+  const storageRef = ref(storage, "images/" + auth.currentUser.uid + "/" + Date.now() + "_" + file.name);
+
+  await uploadBytes(storageRef, file);
+  const url = await getDownloadURL(storageRef);
+
+  await addDoc(collection(db,"blogMessages"),{
+    uid:auth.currentUser.uid,
+    pseudo:currentPseudo,
+    imageUrl:url,
+    message:"",
+    type:"image",
+    visible:true,
+    createdAt:serverTimestamp()
+  });
+
+  input.value = "";
+};
+
+window.openPrivatePanel = function(){
+  const panel = document.getElementById("privatePanel");
+  if(panel){
+    panel.style.display = "block";
+  }
+};
+
+window.closePrivatePanel = function(){
+  const panel = document.getElementById("privatePanel");
+  if(panel){
+    panel.style.display = "none";
+  }
+};
+
+window.messageMemberProfile = function(){
+  alert("Les messages privés seront remis juste après cette étape.");
+};
+
+window.reportMemberProfile = function(){
+  alert("Le signalement sera remis juste après cette étape.");
+};
+
+window.openHelpModal = function(){
+  closeMenu();
+  document.getElementById("helpModal").style.display = "block";
+};
+
+window.closeHelpModal = function(){
+  document.getElementById("helpModal").style.display = "none";
+};
+
+window.openPremiumModal = function(){
+  closeMenu();
+  document.getElementById("premiumModal").style.display = "block";
+};
+
+window.closePremiumModal = function(){
+  document.getElementById("premiumModal").style.display = "none";
+};
+
+window.openLegalModal = function(){
+  closeMenu();
+  document.getElementById("legalModal").style.display = "block";
+};
+
+window.closeLegalModal = function(){
+  document.getElementById("legalModal").style.display = "none";
+};
+
+window.addEventListener("beforeunload", () => {
+  const user = auth.currentUser;
+
+  if(user){
+    updateDoc(doc(db,"blogUsers",user.uid),{
+      online:false,
+      lastSeen:serverTimestamp()
+    });
+  }
+});
