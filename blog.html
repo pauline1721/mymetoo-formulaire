@@ -325,13 +325,13 @@ onAuthStateChanged(auth, async user => {
     listenPrivateConversations();
 
     presenceInterval = setInterval(async ()=>{
-      if(auth.currentUser){
-        await updateDoc(doc(db,"blogUsers",auth.currentUser.uid),{
-          online:true,
-          lastSeen:serverTimestamp()
-        });
-      }
-    },30000);
+  if(auth.currentUser){
+    await updateDoc(doc(db,"blogUsers",auth.currentUser.uid),{
+      online:true,
+      lastSeen:serverTimestamp()
+    });
+   }
+},10000);
 
   }else{
     stopRealtime();
@@ -383,7 +383,6 @@ function listenMembers(){
     if(!user) return;
 
     container.innerHTML = "";
-    const now = Date.now();
     let count = 0;
 
     snap.forEach(d=>{
@@ -391,10 +390,8 @@ function listenMembers(){
       const uid = d.id;
 
       if(uid === user.uid) return;
-      if(!u.online) return;
-
-      const lastSeenTime = u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : 0;
-      if(now - lastSeenTime > 120000) return;
+      if(u.active === false) return;
+      if(u.online !== true) return;
 
       count++;
 
