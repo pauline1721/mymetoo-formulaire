@@ -47,9 +47,17 @@
 <div id="loginBox" class="box">
   <h2>Connexion au blog</h2>
   <p>Connecte-toi avec le compte créé depuis le formulaire.</p>
+
   <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Mot de passe">
+
+  <div class="password-eye-wrap">
+    <input id="password" type="password" placeholder="Mot de passe">
+    <button class="eye-btn" onclick="togglePasswordVisibility('password')" type="button">👁</button>
+  </div>
+
   <button onclick="login()">Se connecter</button>
+  <button class="secondary" onclick="resetPassword()" type="button">Mot de passe oublié</button>
+
   <p>Pas encore de compte ?<br><a href="index.html">Remplir le formulaire MyMeToo</a></p>
   <div id="loginStatus" class="status"></div>
 </div>
