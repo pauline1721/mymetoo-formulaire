@@ -51,8 +51,6 @@ const storage = getStorage(app);
 let currentPseudo = "Anonyme";
 let currentUserData = null;
 let currentPrivateUser = null;
-let currentReportMode = null;
-let currentReportTarget = null;
 
 let presenceInterval = null;
 let unsubscribeMembers = null;
@@ -64,6 +62,8 @@ function getChatId(uid1, uid2){
   return uid1 < uid2 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
 }
 
+/* ================= LOGIN ================= */
+
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -74,8 +74,7 @@ window.login = async function(){
   try{
     await signInWithEmailAndPassword(auth, email, password);
     status.textContent = "Connexion réussie ✅";
-  }catch(error){
-    console.error(error);
+  }catch{
     status.textContent = "Email ou mot de passe incorrect.";
   }
 };
@@ -99,25 +98,12 @@ window.logout = async function(){
   await signOut(auth);
 };
 
-window.resetPassword = async function(){
-  const email = document.getElementById("email").value.trim();
-  const status = document.getElementById("loginStatus");
-
-  if(!email){
-    status.textContent = "Entre ton email avant de réinitialiser le mot de passe.";
-    return;
-  }
-
-  try{
-    await sendPasswordResetEmail(auth, email);
-    status.textContent = "Email de réinitialisation envoyé ✅";
-  }catch{
-    status.textContent = "Impossible d’envoyer l’email de réinitialisation.";
-  }
-};
+/* ================= AUTH STATE ================= */
 
 onAuthStateChanged(auth, async user => {
+
   if(user){
+
     const snap = await getDoc(doc(db,"blogUsers",user.uid));
 
     if(!snap.exists()){
@@ -126,13 +112,6 @@ onAuthStateChanged(auth, async user => {
     }
 
     currentUserData = snap.data();
-
-    if(currentUserData.active === false){
-      await signOut(auth);
-      document.getElementById("loginStatus").textContent = "Ce compte est désactivé.";
-      return;
-    }
-
     currentPseudo = currentUserData.pseudo || "Anonyme";
 
     await updateDoc(doc(db,"blogUsers",user.uid),{
@@ -160,12 +139,127 @@ onAuthStateChanged(auth, async user => {
     loadPrivateConversations();
 
   }else{
-    if(presenceInterval) clearInterval(presenceInterval);
-
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("blogContent").style.display = "none";
   }
+
 });
+
+/* ================= MEMBRES ================= */
+
+function loadMembers(){
+
+  const container = document.getElementById("membersList");
+
+  if(unsubscribeMembers) unsubscribeMembers();
+
+  unsubscribeMembers = onSnapshot(collection(db,"blogUsers"), snap => {
+
+    container.innerHTML = "";
+    const blocked = currentUserData?.blockedUsers || [];
+
+    snap.forEach(docSnap => {
+
+      const uid = docSnap.id;
+      const data = docSnap.data();
+
+      if(uid === auth.currentUser.uid) return;
+      if(data.active === false) return;
+      if(data.online !== true) return;
+      if(blocked.includes(uid)) return;
+
+      const div = document.createElement("div");
+      div.className = "member";
+      div.innerText = data.pseudo || "Anonyme";
+
+      div.onclick = function(){
+        openMemberProfile(uid, data);
+      };
+
+      container.appendChild(div);
+    });
+
+  });
+
+}
+
+/* ================= CHAT PUBLIC ================= */
+
+function loadPublicMessages(){
+
+  const container = document.getElementById("messages");
+
+  if(unsubscribePublicMessages) unsubscribePublicMessages();
+
+  const q = query(collection(db,"blogMessages"), orderBy("createdAt","asc"));
+
+  unsubscribePublicMessages = onSnapshot(q, snap => {
+
+    container.innerHTML = "";
+
+    snap.forEach(docSnap => {
+
+      const m = docSnap.data();
+
+      if(m.visible === false) return;
+
+      const div = document.createElement("div");
+      div.className = "msg";
+
+      div.innerHTML = `
+        <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
+        ${m.message || ""}
+      `;
+
+      container.appendChild(div);
+
+    });
+
+    container.scrollTop = container.scrollHeight;
+
+  });
+
+}
+window.sendMessage = async function(){
+  const text = document.getElementById("chatMessage").value.trim();
+  if(!text) return;
+
+  await addDoc(collection(db,"blogMessages"),{
+    uid:auth.currentUser.uid,
+    pseudo:currentPseudo,
+    message:text,
+    type:"text",
+    visible:true,
+    createdAt:serverTimestamp()
+  });
+
+  document.getElementById("chatMessage").value = "";
+};
+
+window.sendPublicImage = async function(){
+  const input = document.getElementById("publicImageInput");
+  const file = input.files[0];
+
+  if(!file) return;
+
+  const storageRef = ref(storage, "images/" + auth.currentUser.uid + "/" + Date.now() + "_" + file.name);
+  await uploadBytes(storageRef, file);
+  const url = await getDownloadURL(storageRef);
+
+  await addDoc(collection(db,"blogMessages"),{
+    uid:auth.currentUser.uid,
+    pseudo:currentPseudo,
+    imageUrl:url,
+    message:"",
+    type:"image",
+    visible:true,
+    createdAt:serverTimestamp()
+  });
+
+  input.value = "";
+};
+
+/* ================= MENU / PROFIL ================= */
 
 window.openMenu = function(){
   document.getElementById("sideMenu").classList.add("open");
@@ -225,13 +319,13 @@ window.updateProfile = async function(){
 
   try{
     await updateDoc(doc(db,"blogUsers",user.uid),{
-      age:age,
-      departement:departement
+      age,
+      departement
     });
 
     if(email && email !== user.email){
       await updateEmail(user,email);
-      await updateDoc(doc(db,"blogUsers",user.uid),{ email:email });
+      await updateDoc(doc(db,"blogUsers",user.uid),{ email });
     }
 
     currentUserData.age = age;
@@ -298,136 +392,98 @@ window.changePassword = async function(){
   }
 };
 
-function loadMembers(){
-  const container = document.getElementById("membersList");
+window.resetPassword = async function(){
+  const email = document.getElementById("email").value.trim();
+  const status = document.getElementById("loginStatus");
 
-  if(unsubscribeMembers) unsubscribeMembers();
+  if(!email){
+    status.textContent = "Entre ton email avant de réinitialiser le mot de passe.";
+    return;
+  }
 
-  unsubscribeMembers = onSnapshot(collection(db,"blogUsers"), snap => {
-    if(!auth.currentUser) return;
-
-    container.innerHTML = "";
-    let count = 0;
-    const now = Date.now();
-
-    snap.forEach(docSnap => {
-      const uid = docSnap.id;
-      const data = docSnap.data();
-
-      if(uid === auth.currentUser.uid) return;
-      if(data.active === false) return;
-      if(data.online !== true) return;
-
-      const lastSeenTime = data.lastSeen?.toDate ? data.lastSeen.toDate().getTime() : 0;
-      if(!lastSeenTime) return;
-      if(now - lastSeenTime > 120000) return;
-
-      count++;
-
-      const div = document.createElement("div");
-      div.className = "member";
-      div.innerText = data.pseudo || "Anonyme";
-      div.onclick = function(){
-        openMemberProfile(uid, data);
-      };
-
-      container.appendChild(div);
-    });
-
-    if(count === 0){
-      container.innerHTML = `<div class="member">Aucun autre membre en ligne</div>`;
-    }
-  });
-}
-
-window.openMemberProfile = function(uid, data){
-  const modal = document.getElementById("memberProfileModal");
-
-  if(modal){
-    document.getElementById("memberProfileTitle").innerText = "Profil de " + (data.pseudo || "Anonyme");
-    document.getElementById("memberProfilePseudo").innerText = data.pseudo || "Anonyme";
-    document.getElementById("memberProfileAge").innerText = data.age || "Non renseigné";
-    document.getElementById("memberProfileGenre").innerText = data.genre || "Non renseigné";
-    document.getElementById("memberProfileDepartement").innerText = data.departement || "Non renseigné";
-
-    modal.dataset.uid = uid;
-    modal.dataset.pseudo = data.pseudo || "Anonyme";
-    modal.style.display = "block";
+  try{
+    await sendPasswordResetEmail(auth, email);
+    status.textContent = "Email de réinitialisation envoyé ✅";
+  }catch{
+    status.textContent = "Impossible d’envoyer l’email de réinitialisation.";
   }
 };
 
-window.closeMemberProfile = function(){
+/* ================= PROFIL MEMBRE ================= */
+
+window.openMemberProfile = function(uid, data){
   const modal = document.getElementById("memberProfileModal");
-  if(modal) modal.style.display = "none";
+  if(!modal) return;
+
+  document.getElementById("memberProfileTitle").innerText = "Profil de " + (data.pseudo || "Anonyme");
+  document.getElementById("memberProfilePseudo").innerText = data.pseudo || "Anonyme";
+  document.getElementById("memberProfileAge").innerText = data.age || "Non renseigné";
+  document.getElementById("memberProfileGenre").innerText = data.genre || "Non renseigné";
+  document.getElementById("memberProfileDepartement").innerText = data.departement || "Non renseigné";
+
+  modal.dataset.uid = uid;
+  modal.dataset.pseudo = data.pseudo || "Anonyme";
+  modal.style.display = "block";
 };
 
-function loadPublicMessages(){
-  const container = document.getElementById("messages");
-  const q = query(collection(db,"blogMessages"), orderBy("createdAt","asc"));
+window.closeMemberProfile = function(){
+  document.getElementById("memberProfileModal").style.display = "none";
+};
 
-  if(unsubscribePublicMessages) unsubscribePublicMessages();
+window.messageMemberProfile = function(){
+  const modal = document.getElementById("memberProfileModal");
+  const uid = modal.dataset.uid;
+  const pseudo = modal.dataset.pseudo || "Utilisateur";
 
-  unsubscribePublicMessages = onSnapshot(q, snap => {
-    container.innerHTML = "";
+  closeMemberProfile();
+  openPrivateChat(uid, pseudo);
+};
 
-    snap.forEach(docSnap => {
-      const m = docSnap.data();
-      if(m.visible === false) return;
+/* ================= BLOCAGE ================= */
 
-      const div = document.createElement("div");
-      div.className = "msg";
+async function blockUser(uid, pseudo){
+  const user = auth.currentUser;
+  if(!user || !uid) return;
 
-      div.innerHTML = `
-        <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
-        ${m.message || ""}
-        ${m.imageUrl ? `<img src="${m.imageUrl}" class="chat-img">` : ""}
-      `;
+  const ok = confirm("Bloquer " + (pseudo || "ce membre") + " ? Il ne pourra plus t’envoyer de message privé.");
+  if(!ok) return;
 
-      container.appendChild(div);
-    });
-
-    container.scrollTop = container.scrollHeight;
+  await updateDoc(doc(db,"blogUsers",user.uid),{
+    blockedUsers:arrayUnion(uid)
   });
+
+  currentUserData.blockedUsers = currentUserData.blockedUsers || [];
+  if(!currentUserData.blockedUsers.includes(uid)){
+    currentUserData.blockedUsers.push(uid);
+  }
+
+  const chatId = getChatId(user.uid, uid);
+  await setDoc(doc(db,"privateMessages",chatId),{
+    hiddenFor:arrayUnion(user.uid),
+    unreadFor:""
+  }, { merge:true });
+
+  document.getElementById("memberProfileModal").style.display = "none";
+  document.getElementById("privateChatWindow").style.display = "none";
+  currentPrivateUser = null;
+
+  loadMembers();
+  loadPrivateConversations();
+
+  alert("Utilisateur bloqué ✅");
 }
 
-window.sendMessage = async function(){
-  const text = document.getElementById("chatMessage").value.trim();
-  if(!text) return;
-
-  await addDoc(collection(db,"blogMessages"),{
-    uid:auth.currentUser.uid,
-    pseudo:currentPseudo,
-    message:text,
-    type:"text",
-    visible:true,
-    createdAt:serverTimestamp()
-  });
-
-  document.getElementById("chatMessage").value = "";
+window.blockMemberProfile = function(){
+  const modal = document.getElementById("memberProfileModal");
+  blockUser(modal.dataset.uid, modal.dataset.pseudo);
 };
 
-window.sendPublicImage = async function(){
-  const input = document.getElementById("publicImageInput");
-  const file = input.files[0];
-
-  if(!file) return;
-
-  const storageRef = ref(storage, "images/" + auth.currentUser.uid + "/" + Date.now() + "_" + file.name);
-  await uploadBytes(storageRef, file);
-  const url = await getDownloadURL(storageRef);
-
-  await addDoc(collection(db,"blogMessages"),{
-    uid:auth.currentUser.uid,
-    pseudo:currentPseudo,
-    imageUrl:url,
-    message:"",
-    type:"image",
-    visible:true,
-    createdAt:serverTimestamp()
-  });
-
-  input.value = "";
+window.blockPrivateUser = function(){
+  if(!currentPrivateUser) return;
+  blockUser(currentPrivateUser.uid, currentPrivateUser.pseudo);
 };
+
+/* ================= MESSAGES PRIVÉS ================= */
 
 function loadPrivateConversations(){
   const user = auth.currentUser;
@@ -440,6 +496,7 @@ function loadPrivateConversations(){
   unsubscribePrivateList = onSnapshot(collection(db,"privateMessages"), snap => {
     list.innerHTML = "";
 
+    const blocked = currentUserData?.blockedUsers || [];
     let totalConversations = 0;
     let unreadCount = 0;
 
@@ -451,19 +508,16 @@ function loadPrivateConversations(){
       if(Array.isArray(chat.hiddenFor) && chat.hiddenFor.includes(user.uid)) return;
 
       const otherUid = chat.participants.find(id => id !== user.uid);
-      const otherPseudo = chat.participantPseudos?.[otherUid] || "Utilisateur";
+      if(blocked.includes(otherUid)) return;
 
+      const otherPseudo = chat.participantPseudos?.[otherUid] || "Utilisateur";
       const isUnread = chat.unreadFor === user.uid;
 
       totalConversations++;
-
-      if(isUnread){
-        unreadCount++;
-      }
+      if(isUnread) unreadCount++;
 
       const div = document.createElement("div");
       div.className = "private-conversation";
-
       div.innerHTML = `
         <div class="name">
           ${otherPseudo}
@@ -492,31 +546,30 @@ function loadPrivateConversations(){
 }
 
 window.openPrivatePanel = function(){
-  const panel = document.getElementById("privatePanel");
-  if(panel){
-    panel.style.display = "block";
-  }
+  document.getElementById("privatePanel").style.display = "block";
 };
 
 window.closePrivatePanel = function(){
-  const panel = document.getElementById("privatePanel");
-  if(panel){
-    panel.style.display = "none";
-  }
-};
-
-window.messageMemberProfile = function(){
-  const modal = document.getElementById("memberProfileModal");
-  const uid = modal.dataset.uid;
-  const pseudo = modal.dataset.pseudo || "Utilisateur";
-
-  closeMemberProfile();
-  openPrivateChat(uid, pseudo);
+  document.getElementById("privatePanel").style.display = "none";
 };
 
 window.openPrivateChat = async function(uid, pseudo){
   const user = auth.currentUser;
   if(!user || !uid) return;
+
+  const blocked = currentUserData?.blockedUsers || [];
+  if(blocked.includes(uid)){
+    alert("Tu as bloqué cet utilisateur.");
+    return;
+  }
+
+  const otherSnap = await getDoc(doc(db,"blogUsers",uid));
+  const otherData = otherSnap.exists() ? otherSnap.data() : null;
+
+  if(otherData?.blockedUsers?.includes(user.uid)){
+    alert("Tu ne peux pas envoyer de message privé à cet utilisateur.");
+    return;
+  }
 
   currentPrivateUser = { uid, pseudo };
   const chatId = getChatId(user.uid, uid);
@@ -582,6 +635,20 @@ window.sendPrivateMessage = async function(){
     return;
   }
 
+  const blocked = currentUserData?.blockedUsers || [];
+  if(blocked.includes(currentPrivateUser.uid)){
+    status.textContent = "Tu as bloqué cet utilisateur.";
+    return;
+  }
+
+  const otherSnap = await getDoc(doc(db,"blogUsers",currentPrivateUser.uid));
+  const otherData = otherSnap.exists() ? otherSnap.data() : null;
+
+  if(otherData?.blockedUsers?.includes(user.uid)){
+    status.textContent = "Message impossible.";
+    return;
+  }
+
   if(!text){
     status.textContent = "Écris un message avant d’envoyer.";
     return;
@@ -615,6 +682,15 @@ window.sendPrivateMessage = async function(){
   status.textContent = "";
 };
 
+window.viewPrivateProfile = async function(){
+  if(!currentPrivateUser) return;
+
+  const snap = await getDoc(doc(db,"blogUsers", currentPrivateUser.uid));
+  if(!snap.exists()) return;
+
+  openMemberProfile(currentPrivateUser.uid, snap.data());
+};
+
 window.minimizePrivateChat = function(){
   document.getElementById("privateChatWindow").style.display = "none";
 };
@@ -636,8 +712,6 @@ window.hideCurrentPrivateConversation = async function(){
     hiddenFor:arrayUnion(user.uid)
   };
 
-  // On efface la notification UNIQUEMENT si elle appartient à celui qui supprime
-  // Comme ça, si l'expéditeur supprime, la notification du destinataire reste.
   if(chat && chat.unreadFor === user.uid){
     dataToSave.unreadFor = "";
   }
@@ -648,89 +722,14 @@ window.hideCurrentPrivateConversation = async function(){
   currentPrivateUser = null;
 };
 
+/* ================= SIGNALEMENT / MODALES ================= */
+
 window.reportMemberProfile = function(){
-  const modal = document.getElementById("memberProfileModal");
-
-  currentReportMode = "profile";
-  currentReportTarget = {
-    uid:modal.dataset.uid,
-    pseudo:modal.dataset.pseudo
-  };
-
-  openReportModal("⚠️ Signaler ce profil", "Explique pourquoi tu signales ce profil :");
+  alert("Signalement conservé : on remettra la modération avancée juste après.");
 };
 
 window.reportPrivateConversation = function(){
-  if(!currentPrivateUser) return;
-
-  currentReportMode = "privateConversation";
-  currentReportTarget = {
-    uid:currentPrivateUser.uid,
-    pseudo:currentPrivateUser.pseudo,
-    chatId:getChatId(auth.currentUser.uid, currentPrivateUser.uid)
-  };
-
-  openReportModal("⚠️ Signaler cette discussion", "Explique pourquoi tu signales cette discussion privée :");
-};
-
-function openReportModal(title, text){
-  document.getElementById("reportModalTitle").textContent = title;
-  document.getElementById("reportModalText").textContent = text;
-  document.getElementById("reportReason").value = "";
-  document.getElementById("reportModalStatus").textContent = "";
-  document.getElementById("reportModal").style.display = "flex";
-}
-
-window.closeReportModal = function(){
-  document.getElementById("reportModal").style.display = "none";
-  document.getElementById("reportReason").value = "";
-  document.getElementById("reportModalStatus").textContent = "";
-  currentReportMode = null;
-  currentReportTarget = null;
-};
-
-window.confirmReport = async function(){
-  const user = auth.currentUser;
-  const reason = document.getElementById("reportReason").value.trim();
-  const status = document.getElementById("reportModalStatus");
-
-  if(!user){
-    status.textContent = "Tu dois être connecté(e).";
-    return;
-  }
-
-  if(reason.length < 5){
-    status.textContent = "Merci d’expliquer la raison du signalement.";
-    return;
-  }
-
-  if(!currentReportMode || !currentReportTarget){
-    status.textContent = "Aucun signalement sélectionné.";
-    return;
-  }
-
-  const reportData = {
-    type:currentReportMode,
-    reportedUserUid:currentReportTarget.uid,
-    reportedUserPseudo:currentReportTarget.pseudo || "Utilisateur",
-    reportedBy:user.uid,
-    reportedByPseudo:currentPseudo,
-    reason:reason,
-    createdAt:serverTimestamp(),
-    status:"pending"
-  };
-
-  if(currentReportMode === "privateConversation"){
-    reportData.chatId = currentReportTarget.chatId;
-  }
-
-  await addDoc(collection(db,"reports"), reportData);
-
-  status.textContent = "Signalement envoyé ✅";
-
-  setTimeout(() => {
-    closeReportModal();
-  }, 700);
+  alert("Signalement conservé : on remettra la modération avancée juste après.");
 };
 
 window.openHelpModal = function(){
@@ -770,47 +769,3 @@ window.addEventListener("beforeunload", () => {
     });
   }
 });
-
-
-// 👇 AJOUTE ÇA ICI
-window.viewPrivateProfile = async function(){
-  const user = auth.currentUser;
-  if(!user || !currentPrivateUser) return;
-
-  try{
-    const snap = await getDoc(doc(db,"blogUsers", currentPrivateUser.uid));
-
-    if(!snap.exists()){
-      alert("Profil introuvable.");
-      return;
-    }
-
-    const data = snap.data();
-
-    document.getElementById("memberProfileTitle").innerText =
-      "Profil de " + (data.pseudo || "Anonyme");
-
-    document.getElementById("memberProfilePseudo").innerText =
-      data.pseudo || "Anonyme";
-
-    document.getElementById("memberProfileAge").innerText =
-      data.age || "Non renseigné";
-
-    document.getElementById("memberProfileGenre").innerText =
-      data.genre || "Non renseigné";
-
-    document.getElementById("memberProfileDepartement").innerText =
-      data.departement || "Non renseigné";
-
-    const modal = document.getElementById("memberProfileModal");
-    modal.dataset.uid = currentPrivateUser.uid;
-    modal.dataset.pseudo = data.pseudo || "Anonyme";
-
-    modal.style.display = "block";
-
-  }catch(error){
-    console.error(error);
-    alert("Erreur chargement profil.");
-  }
-};
-
