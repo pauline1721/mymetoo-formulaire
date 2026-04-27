@@ -627,11 +627,22 @@ window.hideCurrentPrivateConversation = async function(){
   if(!ok) return;
 
   const chatId = getChatId(user.uid, currentPrivateUser.uid);
+  const chatRef = doc(db,"privateMessages",chatId);
 
-  await setDoc(doc(db,"privateMessages",chatId),{
-    hiddenFor:arrayUnion(user.uid),
-    unreadFor:""
-  }, { merge:true });
+  const snap = await getDoc(chatRef);
+  const chat = snap.exists() ? snap.data() : null;
+
+  const dataToSave = {
+    hiddenFor:arrayUnion(user.uid)
+  };
+
+  // On efface la notification UNIQUEMENT si elle appartient à celui qui supprime
+  // Comme ça, si l'expéditeur supprime, la notification du destinataire reste.
+  if(chat && chat.unreadFor === user.uid){
+    dataToSave.unreadFor = "";
+  }
+
+  await setDoc(chatRef, dataToSave, { merge:true });
 
   document.getElementById("privateChatWindow").style.display = "none";
   currentPrivateUser = null;
