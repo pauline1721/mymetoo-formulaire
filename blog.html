@@ -20,6 +20,7 @@
 
   <div class="menu-content">
     <button class="menu-item" onclick="openMyProfile()">👤 Mon profil</button>
+    <button class="menu-item" onclick="openBlockedUsersModal()">🚫 Membres bloqués</button>
     <button class="menu-item" onclick="openHelpModal()">🚨 Aide / urgence</button>
     <button class="menu-item premium" onclick="openPremiumModal()">⭐ Premium</button>
     <button class="menu-item" onclick="openLegalModal()">⚖️ Légal</button>
@@ -153,6 +154,20 @@
     </div>
 
     <div id="profileUpdateStatus" class="status"></div>
+  </div>
+</div>
+
+<!-- MEMBRES BLOQUÉS -->
+<div id="blockedUsersModal" class="menu-modal">
+  <div class="menu-modal-top">
+    <span>🚫 Membres bloqués</span>
+    <button class="profile-close" onclick="closeBlockedUsersModal()">✕</button>
+  </div>
+
+  <div class="menu-modal-content">
+    <div id="blockedUsersList" class="private-list">
+      Aucun membre bloqué.
+    </div>
   </div>
 </div>
 
