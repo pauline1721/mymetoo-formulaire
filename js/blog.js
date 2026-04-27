@@ -334,19 +334,32 @@ function loadMembers(){
 }
 
 window.openMemberProfile = function(uid, data){
+
   const modal = document.getElementById("memberProfileModal");
 
   if(modal){
-    document.getElementById("memberProfileTitle").innerText = "Profil de " + (data.pseudo || "Anonyme");
-    document.getElementById("memberProfilePseudo").innerText = data.pseudo || "Anonyme";
-    document.getElementById("memberProfileAge").innerText = data.age || "Non renseigné";
-    document.getElementById("memberProfileGenre").innerText = data.genre || "Non renseigné";
+
+    document.getElementById("memberProfileTitle").innerText =
+      "Profil de " + (data.pseudo || "Anonyme");
+
+    document.getElementById("memberProfilePseudo").innerText =
+      data.pseudo || "Anonyme";
+
+    document.getElementById("memberProfileAge").innerText =
+      data.age || "Non renseigné";
+
+    document.getElementById("memberProfileGenre").innerText =
+      data.genre || "Non renseigné";
+
     document.getElementById("memberProfileDepartement").innerText =
-  data.departement || "Non renseigné";
+      data.departement || "Non renseigné";
+
     modal.dataset.uid = uid;
     modal.dataset.pseudo = data.pseudo || "Anonyme";
+
     modal.style.display = "block";
   }
+
 };
 
 window.closeMemberProfile = function(){
