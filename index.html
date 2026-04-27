@@ -1,325 +1,441 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="fr">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
 <title>UNIS - MyMeToo</title>
 
-<style>
-:root{
-  --violet:#24106b;
-  --violet2:#6f42bd;
-  --soft:#f7effb;
-  --border:#ded2ec;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  background:#e8d7f3;
-  font-family: Arial, sans-serif;
+<style>  
+:root{  
+  --violet:#24106b;  
+  --violet2:#6f42bd;  
+  --soft:#f7effb;  
+  --border:#ded2ec;  
+}  
+  
+*{box-sizing:border-box}  
+  
+body{  
+  margin:0;  
+  background:#e8d7f3;  
+  font-family: Arial, sans-serif;  
+  color:var(--violet);  
+}  
+  
+.page{  
+  width:100%;  
+  max-width:1030px;  
+  margin:0 auto;  
+  background:#fff;  
+  border:7px solid #d8c2eb;  
+  border-radius:0 0 18px 18px;  
+  padding:10px 40px 8px;  
+  position:relative;  
+  overflow:hidden;  
+}  
+  
+.logo{  
+  display:block;  
+  width:300px;  
+  margin:0 auto -3px;  
+}  
+  
+.unis{  
+  text-align:center;  
+  font-family:Georgia, serif;  
+  font-weight:bold;  
+  font-size:27px;  
+}  
+  
+h1{  
+  text-align:center;  
+  font-family:Georgia, serif;  
+  font-size:72px;  
+  line-height:.85;  
+  margin:0;  
+}  
+  
+.subtitle{  
+  text-align:center;  
+  font-family:Georgia, serif;  
+  font-size:35px;  
+  font-weight:bold;  
+  margin:10px 0 16px;  
+}  
+  
+.leaf{  
+  position:absolute;  
+  top:30px;  
+  width:480px;  
+  opacity:.6;  
+  z-index:1;  
+}  
+  
+.leaf.left{left:0}  
+.leaf.right{right:0}  
+  
+header{position:relative; z-index:2}  
+  
+.intro{  
+  position:relative;  
+  z-index:2;  
+  max-width:860px;  
+  margin:0 auto 14px;  
+  background:#f7f0fb;  
+  border:2px solid var(--border);  
+  border-radius:11px;  
+  text-align:center;  
+  padding:13px;  
+  font-size:22px;  
+  line-height:1.45;  
+}  
+  
+.intro strong{font-weight:900}  
+  
+.intro-heart{  
+  position:absolute;  
+  right:28px;  
+  top:38px;  
+  font-size:48px;  
+  color:var(--violet2);  
+}  
+  
+.grid{  
+  display:grid;  
+  grid-template-columns:1fr 1fr;  
+  gap:10px 24px;  
+}  
+  
+.card{  
+  border:2px solid #eeeaf3;  
+  border-radius:12px;  
+  padding:14px 20px;  
+  min-height:150px;  
+  position:relative;  
+  background:#fff;  
+}  
+  
+.card.error{  
+  border:3px solid #d94b6a !important;  
+  background:#fff5f7 !important;  
+}  
+  
+.error-message{  
+  color:#d94b6a;  
+  font-weight:bold;  
+  font-size:14px;  
+  margin-top:8px;  
+}  
+  
+.full{grid-column:1/-1}  
+  
+.title{  
+  font-family:Georgia, serif;  
+  font-weight:bold;  
+  font-size:25px;  
+  margin-bottom:12px;  
+}  
+  
+.option{  
+  display:flex;  
+  align-items:center;  
+  gap:14px;  
+  margin:8px 0;  
+  font-size:18px;  
+  font-weight:600;  
+}  
+  
+input{  
+  appearance:none;  
+  width:23px;  
+  height:23px;  
+  border:2.5px solid #835ac4;  
+  background:#fff;  
+  flex-shrink:0;  
+}  
+  
+input[type=radio]{border-radius:50%}  
+input[type=checkbox]{border-radius:1px}  
+  
+input:checked{  
+  background:radial-gradient(circle,#6e42b7 42%,transparent 46%);  
+}  
+  
+input[type=checkbox]:checked{  
+  background:  
+    linear-gradient(45deg,transparent 43%,#6e42b7 44%,#6e42b7 56%,transparent 57%),  
+    linear-gradient(-45deg,transparent 35%,#6e42b7 36%,#6e42b7 52%,transparent 53%);  
+}  
+  
+.text-field{  
+  appearance:auto;  
+  width:100%;  
+  height:auto;  
+  border:2px solid #c4b2e4;  
+  border-radius:8px;  
+  padding:12px;  
+  font-size:17px;  
+  margin-top:12px;  
+  background:white;
   color:var(--violet);
-}
-
-.page{
-  width:100%;
-  max-width:1030px;
-  margin:0 auto;
-  background:#fff;
-  border:7px solid #d8c2eb;
-  border-radius:0 0 18px 18px;
-  padding:10px 40px 8px;
-  position:relative;
-  overflow:hidden;
-}
-
-.logo{
-  display:block;
-  width:300px;
-  margin:0 auto -3px;
-}
-
-.unis{
-  text-align:center;
-  font-family:Georgia, serif;
-  font-weight:bold;
-  font-size:27px;
-}
-
-h1{
-  text-align:center;
-  font-family:Georgia, serif;
-  font-size:72px;
-  line-height:.85;
-  margin:0;
-}
-
-.subtitle{
-  text-align:center;
-  font-family:Georgia, serif;
-  font-size:35px;
-  font-weight:bold;
-  margin:10px 0 16px;
-}
-
-.leaf{
-  position:absolute;
-  top:30px;
-  width:480px;
-  opacity:.6;
-  z-index:1;
-}
-
-.leaf.left{left:0}
-.leaf.right{right:0}
-
-header{position:relative; z-index:2}
-
-.intro{
-  position:relative;
-  z-index:2;
-  max-width:860px;
-  margin:0 auto 14px;
-  background:#f7f0fb;
-  border:2px solid var(--border);
-  border-radius:11px;
-  text-align:center;
-  padding:13px;
-  font-size:22px;
-  line-height:1.45;
-}
-
-.intro strong{font-weight:900}
-
-.intro-heart{
-  position:absolute;
-  right:28px;
-  top:38px;
-  font-size:48px;
-  color:var(--violet2);
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px 24px;
-}
-
-.card{
-  border:2px solid #eeeaf3;
-  border-radius:12px;
-  padding:14px 20px;
-  min-height:150px;
-  position:relative;
-  background:#fff;
-}
-
-.card.error{
-  border:3px solid #d94b6a !important;
-  background:#fff5f7 !important;
-}
-
-.error-message{
-  color:#d94b6a;
-  font-weight:bold;
-  font-size:14px;
-  margin-top:8px;
-}
-
-.full{grid-column:1/-1}
-
-.title{
-  font-family:Georgia, serif;
-  font-weight:bold;
-  font-size:25px;
-  margin-bottom:12px;
-}
-
-.option{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  margin:8px 0;
-  font-size:18px;
-  font-weight:600;
-}
-
-input{
-  appearance:none;
-  width:23px;
-  height:23px;
-  border:2.5px solid #835ac4;
-  background:#fff;
-  flex-shrink:0;
-}
-
-input[type=radio]{border-radius:50%}
-input[type=checkbox]{border-radius:1px}
-
-input:checked{
-  background:radial-gradient(circle,#6e42b7 42%,transparent 46%);
-}
-
-input[type=checkbox]:checked{
-  background:
-    linear-gradient(45deg,transparent 43%,#6e42b7 44%,#6e42b7 56%,transparent 57%),
-    linear-gradient(-45deg,transparent 35%,#6e42b7 36%,#6e42b7 52%,transparent 53%);
-}
-
-.icon{
-  position:absolute;
-  right:28px;
-  bottom:22px;
-  width:92px;
-  height:auto;
-  background: transparent;
-  mix-blend-mode: multiply;
-}
-
-.icon.big{
-  width:130px;
-  right:70px;
-  bottom:20px;
-}
-
-.icon.heartbig{
-  width:145px;
-  right:95px;
-  bottom:12px;
-}
-
-.hint{
-  font-size:17px;
-  font-weight:600;
-  margin-top:-7px;
-  margin-bottom:6px;
-}
-
-textarea{
-  width:100%;
-  height:58px;
-  border:2px solid #c4b2e4;
-  border-radius:8px;
-  resize:none;
-  outline:none;
-  padding:10px 60px 10px 10px;
-  font-size:18px;
-}
-
-.pen{
-  position:absolute;
-  right:37px;
-  bottom:23px;
-  width:43px;
-  height:auto;
-}
-
-.consent{
-  grid-column:1/-1;
-  border:2px solid #eeeaf3;
-  border-radius:10px;
-  padding:14px 145px 14px 20px;
-  display:flex;
-  align-items:flex-start;
-  gap:16px;
+}  
+  
+.icon{  
+  position:absolute;  
+  right:28px;  
+  bottom:22px;  
+  width:92px;  
+  height:auto;  
+  background: transparent;  
+  mix-blend-mode: multiply;  
+}  
+  
+.icon.big{  
+  width:130px;  
+  right:70px;  
+  bottom:20px;  
+}  
+  
+.icon.heartbig{  
+  width:145px;  
+  right:95px;  
+  bottom:12px;  
+}  
+  
+.hint{  
+  font-size:17px;  
+  font-weight:600;  
+  margin-top:-7px;  
+  margin-bottom:6px;  
+}  
+  
+textarea{  
+  width:100%;  
+  height:58px;  
+  border:2px solid #c4b2e4;  
+  border-radius:8px;  
+  resize:none;  
+  outline:none;  
+  padding:10px 60px 10px 10px;  
+  font-size:18px;  
+}  
+  
+.pen{  
+  position:absolute;  
+  right:37px;  
+  bottom:23px;  
+  width:43px;  
+  height:auto;  
+}  
+  
+.consent{  
+  grid-column:1/-1;  
+  border:2px solid #eeeaf3;  
+  border-radius:10px;  
+  padding:14px 145px 14px 20px;  
+  display:flex;  
+  align-items:flex-start;  
+  gap:16px;  
+  font-family:Georgia, serif;  
+  font-size:21px;  
+  font-weight:bold;  
+  line-height:1.35;  
+  position:relative;  
+}  
+  
+.share{  
+  position:absolute;  
+  right:58px;  
+  top:22px;  
+  width:58px;  
+  height:auto;  
+}  
+  
+.blog-card{  
+  grid-column:1/-1;  
+}  
+  
+.blog-fields{  
+  display:none;  
+  margin-top:14px;  
+  background:#f7effb;  
+  border-radius:10px;  
+  padding:14px;  
+}  
+  
+.blog-fields input,
+.blog-fields select{  
+  appearance:auto;  
+  width:100%;  
+  height:auto;  
+  border:2px solid #c4b2e4;  
+  border-radius:8px;  
+  padding:11px;  
+  margin:7px 0;  
+  font-size:16px;  
+  background:white;
+  color:var(--violet);
+}  
+  
+.password-wrap{  
+  position:relative;  
+}  
+  
+.password-wrap input{  
+  padding-right:48px;  
+}  
+  
+.eye{  
+  position:absolute;  
+  right:13px;  
+  top:18px;  
+  cursor:pointer;  
+  font-size:20px;  
+  color:#5b23ad;  
+  user-select:none;  
+}  
+  
+.blog-profile-title{
   font-family:Georgia, serif;
   font-size:21px;
   font-weight:bold;
-  line-height:1.35;
-  position:relative;
-}
-
-.share{
-  position:absolute;
-  right:58px;
-  top:22px;
-  width:58px;
-  height:auto;
-}
-
-.bottom{
-  grid-column:1/-1;
-  background:#f6ebfb;
-  border-radius:10px;
-  min-height:88px;
-  display:grid;
-  grid-template-columns:170px 1fr 120px;
-  align-items:center;
-  padding:10px 30px;
-}
-
-.env{
-  width:90px;
-  height:auto;
-}
-
-.bottom-text{
-  font-size:19px;
-  line-height:1.35;
-}
-
-.bottom-text strong{
-  font-family:Georgia, serif;
-  font-size:24px;
-}
-
-.big-heart{
-  font-size:62px;
-  text-align:right;
-  color:#5d2fac;
-}
-
-.footer{
-  display:flex;
-  align-items:center;
-  margin-top:8px;
-}
-
-button{
-  background:linear-gradient(90deg,#5b23ad,#7e45d1);
-  color:white;
-  border:none;
-  border-radius:9px 9px 0 0;
-  padding:10px 42px;
-  font-size:20px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-button:disabled{
-  opacity:.6;
-  cursor:not-allowed;
-}
-
-.thanks{
-  flex:1;
-  text-align:center;
-  color:#6e4cb0;
-  font-size:17px;
-  font-weight:600;
-}
-
-#status{
-  text-align:center;
-  font-weight:bold;
-  margin-top:8px;
   color:#5b23ad;
+  margin:16px 0 8px;
 }
 
-@media(max-width:800px){
-  .page{padding:8px 12px}
-  .grid{grid-template-columns:1fr}
-  .full,.consent,.bottom{grid-column:auto}
-  h1{font-size:52px}
-  .subtitle{font-size:26px}
-  .logo{width:165px}
-  .leaf{width:150px; opacity:.35}
-  .icon{opacity:.28}
-  .bottom{grid-template-columns:80px 1fr 50px}
-  .consent{padding-right:20px}
-  .share{display:none}
-}
+.blog-note{  
+  font-size:15px;  
+  line-height:1.4;  
+  color:#5b23ad;  
+  margin-top:8px;  
+}  
+  
+.bottom{  
+  grid-column:1/-1;  
+  background:#f6ebfb;  
+  border-radius:10px;  
+  min-height:88px;  
+  display:grid;  
+  grid-template-columns:170px 1fr 120px;  
+  align-items:center;  
+  padding:10px 30px;  
+}  
+  
+.env{  
+  width:90px;  
+  height:auto;  
+}  
+  
+.bottom-text{  
+  font-size:19px;  
+  line-height:1.35;  
+}  
+  
+.bottom-text strong{  
+  font-family:Georgia, serif;  
+  font-size:24px;  
+}  
+  
+.big-heart{  
+  font-size:62px;  
+  text-align:right;  
+  color:#5d2fac;  
+}  
+  
+.footer{  
+  display:flex;  
+  align-items:center;  
+  margin-top:8px;  
+}  
+  
+button{  
+  background:linear-gradient(90deg,#5b23ad,#7e45d1);  
+  color:white;  
+  border:none;  
+  border-radius:9px 9px 0 0;  
+  padding:10px 42px;  
+  font-size:20px;  
+  font-weight:bold;  
+  cursor:pointer;  
+}  
+  
+button:disabled{  
+  opacity:.6;  
+  cursor:not-allowed;  
+}  
+  
+.thanks{  
+  flex:1;  
+  text-align:center;  
+  color:#6e4cb0;  
+  font-size:17px;  
+  font-weight:600;  
+}  
+  
+#status{  
+  text-align:center;  
+  font-weight:bold;  
+  margin-top:8px;  
+  color:#5b23ad;  
+}  
+  
+#successScreen{  
+  display:none;  
+  position:fixed;  
+  inset:0;  
+  background:#e8d7f3;  
+  z-index:9999;  
+  justify-content:center;  
+  align-items:center;  
+  padding:20px;  
+}  
+  
+.success-box{  
+  background:white;  
+  max-width:390px;  
+  padding:38px 26px;  
+  border-radius:18px;  
+  text-align:center;  
+  color:#24106b;  
+  box-shadow:0 10px 35px rgba(0,0,0,.18);  
+}  
+  
+.success-box h2{  
+  font-family:Georgia, serif;  
+  font-size:36px;  
+  margin:0 0 15px;  
+}  
+  
+.success-box p{  
+  font-size:18px;  
+  line-height:1.5;  
+  margin:0;  
+}  
+  
+.success-btn{  
+  display:inline-block;  
+  margin-top:22px;  
+  background:linear-gradient(90deg,#5b23ad,#7e45d1);  
+  color:white;  
+  padding:13px 22px;  
+  border-radius:9px;  
+  text-decoration:none;  
+  font-weight:bold;  
+}  
+  
+@media(max-width:800px){  
+  .page{padding:8px 12px}  
+  .grid{grid-template-columns:1fr}  
+  .full,.consent,.bottom,.blog-card{grid-column:auto}  
+  h1{font-size:52px}  
+  .subtitle{font-size:26px}  
+  .logo{width:165px}  
+  .leaf{width:150px; opacity:.35}  
+  .icon{opacity:.28}  
+  .bottom{grid-template-columns:80px 1fr 50px}  
+  .consent{padding-right:20px}  
+  .share{display:none}  
+}  
 </style>
 </head>
 
@@ -327,118 +443,281 @@ button:disabled{
 
 <main class="page">
 
-<img src="feuille-gauche.png" class="leaf left" alt="">
+<img src="feuille-gauche.png" class="leaf left" alt="">  
 <img src="feuille-droite.png" class="leaf right" alt="">
 
-<header>
-  <img class="logo" src="logoUNIS.png" alt="UNIS">
-  <div class="unis">UNIS</div>
-  <h1>MyMeToo*</h1>
-  <div class="subtitle">Ta voix, même silencieuse, compte ♡</div>
+<header>  
+  <img class="logo" src="logoUNIS.png" alt="UNIS">  
+  <div class="unis">UNIS</div>  
+  <h1>MyMeToo*</h1>  
+  <div class="subtitle">Ta voix, même silencieuse, compte ♡</div>  
 </header>
 
-<section class="intro">
-  Ici, tu n’as pas besoin de tout raconter.<br>
-  <strong>Simplement d’exister.</strong><br>
-  Juste de déposer ce que tu peux.
-  <span class="intro-heart">♡</span>
+<section class="intro">  
+  Ici, tu n’as pas besoin de tout raconter.<br>  
+  <strong>Simplement d’exister.</strong><br>  
+  Juste de déposer ce que tu peux.  
+  <span class="intro-heart">♡</span>  
 </section>
 
 <section class="grid">
 
-<div class="card">
-  <div class="title">1. Quel est ton âge ?</div>
-  <label class="option"><input type="radio" name="age" value="Moins de 18 ans">Moins de 18 ans</label>
-  <label class="option"><input type="radio" name="age" value="18 / 35 ans">18 / 35 ans</label>
-  <label class="option"><input type="radio" name="age" value="Plus de 35 ans">Plus de 35 ans</label>
-  <label class="option"><input type="radio" name="age" value="Je préfère ne pas répondre">Je préfère ne pas répondre</label>
-  <img src="icon-age.png" class="icon" alt="">
+<div class="card">  
+  <div class="title">1. Quel est ton âge ?</div>  
+  <label class="option"><input type="radio" name="age" value="Moins de 18 ans">Moins de 18 ans</label>  
+  <label class="option"><input type="radio" name="age" value="18 / 35 ans">18 / 35 ans</label>  
+  <label class="option"><input type="radio" name="age" value="Plus de 35 ans">Plus de 35 ans</label>  
+  <label class="option"><input type="radio" name="age" value="Je préfère ne pas répondre">Je préfère ne pas répondre</label>  
+  <img src="icon-age.png" class="icon" alt="">  
 </div>
 
-<div class="card">
-  <div class="title">2. Quel est ton genre ?</div>
-  <label class="option"><input type="radio" name="genre" value="Une femme">Une femme</label>
-  <label class="option"><input type="radio" name="genre" value="Un homme">Un homme</label>
-  <label class="option"><input type="radio" name="genre" value="Je préfère ne pas répondre">Je préfère ne pas répondre</label>
-  <img src="icon-genre.png" class="icon" alt="">
+<div class="card">  
+  <div class="title">2. Quel est ton genre ?</div>  
+  <label class="option"><input type="radio" name="genre" value="Une femme">Une femme</label>  
+  <label class="option"><input type="radio" name="genre" value="Un homme">Un homme</label>  
+  <label class="option"><input type="radio" name="genre" value="Je préfère ne pas répondre">Je préfère ne pas répondre</label>  
+  <img src="icon-genre.png" class="icon" alt="">  
 </div>
 
-<div class="card full">
-  <div class="title">3. Ton vécu a-t-il été porté devant la justice ?</div>
-  <label class="option"><input type="radio" name="justice" value="Non, jamais">Non, jamais</label>
-  <label class="option"><input type="radio" name="justice" value="Oui, j’ai porté plainte ou engagé une démarche officielle">Oui, j’ai porté plainte ou engagé<br>une démarche officielle</label>
-  <img src="icon-justice.png" class="icon big" alt="">
+<div class="card full">  
+  <div class="title">3. Ton vécu a-t-il été porté devant la justice ?</div>  
+  <label class="option"><input type="radio" name="justice" value="Non, jamais">Non, jamais</label>  
+  <label class="option"><input type="radio" name="justice" value="Oui, j’ai porté plainte ou engagé une démarche officielle">Oui, j’ai porté plainte ou engagé<br>une démarche officielle</label>  
+  <img src="icon-justice.png" class="icon big" alt="">  
 </div>
 
-<div class="card">
-  <div class="title">4. As-tu déjà parlé de ce que tu as vécu<br>(hors justice) ?</div>
-  <label class="option"><input type="radio" name="parle" value="Non, je n’en ai jamais parlé">Non, je n’en ai jamais parlé.</label>
-  <label class="option"><input type="radio" name="parle" value="Oui, à un proche">Oui, à un proche (famille, ami, ...)</label>
-  <label class="option"><input type="radio" name="parle" value="Oui, à un professionnel">Oui, à un professionnel<br>(médecin, psychologue, ...)</label>
-  <img src="icon-discussion.png" class="icon" alt="">
+<div class="card">  
+  <div class="title">4. As-tu déjà parlé de ce que tu as vécu<br>(hors justice) ?</div>  
+  <label class="option"><input type="radio" name="parle" value="Non, je n’en ai jamais parlé">Non, je n’en ai jamais parlé.</label>  
+  <label class="option"><input type="radio" name="parle" value="Oui, à un proche">Oui, à un proche (famille, ami, ...)</label>  
+  <label class="option"><input type="radio" name="parle" value="Oui, à un professionnel">Oui, à un professionnel<br>(médecin, psychologue, ...)</label>  
+  <img src="icon-discussion.png" class="icon" alt="">  
 </div>
 
-<div class="card">
-  <div class="title">5. Aujourd’hui, te sens-tu écouté(e) ?</div>
-  <label class="option"><input type="radio" name="ecoute" value="Oui">Oui</label>
-  <label class="option"><input type="radio" name="ecoute" value="Un peu">Un peu</label>
-  <label class="option"><input type="radio" name="ecoute" value="Non">Non</label>
-  <label class="option"><input type="radio" name="ecoute" value="Je ne sais pas">Je ne sais pas</label>
-  <img src="icon-ecoute.png" class="icon" alt="">
+<div class="card">  
+  <div class="title">5. Aujourd’hui, te sens-tu écouté(e) ?</div>  
+  <label class="option"><input type="radio" name="ecoute" value="Oui">Oui</label>  
+  <label class="option"><input type="radio" name="ecoute" value="Un peu">Un peu</label>  
+  <label class="option"><input type="radio" name="ecoute" value="Non">Non</label>  
+  <label class="option"><input type="radio" name="ecoute" value="Je ne sais pas">Je ne sais pas</label>  
+  <img src="icon-ecoute.png" class="icon" alt="">  
 </div>
 
-<div class="card full">
-  <div class="title">6. Que souhaites-tu exprimer par ta voix silencieuse ?</div>
-  <div class="hint">(Tu peux cocher une ou plusieurs réponses.)</div>
-  <label class="option"><input type="checkbox" name="expression" value="Je suis là, même sans mots">Je suis là, même sans mots.</label>
-  <label class="option"><input type="checkbox" name="expression" value="Je veux être reconnu(e) sans devoir tout raconter">Je veux être reconnu(e) sans devoir tout raconter.</label>
-  <label class="option"><input type="checkbox" name="expression" value="Je cherche à me reconstruire intérieurement">Je cherche à me reconstruire intérieurement.</label>
-  <label class="option"><input type="checkbox" name="expression" value="Je veux aider d’autres personnes en partageant mon vécu">Je veux aider d’autres personnes en partageant mon vécu.</label>
-  <img src="icon-coeur.png" class="icon heartbig" alt="">
+<div class="card full">  
+  <div class="title">6. Que souhaites-tu exprimer par ta voix silencieuse ?</div>  
+  <div class="hint">(Tu peux cocher une ou plusieurs réponses.)</div>  
+  <label class="option"><input type="checkbox" name="expression" value="Je suis là, même sans mots">Je suis là, même sans mots.</label>  
+  <label class="option"><input type="checkbox" name="expression" value="Je veux être reconnu(e) sans devoir tout raconter">Je veux être reconnu(e) sans devoir tout raconter.</label>  
+  <label class="option"><input type="checkbox" name="expression" value="Je cherche à me reconstruire intérieurement">Je cherche à me reconstruire intérieurement.</label>  
+  <label class="option"><input type="checkbox" name="expression" value="Je veux aider d’autres personnes en partageant mon vécu">Je veux aider d’autres personnes en partageant mon vécu.</label>  
+  <img src="icon-coeur.png" class="icon heartbig" alt="">  
 </div>
 
-<div class="card full">
-  <div class="title">7. Si tu souhaites laisser quelques mots anonymes, cet espace est pour toi.</div>
-  <div class="hint">Aucun jugement. Juste un espace sûr pour déposer ce que tu veux.</div>
-  <textarea id="message"></textarea>
-  <img src="icon-stylo.png" class="pen" alt="">
+<div class="card full">  
+  <div class="title">7. Si tu souhaites laisser quelques mots anonymes, cet espace est pour toi.</div>  
+  <div class="hint">Aucun jugement. Juste un espace sûr pour déposer ce que tu veux.</div>  
+  <textarea id="message"></textarea>  
+  <img src="icon-stylo.png" class="pen" alt="">  
 </div>
 
-<div class="consent">
-  <input type="checkbox" id="partage">
-  <div>
-    Si mes mots peuvent aider d’autres personnes, j’autorise le partage anonyme<br>
-    de mon message écrit, sans mon nom ni aucune information personnelle.
-  </div>
-  <img src="icon-partage.png" class="share" alt="">
+<div class="consent">  
+  <input type="checkbox" id="partage">  
+  <div>  
+    Si mes mots peuvent aider d’autres personnes, j’autorise le partage anonyme<br>  
+    de mon message écrit, sans mon nom ni aucune information personnelle.  
+  </div>  
+  <img src="icon-partage.png" class="share" alt="">  
 </div>
 
-<div class="bottom">
-  <img src="icon-envelope.png" class="env" alt="">
+<div class="card blog-card" id="blogCard">  
+  <div class="title">8. Souhaites-tu participer au blog sécurisé ?</div>  
+  <label class="option">  
+    <input type="checkbox" id="joinBlog">  
+    Oui, je souhaite créer un accès au blog privé MyMeToo.  
+  </label>
 
-  <div class="bottom-text">
-    <strong>Ici, chaque réponse compte.</strong><br>
-    Chaque silence aussi.<br>
-    Quand tu es prêt(e), clique sur “Envoyer”.
-  </div>
+  <div class="blog-fields" id="blogFields">  
+    <input id="blogPseudo" type="text" placeholder="Pseudo visible dans le blog">  
+    <input id="blogEmail" type="email" placeholder="Email de connexion">
 
-  <div class="big-heart">♡</div>
+    <div class="password-wrap">  
+      <input id="blogPassword" type="password" placeholder="Mot de passe">  
+      <span class="eye" onclick="togglePassword('blogPassword')">👁</span>  
+    </div>
+
+    <div class="password-wrap">  
+      <input id="blogPasswordConfirm" type="password" placeholder="Confirmer le mot de passe">  
+      <span class="eye" onclick="togglePassword('blogPasswordConfirm')">👁</span>  
+    </div>
+
+    <div class="blog-profile-title">Profil blog</div>
+
+    <select id="blogAge">
+      <option value="">Tranche d’âge pour le blog</option>
+      <option value="Moins de 18 ans">Moins de 18 ans</option>
+      <option value="18 / 35 ans">18 / 35 ans</option>
+      <option value="Plus de 35 ans">Plus de 35 ans</option>
+      <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
+    </select>
+
+    <select id="blogGenre">
+      <option value="">Genre pour le blog</option>
+      <option value="Une femme">Une femme</option>
+      <option value="Un homme">Un homme</option>
+      <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
+    </select>
+
+    <select id="blogDepartement">
+      <option value="">Département</option>
+      <option value="Ain (01)">Ain (01)</option>
+      <option value="Aisne (02)">Aisne (02)</option>
+      <option value="Allier (03)">Allier (03)</option>
+      <option value="Alpes-de-Haute-Provence (04)">Alpes-de-Haute-Provence (04)</option>
+      <option value="Hautes-Alpes (05)">Hautes-Alpes (05)</option>
+      <option value="Alpes-Maritimes (06)">Alpes-Maritimes (06)</option>
+      <option value="Ardèche (07)">Ardèche (07)</option>
+      <option value="Ardennes (08)">Ardennes (08)</option>
+      <option value="Ariège (09)">Ariège (09)</option>
+      <option value="Aube (10)">Aube (10)</option>
+      <option value="Aude (11)">Aude (11)</option>
+      <option value="Aveyron (12)">Aveyron (12)</option>
+      <option value="Bouches-du-Rhône (13)">Bouches-du-Rhône (13)</option>
+      <option value="Calvados (14)">Calvados (14)</option>
+      <option value="Cantal (15)">Cantal (15)</option>
+      <option value="Charente (16)">Charente (16)</option>
+      <option value="Charente-Maritime (17)">Charente-Maritime (17)</option>
+      <option value="Cher (18)">Cher (18)</option>
+      <option value="Corrèze (19)">Corrèze (19)</option>
+      <option value="Corse-du-Sud (2A)">Corse-du-Sud (2A)</option>
+      <option value="Haute-Corse (2B)">Haute-Corse (2B)</option>
+      <option value="Côte-d’Or (21)">Côte-d’Or (21)</option>
+      <option value="Côtes-d’Armor (22)">Côtes-d’Armor (22)</option>
+      <option value="Creuse (23)">Creuse (23)</option>
+      <option value="Dordogne (24)">Dordogne (24)</option>
+      <option value="Doubs (25)">Doubs (25)</option>
+      <option value="Drôme (26)">Drôme (26)</option>
+      <option value="Eure (27)">Eure (27)</option>
+      <option value="Eure-et-Loir (28)">Eure-et-Loir (28)</option>
+      <option value="Finistère (29)">Finistère (29)</option>
+      <option value="Gard (30)">Gard (30)</option>
+      <option value="Haute-Garonne (31)">Haute-Garonne (31)</option>
+      <option value="Gers (32)">Gers (32)</option>
+      <option value="Gironde (33)">Gironde (33)</option>
+      <option value="Hérault (34)">Hérault (34)</option>
+      <option value="Ille-et-Vilaine (35)">Ille-et-Vilaine (35)</option>
+      <option value="Indre (36)">Indre (36)</option>
+      <option value="Indre-et-Loire (37)">Indre-et-Loire (37)</option>
+      <option value="Isère (38)">Isère (38)</option>
+      <option value="Jura (39)">Jura (39)</option>
+      <option value="Landes (40)">Landes (40)</option>
+      <option value="Loir-et-Cher (41)">Loir-et-Cher (41)</option>
+      <option value="Loire (42)">Loire (42)</option>
+      <option value="Haute-Loire (43)">Haute-Loire (43)</option>
+      <option value="Loire-Atlantique (44)">Loire-Atlantique (44)</option>
+      <option value="Loiret (45)">Loiret (45)</option>
+      <option value="Lot (46)">Lot (46)</option>
+      <option value="Lot-et-Garonne (47)">Lot-et-Garonne (47)</option>
+      <option value="Lozère (48)">Lozère (48)</option>
+      <option value="Maine-et-Loire (49)">Maine-et-Loire (49)</option>
+      <option value="Manche (50)">Manche (50)</option>
+      <option value="Marne (51)">Marne (51)</option>
+      <option value="Haute-Marne (52)">Haute-Marne (52)</option>
+      <option value="Mayenne (53)">Mayenne (53)</option>
+      <option value="Meurthe-et-Moselle (54)">Meurthe-et-Moselle (54)</option>
+      <option value="Meuse (55)">Meuse (55)</option>
+      <option value="Morbihan (56)">Morbihan (56)</option>
+      <option value="Moselle (57)">Moselle (57)</option>
+      <option value="Nièvre (58)">Nièvre (58)</option>
+      <option value="Nord (59)">Nord (59)</option>
+      <option value="Oise (60)">Oise (60)</option>
+      <option value="Orne (61)">Orne (61)</option>
+      <option value="Pas-de-Calais (62)">Pas-de-Calais (62)</option>
+      <option value="Puy-de-Dôme (63)">Puy-de-Dôme (63)</option>
+      <option value="Pyrénées-Atlantiques (64)">Pyrénées-Atlantiques (64)</option>
+      <option value="Hautes-Pyrénées (65)">Hautes-Pyrénées (65)</option>
+      <option value="Pyrénées-Orientales (66)">Pyrénées-Orientales (66)</option>
+      <option value="Bas-Rhin (67)">Bas-Rhin (67)</option>
+      <option value="Haut-Rhin (68)">Haut-Rhin (68)</option>
+      <option value="Rhône (69)">Rhône (69)</option>
+      <option value="Haute-Saône (70)">Haute-Saône (70)</option>
+      <option value="Saône-et-Loire (71)">Saône-et-Loire (71)</option>
+      <option value="Sarthe (72)">Sarthe (72)</option>
+      <option value="Savoie (73)">Savoie (73)</option>
+      <option value="Haute-Savoie (74)">Haute-Savoie (74)</option>
+      <option value="Paris (75)">Paris (75)</option>
+      <option value="Seine-Maritime (76)">Seine-Maritime (76)</option>
+      <option value="Seine-et-Marne (77)">Seine-et-Marne (77)</option>
+      <option value="Yvelines (78)">Yvelines (78)</option>
+      <option value="Deux-Sèvres (79)">Deux-Sèvres (79)</option>
+      <option value="Somme (80)">Somme (80)</option>
+      <option value="Tarn (81)">Tarn (81)</option>
+      <option value="Tarn-et-Garonne (82)">Tarn-et-Garonne (82)</option>
+      <option value="Var (83)">Var (83)</option>
+      <option value="Vaucluse (84)">Vaucluse (84)</option>
+      <option value="Vendée (85)">Vendée (85)</option>
+      <option value="Vienne (86)">Vienne (86)</option>
+      <option value="Haute-Vienne (87)">Haute-Vienne (87)</option>
+      <option value="Vosges (88)">Vosges (88)</option>
+      <option value="Yonne (89)">Yonne (89)</option>
+      <option value="Territoire de Belfort (90)">Territoire de Belfort (90)</option>
+      <option value="Essonne (91)">Essonne (91)</option>
+      <option value="Hauts-de-Seine (92)">Hauts-de-Seine (92)</option>
+      <option value="Seine-Saint-Denis (93)">Seine-Saint-Denis (93)</option>
+      <option value="Val-de-Marne (94)">Val-de-Marne (94)</option>
+      <option value="Val-d’Oise (95)">Val-d’Oise (95)</option>
+      <option value="Guadeloupe (971)">Guadeloupe (971)</option>
+      <option value="Martinique (972)">Martinique (972)</option>
+      <option value="Guyane (973)">Guyane (973)</option>
+      <option value="La Réunion (974)">La Réunion (974)</option>
+      <option value="Mayotte (976)">Mayotte (976)</option>
+    </select>
+
+    <div class="blog-note">  
+      Ces informations seront visibles uniquement dans ton profil blog.
+      Ton email et ton mot de passe ne seront jamais visibles publiquement.  
+    </div>
+
+  </div>  
+</div>
+
+<div class="bottom">  
+  <img src="icon-envelope.png" class="env" alt="">  
+  
+  <div class="bottom-text">  
+    <strong>Ici, chaque réponse compte.</strong><br>  
+    Chaque silence aussi.<br>  
+    Quand tu es prêt(e), clique sur “Envoyer”.  
+  </div>  
+  
+  <div class="big-heart">♡</div>  
 </div>
 
 </section>
 
-<div class="footer">
-  <button type="button" id="sendBtn">✈ Envoyer</button>
-  <div class="thanks">♡ &nbsp; Merci d’être là. Tu n’es pas seul(e). &nbsp; ♡</div>
+<div class="footer">  
+  <button type="button" id="sendBtn">✈ Envoyer</button>  
+  <div class="thanks">♡ &nbsp; Merci d’être là. Tu n’es pas seul(e). &nbsp; ♡</div>  
 </div>
 
 <div id="status"></div>
 
 </main>
 
+<div id="successScreen">  
+  <div class="success-box">  
+    <h2>Merci 💜</h2>  
+    <p id="successText">  
+      Ta voix a été entendue.<br><br>  
+      Même silencieuse, elle compte vraiment.  
+    </p>  
+    <a href="temoignages.html" class="success-btn">Voir les témoignages</a>  
+    <a href="blog.html" class="success-btn" id="blogSuccessBtn" style="display:none;">Accéder au blog</a>  
+  </div>  
+</div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
@@ -451,9 +730,21 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 const sendBtn = document.getElementById("sendBtn");
 const status = document.getElementById("status");
+const joinBlog = document.getElementById("joinBlog");
+const blogFields = document.getElementById("blogFields");
+
+joinBlog.addEventListener("change", () => {
+  blogFields.style.display = joinBlog.checked ? "block" : "none";
+});
+
+window.togglePassword = function(id){
+  const input = document.getElementById(id);
+  input.type = input.type === "password" ? "text" : "password";
+};
 
 function getRadio(name){
   return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
@@ -464,13 +755,8 @@ function getChecks(name){
 }
 
 function clearErrors(){
-  document.querySelectorAll(".card").forEach(el => {
-    el.classList.remove("error");
-  });
-
-  document.querySelectorAll(".error-message").forEach(el => {
-    el.remove();
-  });
+  document.querySelectorAll(".card").forEach(el => el.classList.remove("error"));
+  document.querySelectorAll(".error-message").forEach(el => el.remove());
 }
 
 function showError(element, message){
@@ -485,41 +771,48 @@ function showError(element, message){
 
 function validateForm(){
   clearErrors();
-
   let isValid = true;
 
   const requiredRadios = [
-    { name:"age", message:"Merci de choisir une réponse." },
-    { name:"genre", message:"Merci de choisir une réponse." },
-    { name:"justice", message:"Merci de choisir une réponse." },
-    { name:"parle", message:"Merci de choisir une réponse." },
-    { name:"ecoute", message:"Merci de choisir une réponse." }
+    "age","genre","justice","parle","ecoute"
   ];
 
-  requiredRadios.forEach(item => {
-    const checked = document.querySelector(`input[name="${item.name}"]:checked`);
-
-    if(!checked){
-      const firstInput = document.querySelector(`input[name="${item.name}"]`);
-      const card = firstInput.closest(".card");
-      showError(card, item.message);
+  requiredRadios.forEach(name=>{
+    if(!document.querySelector(`input[name="${name}"]:checked`)){
+      showError(document.querySelector(`input[name="${name}"]`).closest(".card"), "Merci de choisir une réponse.");
       isValid = false;
     }
   });
 
-  const expressionChecked = document.querySelectorAll('input[name="expression"]:checked');
-
-  if(expressionChecked.length === 0){
-    const card = document.querySelector('input[name="expression"]').closest(".card");
-    showError(card, "Merci de cocher au moins une réponse.");
+  if(document.querySelectorAll('input[name="expression"]:checked').length === 0){
+    showError(document.querySelector('input[name="expression"]').closest(".card"), "Merci de cocher au moins une réponse.");
     isValid = false;
   }
 
+  // VALIDATION BLOG
+  if(joinBlog.checked){
+    const blogCard = document.getElementById("blogCard");
+
+    const pseudo = document.getElementById("blogPseudo").value.trim();
+    const email = document.getElementById("blogEmail").value.trim();
+    const password = document.getElementById("blogPassword").value.trim();
+    const passwordConfirm = document.getElementById("blogPasswordConfirm").value.trim();
+    const departement = document.getElementById("blogDepartement").value;
+
+    if(!pseudo || !email || !password || !passwordConfirm || !departement){
+      showError(blogCard, "Merci de compléter toutes les informations du profil blog.");
+      isValid = false;
+    }else if(password.length < 6){
+      showError(blogCard, "Mot de passe trop court (6 caractères minimum).");
+      isValid = false;
+    }else if(password !== passwordConfirm){
+      showError(blogCard, "Les mots de passe ne correspondent pas.");
+      isValid = false;
+    }
+  }
+
   if(!isValid){
-    document.querySelector(".error")?.scrollIntoView({
-      behavior:"smooth",
-      block:"center"
-    });
+    document.querySelector(".error")?.scrollIntoView({behavior:"smooth",block:"center"});
   }
 
   return isValid;
@@ -527,36 +820,90 @@ function validateForm(){
 
 sendBtn.addEventListener("click", async () => {
   if(!validateForm()){
-    status.textContent = "Merci de compléter toutes les questions obligatoires 💜";
+    status.textContent = "Merci de compléter les champs 💜";
     return;
   }
 
   sendBtn.disabled = true;
   status.textContent = "Envoi en cours...";
 
-  const data = {
-    age: getRadio("age"),
-    genre: getRadio("genre"),
-    justice: getRadio("justice"),
-    parle: getRadio("parle"),
-    ecoute: getRadio("ecoute"),
-    expression: getChecks("expression"),
-    message: document.getElementById("message").value.trim(),
-    partageAutorise: document.getElementById("partage").checked,
-    createdAt: serverTimestamp()
-  };
+  const wantsBlog = joinBlog.checked;
+  let blogUid = null;
+  let blogPseudo = "";
+
+  const age = getRadio("age");
+  const genre = getRadio("genre");
 
   try {
-    await addDoc(collection(db, "reponses"), data);
-    status.textContent = "Merci ❤️ ta réponse a bien été envoyée.";
-    sendBtn.textContent = "Envoyé";
+
+    /* ========================
+       CREATION COMPTE BLOG
+    ======================== */
+    if(wantsBlog){
+
+      blogPseudo = document.getElementById("blogPseudo").value.trim();
+      const email = document.getElementById("blogEmail").value.trim();
+      const password = document.getElementById("blogPassword").value.trim();
+      const departement = document.getElementById("blogDepartement").value;
+
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      blogUid = userCredential.user.uid;
+
+      await setDoc(doc(db, "blogUsers", blogUid), {
+        pseudo: blogPseudo,
+        email: email,
+
+        // 👇 PROFIL BLOG
+        age: age,
+        genre: genre,
+        departement: departement,
+
+        plan: "free",
+        createdAt: serverTimestamp(),
+        active: true,
+        online: false
+      });
+    }
+
+    /* ========================
+       ENREGISTREMENT FORMULAIRE
+    ======================== */
+
+    await addDoc(collection(db, "reponses"), {
+      age: age,
+      genre: genre,
+      justice: getRadio("justice"),
+      parle: getRadio("parle"),
+      ecoute: getRadio("ecoute"),
+      expression: getChecks("expression"),
+      message: document.getElementById("message").value.trim(),
+      partageAutorise: document.getElementById("partage").checked,
+      blogAccessRequested: wantsBlog,
+      blogUid: blogUid,
+      blogPseudo: blogPseudo,
+      createdAt: serverTimestamp()
+    });
+
+    document.querySelector(".page").style.display = "none";
+
+    if(wantsBlog){
+      document.getElementById("successText").innerHTML =
+        "Ta voix a été entendue 💜<br><br>Ton accès au blog est créé.";
+      document.getElementById("blogSuccessBtn").style.display = "inline-block";
+    }
+
+    document.getElementById("successScreen").style.display = "flex";
+
   } catch (error) {
     console.error(error);
-    status.textContent = "Erreur : la réponse n’a pas pu être envoyée.";
+
+    if(error.code === "auth/email-already-in-use"){
+      status.textContent = "Email déjà utilisé.";
+    }else{
+      status.textContent = "Erreur lors de l'envoi.";
+    }
+
     sendBtn.disabled = false;
   }
 });
 </script>
-
-</body>
-</html>
