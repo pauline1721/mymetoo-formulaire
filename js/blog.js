@@ -343,3 +343,15 @@ window.openMemberProfile = function(uid, data){
     document.getElementById("memberProfileGenre").innerText = data.genre || "Non renseigné";
     document.getElementById("memberProfileDepartement").innerText =
   data.departement || "Non renseigné";
+    modal.dataset.uid = uid;
+    modal.dataset.pseudo = data.pseudo || "Anonyme";
+    modal.style.display = "block";
+  }
+};
+
+window.closeMemberProfile = function(){
+  const modal = document.getElementById("memberProfileModal");
+  if(modal){
+    modal.style.display = "none";
+  }
+};
