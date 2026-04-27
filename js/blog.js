@@ -52,6 +52,9 @@ let currentPseudo = "Anonyme";
 let currentUserData = null;
 let currentPrivateUser = null;
 
+let currentReportMode = null;
+let currentReportTarget = null;
+
 let presenceInterval = null;
 let unsubscribeMembers = null;
 let unsubscribePublicMessages = null;
@@ -118,9 +121,7 @@ window.resetPassword = async function(){
 /* ================= AUTH STATE ================= */
 
 onAuthStateChanged(auth, async user => {
-
   if(user){
-
     const snap = await getDoc(doc(db,"blogUsers",user.uid));
 
     if(!snap.exists()){
@@ -159,26 +160,21 @@ onAuthStateChanged(auth, async user => {
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("blogContent").style.display = "none";
   }
-
 });
 
 /* ================= MEMBRES ================= */
 
 function loadMembers(){
-
   const container = document.getElementById("membersList");
 
   if(unsubscribeMembers) unsubscribeMembers();
 
   unsubscribeMembers = onSnapshot(collection(db,"blogUsers"), snap => {
-
     container.innerHTML = "";
     const blocked = currentUserData?.blockedUsers || [];
-
     let count = 0;
 
     snap.forEach(docSnap => {
-
       const uid = docSnap.id;
       const data = docSnap.data();
 
@@ -204,15 +200,12 @@ function loadMembers(){
     if(count === 0){
       container.innerHTML = `<div class="member">Aucun autre membre en ligne</div>`;
     }
-
   });
-
 }
 
 /* ================= CHAT PUBLIC ================= */
 
 function loadPublicMessages(){
-
   const container = document.getElementById("messages");
 
   if(unsubscribePublicMessages) unsubscribePublicMessages();
@@ -220,11 +213,9 @@ function loadPublicMessages(){
   const q = query(collection(db,"blogMessages"), orderBy("createdAt","asc"));
 
   unsubscribePublicMessages = onSnapshot(q, snap => {
-
     container.innerHTML = "";
 
     snap.forEach(docSnap => {
-
       const m = docSnap.data();
 
       if(m.visible === false) return;
@@ -239,13 +230,10 @@ function loadPublicMessages(){
       `;
 
       container.appendChild(div);
-
     });
 
     container.scrollTop = container.scrollHeight;
-
   });
-
 }
 
 window.sendMessage = async function(){
@@ -792,15 +780,94 @@ window.hideCurrentPrivateConversation = async function(){
   currentPrivateUser = null;
 };
 
-/* ================= SIGNALEMENT / MODALES ================= */
+/* ================= SIGNALEMENT ================= */
 
 window.reportMemberProfile = function(){
-  alert("Signalement conservé : on remettra la modération avancée juste après.");
+  const modal = document.getElementById("memberProfileModal");
+
+  currentReportMode = "profile";
+  currentReportTarget = {
+    uid:modal.dataset.uid,
+    pseudo:modal.dataset.pseudo || "Utilisateur"
+  };
+
+  openReportModal("⚠️ Signaler ce profil", "Explique pourquoi tu signales ce profil :");
 };
 
 window.reportPrivateConversation = function(){
-  alert("Signalement conservé : on remettra la modération avancée juste après.");
+  if(!currentPrivateUser) return;
+
+  currentReportMode = "privateConversation";
+  currentReportTarget = {
+    uid:currentPrivateUser.uid,
+    pseudo:currentPrivateUser.pseudo || "Utilisateur",
+    chatId:getChatId(auth.currentUser.uid, currentPrivateUser.uid)
+  };
+
+  openReportModal("⚠️ Signaler cette discussion", "Explique pourquoi tu signales cette discussion privée :");
 };
+
+function openReportModal(title, text){
+  document.getElementById("reportModalTitle").textContent = title;
+  document.getElementById("reportModalText").textContent = text;
+  document.getElementById("reportReason").value = "";
+  document.getElementById("reportModalStatus").textContent = "";
+  document.getElementById("reportModal").style.display = "flex";
+}
+
+window.closeReportModal = function(){
+  document.getElementById("reportModal").style.display = "none";
+  document.getElementById("reportReason").value = "";
+  document.getElementById("reportModalStatus").textContent = "";
+  currentReportMode = null;
+  currentReportTarget = null;
+};
+
+window.confirmReport = async function(){
+  const user = auth.currentUser;
+  const reason = document.getElementById("reportReason").value.trim();
+  const status = document.getElementById("reportModalStatus");
+
+  if(!user){
+    status.textContent = "Tu dois être connecté(e).";
+    return;
+  }
+
+  if(reason.length < 5){
+    status.textContent = "Merci d’expliquer la raison du signalement.";
+    return;
+  }
+
+  if(!currentReportMode || !currentReportTarget){
+    status.textContent = "Aucun signalement sélectionné.";
+    return;
+  }
+
+  const reportData = {
+    type:currentReportMode,
+    reportedUserUid:currentReportTarget.uid,
+    reportedUserPseudo:currentReportTarget.pseudo,
+    reportedBy:user.uid,
+    reportedByPseudo:currentPseudo,
+    reason:reason,
+    createdAt:serverTimestamp(),
+    status:"pending"
+  };
+
+  if(currentReportMode === "privateConversation"){
+    reportData.chatId = currentReportTarget.chatId;
+  }
+
+  await addDoc(collection(db,"reports"), reportData);
+
+  status.textContent = "Signalement envoyé ✅";
+
+  setTimeout(() => {
+    closeReportModal();
+  }, 700);
+};
+
+/* ================= MODALES ================= */
 
 window.openHelpModal = function(){
   closeMenu();
