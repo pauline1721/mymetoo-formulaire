@@ -137,7 +137,7 @@ onAuthStateChanged(auth, async user => {
     document.getElementById("blogContent").style.display = "block";
 
     loadMembers();
-    loadMessages();
+    loadPublicMessages();
 
   }else{
     if(presenceInterval){
