@@ -34,9 +34,9 @@ h1{font-family:Georgia,serif;font-size:56px;line-height:.9;margin:5px 0 8px}
 }
 
 .side-menu{
-  position:fixed;
-  left:0;
-  top:0;
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
   width:310px;
   max-width:88vw;
   height:100vh;
@@ -44,8 +44,8 @@ h1{font-family:Georgia,serif;font-size:56px;line-height:.9;margin:5px 0 8px}
   border-right:3px solid #ded2ec;
   box-shadow:8px 0 30px rgba(0,0,0,.18);
   z-index:30000;
-  transform:translateX(-105%);
-  transition:.25s;
+  transform:translateX(-100%);
+  transition:transform .25s ease;
   display:flex;
   flex-direction:column;
 }
@@ -91,9 +91,7 @@ h1{font-family:Georgia,serif;font-size:56px;line-height:.9;margin:5px 0 8px}
   font-weight:bold;
 }
 
-.menu-item:hover{
-  background:#efe4f8;
-}
+.menu-item:hover{background:#efe4f8}
 
 .menu-item.premium{
   background:linear-gradient(90deg,#5b23ad,#7e45d1);
@@ -119,9 +117,7 @@ h1{font-family:Georgia,serif;font-size:56px;line-height:.9;margin:5px 0 8px}
   z-index:29999;
 }
 
-.menu-overlay.open{
-  display:block;
-}
+.menu-overlay.open{display:block}
 
 .box{max-width:430px;margin:0 auto 20px;background:var(--soft);border:2px solid #ded2ec;border-radius:12px;padding:18px;position:relative;z-index:2}
 input,textarea,select{width:100%;border:2px solid #d8c2eb;border-radius:10px;padding:12px;font-size:16px;margin-top:10px;background:white;color:#24106b}
@@ -129,14 +125,18 @@ button{margin-top:12px;background:linear-gradient(90deg,#5b23ad,#7e45d1);color:w
 button.secondary{background:#6f42bd}
 button.danger{background:#d94b6a}
 .status{margin-top:10px;font-weight:bold;color:#5b23ad}
+
 #blogContent{display:none;position:relative;z-index:2}
 .visual-notification{display:none;max-width:1050px;margin:0 auto 15px;background:#fff5f7;color:#d94b6a;border:2px solid #d94b6a;border-radius:12px;padding:12px;font-weight:bold;text-align:center;position:relative;z-index:3}
+
 .chat-layout{display:grid;grid-template-columns:260px 1fr;gap:18px;max-width:1050px;margin:0 auto}
 .members-panel,.chat-panel,.private-panel{background:#f7effb;border:2px solid #ded2ec;border-radius:14px;padding:15px}
 .members-panel{height:600px;overflow-y:auto}
 .members-panel h2{margin-top:0;color:#5b23ad;font-size:22px}
 .member{background:white;border-radius:10px;padding:10px;margin-bottom:8px;font-weight:bold;color:#5b23ad;cursor:pointer;transition:.2s}
-.member:hover{background:#efe4f8}.member::before{content:"● ";color:#2fbb62}
+.member:hover{background:#efe4f8}
+.member::before{content:"● ";color:#2fbb62}
+
 .private-badge{display:inline-block;background:#d94b6a;color:white;border-radius:999px;padding:2px 7px;font-size:12px;margin-left:6px}
 .chat-panel{height:600px;display:flex;flex-direction:column}
 .chat-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
@@ -149,6 +149,7 @@ button.danger{background:#d94b6a}
 .write-box textarea{min-height:75px;resize:vertical;background:white}
 .file-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .file-row input{background:white}
+
 .private-panel{max-width:1050px;margin:18px auto 0;display:none;position:relative;z-index:2}
 .private-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;color:#5b23ad;font-weight:bold;flex-wrap:wrap}
 .private-list{background:white;border:2px solid #eeeaf3;border-radius:12px;padding:12px;max-height:260px;overflow-y:auto}
@@ -157,6 +158,7 @@ button.danger{background:#d94b6a}
 .private-conversation .name{font-weight:bold;color:#6f42bd}
 .private-conversation .preview{margin-top:5px;font-size:14px}
 .private-conversation .new{display:inline-block;background:#d94b6a;color:white;border-radius:999px;padding:2px 8px;font-size:12px;margin-left:8px}
+
 .private-chat-window{display:none;position:fixed;right:25px;bottom:25px;width:370px;max-width:calc(100vw - 30px);background:#fbf8ff;border:2px solid #ded2ec;border-radius:16px;box-shadow:0 10px 35px rgba(0,0,0,.18);z-index:9999;overflow:hidden}
 .private-chat-top{background:#6f42bd;color:white;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:bold}
 .window-actions{display:flex;gap:6px}
@@ -176,7 +178,7 @@ button.danger{background:#d94b6a}
   left:50%;
   top:50%;
   transform:translate(-50%,-50%);
-  width:420px;
+  width:430px;
   max-width:calc(100vw - 30px);
   max-height:90vh;
   overflow-y:auto;
@@ -216,122 +218,58 @@ button.danger{background:#d94b6a}
 .profile-actions{display:flex;flex-direction:column;gap:8px}
 .profile-close{margin:0;padding:5px 9px;border-radius:8px;background:white;color:#6f42bd}
 
-.form-row{
-  margin-bottom:10px;
-}
+.form-row{margin-bottom:10px}
+.form-row label{display:block;font-weight:bold;color:#5b23ad;margin-bottom:4px}
 
-.form-row label{
-  display:block;
-  font-weight:bold;
-  color:#5b23ad;
-  margin-bottom:4px;
-}
-
-.help-card{
-  background:white;
-  border:1px solid #eeeaf3;
-  border-radius:12px;
-  padding:12px;
-  margin-bottom:10px;
-}
-
-.help-card strong{
-  color:#5b23ad;
-}
-
-.help-card a{
-  display:inline-block;
-  margin-top:8px;
-  background:#d94b6a;
-  color:white;
-  text-decoration:none;
-  padding:9px 12px;
-  border-radius:8px;
-  font-weight:bold;
-}
-
-.premium-box{
-  background:white;
-  border-radius:12px;
-  padding:14px;
-  border:2px solid #eeeaf3;
-}
-
-.premium-price{
-  font-size:28px;
-  font-weight:bold;
-  color:#5b23ad;
-  margin:10px 0;
-}
-
-.legal-links-menu a{
-  display:block;
-  background:white;
-  border:1px solid #eeeaf3;
-  border-radius:10px;
-  padding:12px;
-  margin-bottom:8px;
-  color:#5b23ad;
-  font-weight:bold;
-  text-decoration:none;
-}
-
-.report-modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(36,16,107,.55);
-  z-index:20000;
-  justify-content:center;
-  align-items:center;
-  padding:18px;
-}
-
-.report-modal-box{
-  width:100%;
-  max-width:430px;
-  background:white;
-  border:2px solid #ded2ec;
-  border-radius:18px;
-  box-shadow:0 14px 45px rgba(0,0,0,.25);
-  overflow:hidden;
-}
-
-.report-modal-top{
-  background:#6f42bd;
-  color:white;
-  padding:14px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-weight:bold;
-}
-
-.report-modal-content{
-  padding:18px;
-  background:#fbf8ff;
-}
-
-.report-modal-content p{
-  margin:0 0 10px;
-  font-weight:bold;
-  color:#5b23ad;
-}
-
-.report-modal-content textarea{
-  min-height:110px;
-  resize:vertical;
-  background:white;
-}
-
-.report-modal-actions{
+.profile-view-actions{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
-  margin-top:10px;
+  margin-top:12px;
 }
 
+.gear-btn{
+  background:#6f42bd;
+}
+
+.password-eye-wrap{
+  position:relative;
+}
+
+.password-eye-wrap input{
+  padding-right:45px;
+}
+
+.eye-btn{
+  position:absolute;
+  right:10px;
+  top:20px;
+  background:transparent;
+  color:#5b23ad;
+  padding:0;
+  margin:0;
+  font-size:20px;
+}
+
+.help-card{background:white;border:1px solid #eeeaf3;border-radius:12px;padding:12px;margin-bottom:10px}
+.help-card strong{color:#5b23ad}
+.help-card a{display:inline-block;margin-top:8px;background:#d94b6a;color:white;text-decoration:none;padding:9px 12px;border-radius:8px;font-weight:bold}
+
+.premium-box{background:white;border-radius:12px;padding:14px;border:2px solid #eeeaf3}
+.premium-price{font-size:28px;font-weight:bold;color:#5b23ad;margin:10px 0}
+
+.legal-links-menu a{display:block;background:white;border:1px solid #eeeaf3;border-radius:10px;padding:12px;margin-bottom:8px;color:#5b23ad;font-weight:bold;text-decoration:none}
+
+.report-modal{display:none;position:fixed;inset:0;background:rgba(36,16,107,.55);z-index:20000;justify-content:center;align-items:center;padding:18px}
+.report-modal-box{width:100%;max-width:430px;background:white;border:2px solid #ded2ec;border-radius:18px;box-shadow:0 14px 45px rgba(0,0,0,.25);overflow:hidden}
+.report-modal-top{background:#6f42bd;color:white;padding:14px;display:flex;justify-content:space-between;align-items:center;font-weight:bold}
+.report-modal-content{padding:18px;background:#fbf8ff}
+.report-modal-content p{margin:0 0 10px;font-weight:bold;color:#5b23ad}
+.report-modal-content textarea{min-height:110px;resize:vertical;background:white}
+.report-modal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
 .footer{text-align:center;margin-top:30px;color:#6e4cb0;font-weight:bold}
+
 @media(max-width:800px){
   .page{padding:12px}
   .logo{width:130px}
@@ -438,7 +376,7 @@ button.danger{background:#d94b6a}
 <div class="footer">♡ Un espace privé pour échanger avec respect. ♡</div>
 </main>
 <!-- =========================
-   PROFIL (MODIFIABLE)
+   PROFIL PERSONNEL
 ========================= -->
 <div id="myProfileModal" class="menu-modal">
   <div class="menu-modal-top">
@@ -448,54 +386,87 @@ button.danger{background:#d94b6a}
 
   <div class="menu-modal-content">
 
-    <div class="form-row">
-      <label>Pseudo</label>
-      <input id="profilePseudoEdit" type="text">
+    <div id="profileView">
+      <div class="profile-field"><strong>Pseudo :</strong> <span id="myProfilePseudo"></span></div>
+      <div class="profile-field"><strong>Tranche d’âge :</strong> <span id="myProfileAge"></span></div>
+      <div class="profile-field"><strong>Genre :</strong> <span id="myProfileGenre"></span></div>
+      <div class="profile-field"><strong>Département :</strong> <span id="myProfileDepartement"></span></div>
+      <div class="profile-field"><strong>Email :</strong> <span id="myProfileEmail"></span></div>
+
+      <div class="profile-view-actions">
+        <button class="gear-btn" onclick="openEditProfile()">⚙️ Modifier mes infos</button>
+        <button class="secondary" onclick="openPasswordModal()">🔐 Modifier mon mot de passe</button>
+      </div>
     </div>
 
-    <div class="form-row">
-      <label>Tranche d’âge</label>
-      <select id="profileAgeEdit">
-        <option value="">Choisir</option>
-        <option value="Moins de 18 ans">Moins de 18 ans</option>
-        <option value="18 / 35 ans">18 / 35 ans</option>
-        <option value="Plus de 35 ans">Plus de 35 ans</option>
-        <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
-      </select>
+    <div id="profileEdit" style="display:none;">
+      <div class="form-row">
+        <label>Email</label>
+        <input id="profileEmailEdit" type="email">
+      </div>
+
+      <div class="form-row">
+        <label>Tranche d’âge</label>
+        <select id="profileAgeEdit">
+          <option value="">Choisir</option>
+          <option value="Moins de 18 ans">Moins de 18 ans</option>
+          <option value="18 / 35 ans">18 / 35 ans</option>
+          <option value="Plus de 35 ans">Plus de 35 ans</option>
+          <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Département</label>
+        <input id="profileDepartementEdit" type="text" placeholder="Ex : Aisne (02)">
+      </div>
+
+      <button onclick="updateProfile()">Enregistrer</button>
+      <button class="secondary" onclick="cancelEditProfile()">Annuler</button>
     </div>
 
-    <div class="form-row">
-      <label>Genre</label>
-      <select id="profileGenreEdit">
-        <option value="">Choisir</option>
-        <option value="Une femme">Une femme</option>
-        <option value="Un homme">Un homme</option>
-        <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
-      </select>
-    </div>
-
-    <div class="form-row">
-      <label>Département</label>
-      <input id="profileDepartementEdit" type="text" placeholder="Ex : Aisne (02)">
-    </div>
-
-    <hr>
-
-    <div class="form-row">
-      <label>Email</label>
-      <input id="profileEmail" type="email">
-    </div>
-
-    <div class="form-row">
-      <label>Nouveau mot de passe</label>
-      <input id="profilePassword" type="password" placeholder="Laisser vide si inchangé">
-    </div>
-
-    <button onclick="updateProfile()">Enregistrer les modifications</button>
     <div id="profileUpdateStatus" class="status"></div>
   </div>
 </div>
 
+<!-- =========================
+   MODIFIER MOT DE PASSE
+========================= -->
+<div id="passwordModal" class="menu-modal">
+  <div class="menu-modal-top">
+    <span>🔐 Modifier mon mot de passe</span>
+    <button class="profile-close" onclick="closePasswordModal()">✕</button>
+  </div>
+
+  <div class="menu-modal-content">
+    <div class="form-row">
+      <label>Ancien mot de passe</label>
+      <div class="password-eye-wrap">
+        <input id="oldPassword" type="password">
+        <button class="eye-btn" onclick="togglePasswordVisibility('oldPassword')" type="button">👁</button>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>Nouveau mot de passe</label>
+      <div class="password-eye-wrap">
+        <input id="newPassword" type="password">
+        <button class="eye-btn" onclick="togglePasswordVisibility('newPassword')" type="button">👁</button>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>Confirmer le nouveau mot de passe</label>
+      <div class="password-eye-wrap">
+        <input id="confirmNewPassword" type="password">
+        <button class="eye-btn" onclick="togglePasswordVisibility('confirmNewPassword')" type="button">👁</button>
+      </div>
+    </div>
+
+    <button onclick="changePassword()">Modifier le mot de passe</button>
+    <div id="passwordStatus" class="status"></div>
+  </div>
+</div>
 
 <!-- =========================
    AIDE / URGENCE
@@ -507,44 +478,73 @@ button.danger{background:#d94b6a}
   </div>
 
   <div class="menu-modal-content">
-
     <div class="help-card">
       <strong>Police / Gendarmerie</strong><br>
-      En cas de danger immédiat
+      Danger immédiat, agression, menace.
       <a href="tel:17">Appeler le 17</a>
     </div>
 
     <div class="help-card">
       <strong>SAMU</strong><br>
-      Urgence médicale
+      Urgence médicale.
       <a href="tel:15">Appeler le 15</a>
     </div>
 
     <div class="help-card">
       <strong>Pompiers</strong><br>
-      Accident / incendie
+      Accident, incendie, secours.
       <a href="tel:18">Appeler le 18</a>
     </div>
 
     <div class="help-card">
-      <strong>Numéro d'urgence européen</strong>
+      <strong>Urgence européenne</strong><br>
+      Numéro d’urgence utilisable partout en Europe.
       <a href="tel:112">Appeler le 112</a>
     </div>
 
     <div class="help-card">
+      <strong>Urgence par SMS</strong><br>
+      Pour personnes sourdes, malentendantes ou impossibilité de parler.
+      <a href="sms:114">Contacter le 114</a>
+    </div>
+
+    <div class="help-card">
       <strong>Violences femmes info</strong><br>
-      Écoute anonyme 24h/24
+      Écoute, information et orientation.
       <a href="tel:3919">Appeler le 3919</a>
     </div>
 
     <div class="help-card">
-      <strong>Net Écoute (jeunes)</strong>
-      <a href="tel:3018">Appeler le 3018</a>
+      <strong>Aide aux victimes</strong><br>
+      Écoute et accompagnement des victimes.
+      <a href="tel:116006">Appeler le 116 006</a>
     </div>
 
+    <div class="help-card">
+      <strong>Enfance en danger</strong><br>
+      Protection des mineurs en danger.
+      <a href="tel:119">Appeler le 119</a>
+    </div>
+
+    <div class="help-card">
+      <strong>Prévention suicide</strong><br>
+      Écoute en cas de détresse psychologique.
+      <a href="tel:3114">Appeler le 3114</a>
+    </div>
+
+    <div class="help-card">
+      <strong>Hébergement d’urgence</strong><br>
+      SAMU social.
+      <a href="tel:115">Appeler le 115</a>
+    </div>
+
+    <div class="help-card">
+      <strong>Net Écoute</strong><br>
+      Cyberharcèlement, violences numériques.
+      <a href="tel:3018">Appeler le 3018</a>
+    </div>
   </div>
 </div>
-
 
 <!-- =========================
    PREMIUM
@@ -556,23 +556,18 @@ button.danger{background:#d94b6a}
   </div>
 
   <div class="menu-modal-content">
-
     <div class="premium-box">
       <strong>Version Premium</strong>
+      <div class="premium-price">1,99€ / mois</div>
+      ✔ Filtres avancés par âge, genre et département<br>
+      ✔ Profil plus complet<br>
+      ✔ Accès prioritaire aux futures fonctions<br>
+      ✔ Soutien du projet MyMeToo 💜
 
-      <div class="premium-price">4,99€ / mois</div>
-
-      ✔ Messages privés illimités<br>
-      ✔ Accès prioritaire<br>
-      ✔ Badge profil Premium<br>
-      ✔ Soutien du projet 💜
-
-      <button style="margin-top:15px">Passer Premium</button>
+      <button style="margin-top:15px" onclick="alert('Premium bientôt disponible 💜')">Passer Premium</button>
     </div>
-
   </div>
 </div>
-
 
 <!-- =========================
    LEGAL
@@ -584,13 +579,87 @@ button.danger{background:#d94b6a}
   </div>
 
   <div class="menu-modal-content">
-
     <div class="legal-links-menu">
       <a href="mentions-legales.html">Mentions légales</a>
       <a href="confidentialite.html">Politique de confidentialité</a>
       <a href="cgu.html">Conditions d'utilisation</a>
     </div>
+  </div>
+</div>
 
+<!-- =========================
+   FENÊTRE PROFIL D'UN AUTRE MEMBRE
+========================= -->
+<div id="profileWindow" class="profile-window">
+  <div class="profile-top">
+    <span id="profileTitle">Profil</span>
+    <button class="profile-close" onclick="closeProfile()">✕</button>
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-field"><strong>Pseudo :</strong> <span id="profilePseudo"></span></div>
+    <div class="profile-field"><strong>Genre :</strong> <span id="profileGenre"></span></div>
+    <div class="profile-field"><strong>Âge :</strong> <span id="profileAge"></span></div>
+    <div class="profile-field"><strong>Département :</strong> <span id="profileDepartement"></span></div>
+
+    <div class="profile-actions">
+      <button onclick="messageProfileUser()">💬 Envoyer un message privé</button>
+      <button class="danger" onclick="reportProfileUser()">⚠️ Signaler ce profil</button>
+    </div>
+
+    <div id="profileStatus" class="status"></div>
+  </div>
+</div>
+
+<!-- =========================
+   CHAT PRIVÉ
+========================= -->
+<div id="privateChatWindow" class="private-chat-window">
+  <div class="private-chat-top">
+    <span id="privateTitle">Discussion privée</span>
+    <div class="window-actions">
+      <button class="window-btn report" onclick="reportPrivateConversation()">⚠️</button>
+      <button class="window-btn" onclick="minimizePrivateChat()">—</button>
+      <button class="window-btn delete" onclick="hideCurrentPrivateConversation()">✕</button>
+    </div>
+  </div>
+
+  <div id="privateMessages" class="private-messages"></div>
+
+  <div class="private-write">
+    <textarea id="privateText" placeholder="Écris ton message privé ici..."></textarea>
+
+    <div class="file-row">
+      <input id="privateImageInput" type="file" accept="image/png,image/jpeg,image/webp">
+      <button onclick="sendPrivateImage()">📷 Envoyer photo</button>
+    </div>
+
+    <button onclick="sendPrivateMessage()">Envoyer en privé</button>
+    <div id="privateStatus" class="status"></div>
+  </div>
+</div>
+
+<!-- =========================
+   SIGNALEMENT
+========================= -->
+<div id="reportModal" class="report-modal">
+  <div class="report-modal-box">
+    <div class="report-modal-top">
+      <span id="reportModalTitle">⚠️ Signalement</span>
+      <button class="profile-close" onclick="closeReportModal()">✕</button>
+    </div>
+
+    <div class="report-modal-content">
+      <p id="reportModalText">Explique la raison du signalement :</p>
+      <textarea id="reportReason" placeholder="Écris la raison ici..."></textarea>
+
+      <div class="report-modal-actions">
+        <button onclick="confirmReport()">Envoyer le signalement</button>
+        <button class="secondary" onclick="closeReportModal()">Annuler</button>
+      </div>
+
+      <div id="reportModalStatus" class="status"></div>
+    </div>
   </div>
 </div>
 <script type="module">
@@ -602,18 +671,19 @@ import {
   signOut,
   onAuthStateChanged,
   updateEmail,
-  updatePassword
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
   getFirestore, collection, addDoc, query, orderBy, serverTimestamp,
-  doc, getDoc, updateDoc, setDoc, arrayUnion, arrayRemove, onSnapshot
+  doc, getDoc, updateDoc, setDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
   getStorage, ref, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
 
 /* =========================
    FIREBASE INIT
@@ -633,14 +703,12 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-
 /* =========================
    VARIABLES
 ========================= */
 
 let currentPseudo = "Anonyme";
 let currentUserData = null;
-
 
 /* =========================
    LOGIN / LOGOUT
@@ -660,7 +728,6 @@ window.login = async function(){
 window.logout = async function(){
   await signOut(auth);
 };
-
 
 /* =========================
    AUTH STATE
@@ -685,15 +752,17 @@ onAuthStateChanged(auth, async user => {
     document.getElementById("loginBox").style.display="none";
     document.getElementById("blogContent").style.display="block";
 
+    loadMembers();
+    loadMessages();
+
   }else{
     document.getElementById("loginBox").style.display="block";
     document.getElementById("blogContent").style.display="none";
   }
 });
 
-
 /* =========================
-   MENU HAMBURGER
+   MENU
 ========================= */
 
 window.openMenu = function(){
@@ -706,9 +775,8 @@ window.closeMenu = function(){
   document.getElementById("menuOverlay").classList.remove("open");
 };
 
-
 /* =========================
-   PROFIL (MODIF EMAIL / MDP)
+   PROFIL
 ========================= */
 
 window.openMyProfile = function(){
@@ -717,115 +785,205 @@ window.openMyProfile = function(){
   const user = auth.currentUser;
   if(!user) return;
 
-  document.getElementById("profilePseudoEdit").value = currentUserData?.pseudo || "";
-  document.getElementById("profileAgeEdit").value = currentUserData?.age || "";
-  document.getElementById("profileGenreEdit").value = currentUserData?.genre || "";
-  document.getElementById("profileDepartementEdit").value = currentUserData?.departement || "";
+  document.getElementById("myProfilePseudo").innerText = currentUserData?.pseudo || "";
+  document.getElementById("myProfileAge").innerText = currentUserData?.age || "";
+  document.getElementById("myProfileGenre").innerText = currentUserData?.genre || "";
+  document.getElementById("myProfileDepartement").innerText = currentUserData?.departement || "";
+  document.getElementById("myProfileEmail").innerText = user.email || "";
 
-  document.getElementById("profileEmail").value = user.email || "";
-  document.getElementById("profilePassword").value = "";
-  document.getElementById("profileUpdateStatus").textContent = "";
+  document.getElementById("profileView").style.display = "block";
+  document.getElementById("profileEdit").style.display = "none";
 
   document.getElementById("myProfileModal").style.display = "block";
+};
+
+window.closeMyProfile = function(){
+  document.getElementById("myProfileModal").style.display = "none";
+};
+
+window.openEditProfile = function(){
+  document.getElementById("profileView").style.display = "none";
+  document.getElementById("profileEdit").style.display = "block";
+
+  document.getElementById("profileEmailEdit").value = auth.currentUser.email || "";
+  document.getElementById("profileAgeEdit").value = currentUserData?.age || "";
+  document.getElementById("profileDepartementEdit").value = currentUserData?.departement || "";
+};
+
+window.cancelEditProfile = function(){
+  document.getElementById("profileView").style.display = "block";
+  document.getElementById("profileEdit").style.display = "none";
 };
 
 window.updateProfile = async function(){
   const user = auth.currentUser;
   const status = document.getElementById("profileUpdateStatus");
 
-  if(!user){
-    status.textContent = "Tu dois être connecté(e).";
-    return;
-  }
-
-  const newPseudo = document.getElementById("profilePseudoEdit").value.trim();
-  const newAge = document.getElementById("profileAgeEdit").value;
-  const newGenre = document.getElementById("profileGenreEdit").value;
-  const newDepartement = document.getElementById("profileDepartementEdit").value.trim();
-
-  const newEmail = document.getElementById("profileEmail").value.trim();
-  const newPassword = document.getElementById("profilePassword").value.trim();
+  const email = document.getElementById("profileEmailEdit").value.trim();
+  const age = document.getElementById("profileAgeEdit").value;
+  const departement = document.getElementById("profileDepartementEdit").value;
 
   try{
+
     await updateDoc(doc(db,"blogUsers",user.uid),{
-      pseudo:newPseudo,
-      age:newAge,
-      genre:newGenre,
-      departement:newDepartement
+      age,
+      departement
     });
 
-    currentUserData = {
-      ...currentUserData,
-      pseudo:newPseudo,
-      age:newAge,
-      genre:newGenre,
-      departement:newDepartement
-    };
-
-    currentPseudo = newPseudo || "Anonyme";
-    document.getElementById("welcomePseudo").innerText = "Connecté(e) : " + currentPseudo;
-
-    if(newEmail && newEmail !== user.email){
-      await updateEmail(user, newEmail);
-      await updateDoc(doc(db,"blogUsers",user.uid),{
-        email:newEmail
-      });
-    }
-
-    if(newPassword){
-      if(newPassword.length < 6){
-        status.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
-        return;
-      }
-
-      await updatePassword(user, newPassword);
+    if(email !== user.email){
+      await updateEmail(user,email);
     }
 
     status.textContent = "Profil mis à jour ✅";
 
-  }catch(error){
-    console.error(error);
+    currentUserData.age = age;
+    currentUserData.departement = departement;
 
-    if(error.code === "auth/requires-recent-login"){
-      status.textContent = "Reconnecte-toi pour modifier l’email ou le mot de passe.";
-    }else if(error.code === "auth/email-already-in-use"){
-      status.textContent = "Cet email est déjà utilisé.";
-    }else{
-      status.textContent = "Erreur lors de la mise à jour.";
-    }
+    openMyProfile();
+
+  }catch(e){
+    status.textContent = "Erreur mise à jour.";
   }
 };
 
-
 /* =========================
-   MODALES
+   MOT DE PASSE
 ========================= */
 
-window.openHelpModal = function(){
-  closeMenu();
-  document.getElementById("helpModal").style.display = "block";
+window.openPasswordModal = function(){
+  document.getElementById("passwordModal").style.display = "block";
 };
 
-window.closeHelpModal = function(){
-  document.getElementById("helpModal").style.display = "none";
+window.closePasswordModal = function(){
+  document.getElementById("passwordModal").style.display = "none";
 };
 
-window.openPremiumModal = function(){
-  closeMenu();
-  document.getElementById("premiumModal").style.display = "block";
+window.togglePasswordVisibility = function(id){
+  const input = document.getElementById(id);
+  input.type = input.type === "password" ? "text" : "password";
 };
 
-window.closePremiumModal = function(){
-  document.getElementById("premiumModal").style.display = "none";
+window.changePassword = async function(){
+
+  const user = auth.currentUser;
+
+  const oldPass = document.getElementById("oldPassword").value;
+  const newPass = document.getElementById("newPassword").value;
+  const confirmPass = document.getElementById("confirmNewPassword").value;
+  const status = document.getElementById("passwordStatus");
+
+  if(newPass.length < 6){
+    status.textContent = "Mot de passe trop court.";
+    return;
+  }
+
+  if(newPass !== confirmPass){
+    status.textContent = "Les mots de passe ne correspondent pas.";
+    return;
+  }
+
+  try{
+    const cred = EmailAuthProvider.credential(user.email, oldPass);
+    await reauthenticateWithCredential(user, cred);
+    await updatePassword(user, newPass);
+
+    status.textContent = "Mot de passe modifié ✅";
+
+  }catch{
+    status.textContent = "Ancien mot de passe incorrect.";
+  }
 };
 
-window.openLegalModal = function(){
-  closeMenu();
-  document.getElementById("legalModal").style.display = "block";
+/* =========================
+   MEMBRES (CORRIGÉ)
+========================= */
+
+function loadMembers(){
+  const container = document.getElementById("membersList");
+
+  onSnapshot(collection(db,"blogUsers"), snap => {
+
+    container.innerHTML = "";
+
+    snap.forEach(docSnap=>{
+      const data = docSnap.data();
+
+      if(docSnap.id === auth.currentUser.uid) return;
+
+      const div = document.createElement("div");
+      div.className = "member";
+      div.innerText = data.pseudo || "Anonyme";
+
+      container.appendChild(div);
+    });
+
+  });
+}
+
+/* =========================
+   CHAT PUBLIC
+========================= */
+
+function loadMessages(){
+
+  const container = document.getElementById("messages");
+
+  const q = query(collection(db,"blogMessages"), orderBy("createdAt","asc"));
+
+  onSnapshot(q, snap => {
+
+    container.innerHTML = "";
+
+    snap.forEach(docSnap=>{
+      const m = docSnap.data();
+
+      const div = document.createElement("div");
+      div.className = "msg";
+
+      div.innerHTML = `<div class="msg-meta">${m.pseudo}</div>${m.message}`;
+
+      container.appendChild(div);
+    });
+
+    container.scrollTop = container.scrollHeight;
+  });
+}
+
+window.sendMessage = async function(){
+
+  const text = document.getElementById("chatMessage").value.trim();
+  if(!text) return;
+
+  await addDoc(collection(db,"blogMessages"),{
+    pseudo:currentPseudo,
+    message:text,
+    createdAt:serverTimestamp()
+  });
+
+  document.getElementById("chatMessage").value="";
 };
 
-window.closeLegalModal = function(){
-  document.getElementById("legalModal").style.display = "none";
+/* =========================
+   IMAGE
+========================= */
+
+window.sendPublicImage = async function(){
+
+  const file = document.getElementById("publicImageInput").files[0];
+  if(!file) return;
+
+  const storageRef = ref(storage, "images/"+Date.now());
+  await uploadBytes(storageRef, file);
+  const url = await getDownloadURL(storageRef);
+
+  await addDoc(collection(db,"blogMessages"),{
+    pseudo:currentPseudo,
+    imageUrl:url,
+    createdAt:serverTimestamp()
+  });
 };
 
 </script>
+
+</body>
+</html>
