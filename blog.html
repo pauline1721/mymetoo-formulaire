@@ -10,10 +10,8 @@
 
 <body>
 
-<!-- OVERLAY -->
 <div id="menuOverlay" class="menu-overlay" onclick="closeMenu()"></div>
 
-<!-- MENU HAMBURGER -->
 <nav id="sideMenu" class="side-menu">
   <div class="menu-top">
     <span>Menu MyMeToo</span>
@@ -32,17 +30,13 @@
   </div>
 </nav>
 
-<!-- CONTENU PRINCIPAL -->
 <main class="page">
 
-<!-- BOUTON MENU -->
 <button class="menu-btn" onclick="openMenu()">☰</button>
 
-<!-- DECOR -->
 <img src="feuille-gauche.png" class="leaf left" alt="">
 <img src="feuille-droite.png" class="leaf right" alt="">
 
-<!-- HEADER -->
 <div class="header">
   <img src="logoUNIS.png" class="logo" alt="UNIS">
   <div class="unis">UNIS</div>
@@ -111,7 +105,7 @@
 <div class="footer">♡ Un espace privé pour échanger avec respect. ♡</div>
 </main>
 
-<!-- PROFIL -->
+<!-- MON PROFIL -->
 <div id="myProfileModal" class="menu-modal">
   <div class="menu-modal-top">
     <span>👤 Mon profil</span>
@@ -256,6 +250,8 @@
     </div>
   </div>
 </div>
+
+<!-- PROFIL MEMBRE -->
 <div id="memberProfileModal" class="menu-modal">
   <div class="menu-modal-top">
     <span id="memberProfileTitle">Profil membre</span>
@@ -274,6 +270,51 @@
     <div id="memberProfileStatus" class="status"></div>
   </div>
 </div>
+
+<!-- CHAT PRIVÉ -->
+<div id="privateChatWindow" class="private-chat-window">
+  <div class="private-chat-top">
+    <span id="privateTitle">Discussion privée</span>
+
+    <div class="window-actions">
+      <button class="window-btn report" onclick="reportPrivateConversation()">⚠️</button>
+      <button class="window-btn" onclick="minimizePrivateChat()">—</button>
+      <button class="window-btn delete" onclick="hideCurrentPrivateConversation()">✕</button>
+    </div>
+  </div>
+
+  <div id="privateMessages" class="private-messages"></div>
+
+  <div class="private-write">
+    <textarea id="privateText" placeholder="Écris ton message privé ici..."></textarea>
+
+    <button onclick="sendPrivateMessage()">Envoyer en privé</button>
+    <div id="privateStatus" class="status"></div>
+  </div>
+</div>
+
+<!-- SIGNALEMENT -->
+<div id="reportModal" class="report-modal">
+  <div class="report-modal-box">
+    <div class="report-modal-top">
+      <span id="reportModalTitle">⚠️ Signalement</span>
+      <button class="profile-close" onclick="closeReportModal()">✕</button>
+    </div>
+
+    <div class="report-modal-content">
+      <p id="reportModalText">Explique la raison du signalement :</p>
+      <textarea id="reportReason" placeholder="Écris la raison ici..."></textarea>
+
+      <div class="report-modal-actions">
+        <button onclick="confirmReport()">Envoyer le signalement</button>
+        <button class="secondary" onclick="closeReportModal()">Annuler</button>
+      </div>
+
+      <div id="reportModalStatus" class="status"></div>
+    </div>
+  </div>
+</div>
+
 <script type="module" src="js/blog.js"></script>
 
 </body>
