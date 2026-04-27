@@ -94,7 +94,8 @@ button:hover{
   max-width:900px;
 }
 
-#data{
+#data,
+#reportsData{
   max-width:900px;
   margin:0 auto;
 }
@@ -214,6 +215,47 @@ button:hover{
   background:#6f42bd;
 }
 
+.report-card{
+  background:#fff5f7;
+  border:2px solid #d94b6a;
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+.report-card.done{
+  opacity:.65;
+  border-color:#6f42bd;
+  background:#f7effb;
+}
+
+.report-type{
+  font-weight:bold;
+  color:#d94b6a;
+  font-size:18px;
+  margin-bottom:8px;
+}
+
+.report-message{
+  background:white;
+  border-radius:8px;
+  padding:12px;
+  margin-top:10px;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+
+.report-btn{
+  background:#d94b6a;
+  margin-right:8px;
+}
+
+.report-btn.done-btn{
+  background:#6f42bd;
+}
+
 .logout{
   display:block;
   margin:0 auto 20px;
@@ -244,7 +286,7 @@ button:hover{
 </div>
 
 <div id="adminContent">
-  <h1>📊 Réponses MyMeToo</h1>
+  <h1>📊 Admin MyMeToo</h1>
 
   <button class="logout" onclick="logout()">Se déconnecter</button>
 
@@ -272,17 +314,29 @@ button:hover{
     <canvas id="dailyChart"></canvas>
   </div>
 
+  <h2>🚨 Signalements</h2>
+  <div id="reportsData"></div>
+
   <h2>Liste des réponses</h2>
   <div id="data"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, orderBy, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  updateDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const ADMIN_UID = "YBknFdtouzRiDzSj8b2KjncQ7sp2";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
@@ -344,11 +398,16 @@ window.toggleReplyVisibility = async function(parentId, replyId, isVisible){
 };
 
 onAuthStateChanged(auth, user => {
-  if(user){
+  if(user && user.uid === ADMIN_UID){
     document.getElementById("login").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
+    loadReports();
     loadData();
   }else{
+    if(user){
+      signOut(auth);
+    }
+
     document.getElementById("login").style.display = "block";
     document.getElementById("adminContent").style.display = "none";
   }
@@ -393,6 +452,82 @@ function renderDailyChart(daysData){
     }
   });
 }
+
+async function loadReports(){
+  const container = document.getElementById("reportsData");
+  container.innerHTML = "";
+
+  const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+
+  if(snapshot.empty){
+    container.innerHTML = `<div class="empty">Aucun signalement pour le moment.</div>`;
+    return;
+  }
+
+  snapshot.forEach(item => {
+    const r = item.data();
+    const id = item.id;
+    const dateObj = r.createdAt?.toDate ? r.createdAt.toDate() : null;
+    const done = r.status === "done";
+
+    let typeText = "Signalement";
+
+    if(r.type === "profile"){
+      typeText = "Profil signalé";
+    }
+
+    if(r.type === "privateConversation"){
+      typeText = "Discussion privée signalée";
+    }
+
+    if(r.type === "blogMessage"){
+      typeText = "Message public signalé";
+    }
+
+    const div = document.createElement("div");
+    div.className = done ? "report-card done" : "report-card";
+
+    div.innerHTML = `
+      <div class="report-type">🚨 ${typeText}</div>
+
+      <div class="field"><span class="label">Statut :</span> ${r.status || "pending"}</div>
+      <div class="field"><span class="label">Signalé par UID :</span> ${r.reportedBy || ""}</div>
+
+      <div class="field"><span class="label">Utilisateur signalé :</span> ${r.reportedUserPseudo || r.pseudo || ""}</div>
+      <div class="field"><span class="label">UID utilisateur signalé :</span> ${r.reportedUserUid || r.authorUid || ""}</div>
+
+      <div class="field"><span class="label">Genre :</span> ${r.reportedUserGenre || ""}</div>
+      <div class="field"><span class="label">Âge :</span> ${r.reportedUserAge || ""}</div>
+
+      <div class="field"><span class="label">Chat ID :</span> ${r.chatId || ""}</div>
+      <div class="field"><span class="label">Message ID :</span> ${r.messageId || ""}</div>
+
+      ${r.message ? `<div class="report-message"><span class="label">Message signalé :</span><br>${r.message}</div>` : ""}
+
+      <div class="field"><span class="label">Date :</span> ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}</div>
+
+      <button class="report-btn done-btn" onclick="markReportDone('${id}')">
+        Marquer comme traité
+      </button>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+window.markReportDone = async function(reportId){
+  try{
+    await updateDoc(doc(db, "reports", reportId), {
+      status: "done"
+    });
+
+    loadReports();
+  }catch(e){
+    alert("Erreur lors du traitement du signalement.");
+    console.error(e);
+  }
+};
 
 async function loadReplies(parentId, repliesContainer){
   repliesContainer.innerHTML = "";
