@@ -167,17 +167,6 @@ input[type=checkbox]:checked{
     linear-gradient(-45deg,transparent 35%,#6e42b7 36%,#6e42b7 52%,transparent 53%);
 }
 
-.text-field{
-  appearance:auto;
-  width:100%;
-  height:auto;
-  border:2px solid #c4b2e4;
-  border-radius:8px;
-  padding:12px;
-  font-size:17px;
-  margin-top:12px;
-}
-
 .icon{
   position:absolute;
   right:28px;
@@ -249,54 +238,6 @@ textarea{
   height:auto;
 }
 
-.blog-card{
-  grid-column:1/-1;
-}
-
-.blog-fields{
-  display:none;
-  margin-top:14px;
-  background:#f7effb;
-  border-radius:10px;
-  padding:14px;
-}
-
-.blog-fields input{
-  appearance:auto;
-  width:100%;
-  height:auto;
-  border:2px solid #c4b2e4;
-  border-radius:8px;
-  padding:11px;
-  margin:7px 0;
-  font-size:16px;
-}
-
-.password-wrap{
-  position:relative;
-}
-
-.password-wrap input{
-  padding-right:48px;
-}
-
-.eye{
-  position:absolute;
-  right:13px;
-  top:18px;
-  cursor:pointer;
-  font-size:20px;
-  color:#5b23ad;
-  user-select:none;
-}
-
-.blog-note{
-  font-size:15px;
-  line-height:1.4;
-  color:#5b23ad;
-  margin-top:8px;
-}
-
 .bottom{
   grid-column:1/-1;
   background:#f6ebfb;
@@ -366,54 +307,10 @@ button:disabled{
   color:#5b23ad;
 }
 
-#successScreen{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:#e8d7f3;
-  z-index:9999;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
-}
-
-.success-box{
-  background:white;
-  max-width:390px;
-  padding:38px 26px;
-  border-radius:18px;
-  text-align:center;
-  color:#24106b;
-  box-shadow:0 10px 35px rgba(0,0,0,.18);
-}
-
-.success-box h2{
-  font-family:Georgia, serif;
-  font-size:36px;
-  margin:0 0 15px;
-}
-
-.success-box p{
-  font-size:18px;
-  line-height:1.5;
-  margin:0;
-}
-
-.success-btn{
-  display:inline-block;
-  margin-top:22px;
-  background:linear-gradient(90deg,#5b23ad,#7e45d1);
-  color:white;
-  padding:13px 22px;
-  border-radius:9px;
-  text-decoration:none;
-  font-weight:bold;
-}
-
 @media(max-width:800px){
   .page{padding:8px 12px}
   .grid{grid-template-columns:1fr}
-  .full,.consent,.bottom,.blog-card{grid-column:auto}
+  .full,.consent,.bottom{grid-column:auto}
   h1{font-size:52px}
   .subtitle{font-size:26px}
   .logo{width:165px}
@@ -466,21 +363,15 @@ button:disabled{
   <img src="icon-genre.png" class="icon" alt="">
 </div>
 
-<div class="card full" id="departementCard">
-  <div class="title">3. Dans quel département es-tu ?</div>
-  <div class="hint">Exemple : Aisne (02), Nord (59), Somme (80)...</div>
-  <input id="departement" class="text-field" type="text" placeholder="Département">
-</div>
-
 <div class="card full">
-  <div class="title">4. Ton vécu a-t-il été porté devant la justice ?</div>
+  <div class="title">3. Ton vécu a-t-il été porté devant la justice ?</div>
   <label class="option"><input type="radio" name="justice" value="Non, jamais">Non, jamais</label>
   <label class="option"><input type="radio" name="justice" value="Oui, j’ai porté plainte ou engagé une démarche officielle">Oui, j’ai porté plainte ou engagé<br>une démarche officielle</label>
   <img src="icon-justice.png" class="icon big" alt="">
 </div>
 
 <div class="card">
-  <div class="title">5. As-tu déjà parlé de ce que tu as vécu<br>(hors justice) ?</div>
+  <div class="title">4. As-tu déjà parlé de ce que tu as vécu<br>(hors justice) ?</div>
   <label class="option"><input type="radio" name="parle" value="Non, je n’en ai jamais parlé">Non, je n’en ai jamais parlé.</label>
   <label class="option"><input type="radio" name="parle" value="Oui, à un proche">Oui, à un proche (famille, ami, ...)</label>
   <label class="option"><input type="radio" name="parle" value="Oui, à un professionnel">Oui, à un professionnel<br>(médecin, psychologue, ...)</label>
@@ -488,7 +379,7 @@ button:disabled{
 </div>
 
 <div class="card">
-  <div class="title">6. Aujourd’hui, te sens-tu écouté(e) ?</div>
+  <div class="title">5. Aujourd’hui, te sens-tu écouté(e) ?</div>
   <label class="option"><input type="radio" name="ecoute" value="Oui">Oui</label>
   <label class="option"><input type="radio" name="ecoute" value="Un peu">Un peu</label>
   <label class="option"><input type="radio" name="ecoute" value="Non">Non</label>
@@ -497,7 +388,7 @@ button:disabled{
 </div>
 
 <div class="card full">
-  <div class="title">7. Que souhaites-tu exprimer par ta voix silencieuse ?</div>
+  <div class="title">6. Que souhaites-tu exprimer par ta voix silencieuse ?</div>
   <div class="hint">(Tu peux cocher une ou plusieurs réponses.)</div>
   <label class="option"><input type="checkbox" name="expression" value="Je suis là, même sans mots">Je suis là, même sans mots.</label>
   <label class="option"><input type="checkbox" name="expression" value="Je veux être reconnu(e) sans devoir tout raconter">Je veux être reconnu(e) sans devoir tout raconter.</label>
@@ -507,7 +398,7 @@ button:disabled{
 </div>
 
 <div class="card full">
-  <div class="title">8. Si tu souhaites laisser quelques mots anonymes, cet espace est pour toi.</div>
+  <div class="title">7. Si tu souhaites laisser quelques mots anonymes, cet espace est pour toi.</div>
   <div class="hint">Aucun jugement. Juste un espace sûr pour déposer ce que tu veux.</div>
   <textarea id="message"></textarea>
   <img src="icon-stylo.png" class="pen" alt="">
@@ -520,34 +411,6 @@ button:disabled{
     de mon message écrit, sans mon nom ni aucune information personnelle.
   </div>
   <img src="icon-partage.png" class="share" alt="">
-</div>
-
-<div class="card blog-card" id="blogCard">
-  <div class="title">9. Souhaites-tu participer au blog sécurisé ?</div>
-  <label class="option">
-    <input type="checkbox" id="joinBlog">
-    Oui, je souhaite créer un accès au blog privé MyMeToo.
-  </label>
-
-  <div class="blog-fields" id="blogFields">
-    <input id="blogPseudo" type="text" placeholder="Pseudo visible dans le blog">
-    <input id="blogEmail" type="email" placeholder="Email de connexion">
-
-    <div class="password-wrap">
-      <input id="blogPassword" type="password" placeholder="Mot de passe">
-      <span class="eye" onclick="togglePassword('blogPassword')">👁</span>
-    </div>
-
-    <div class="password-wrap">
-      <input id="blogPasswordConfirm" type="password" placeholder="Confirmer le mot de passe">
-      <span class="eye" onclick="togglePassword('blogPasswordConfirm')">👁</span>
-    </div>
-
-    <div class="blog-note">
-      Ton âge, ton genre et ton département seront utilisés dans ton profil blog.
-      Ton email et ton mot de passe ne seront jamais visibles publiquement.
-    </div>
-  </div>
 </div>
 
 <div class="bottom">
@@ -573,22 +436,9 @@ button:disabled{
 
 </main>
 
-<div id="successScreen">
-  <div class="success-box">
-    <h2>Merci 💜</h2>
-    <p id="successText">
-      Ta voix a été entendue.<br><br>
-      Même silencieuse, elle compte vraiment.
-    </p>
-    <a href="temoignages.html" class="success-btn">Voir les témoignages</a>
-    <a href="blog.html" class="success-btn" id="blogSuccessBtn" style="display:none;">Accéder au blog</a>
-  </div>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
@@ -601,21 +451,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
 const sendBtn = document.getElementById("sendBtn");
 const status = document.getElementById("status");
-const joinBlog = document.getElementById("joinBlog");
-const blogFields = document.getElementById("blogFields");
-
-joinBlog.addEventListener("change", () => {
-  blogFields.style.display = joinBlog.checked ? "block" : "none";
-});
-
-window.togglePassword = function(id){
-  const input = document.getElementById(id);
-  input.type = input.type === "password" ? "text" : "password";
-};
 
 function getRadio(name){
   return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
@@ -669,38 +507,12 @@ function validateForm(){
     }
   });
 
-  const departement = document.getElementById("departement").value.trim();
-
-  if(!departement){
-    showError(document.getElementById("departementCard"), "Merci d’indiquer ton département.");
-    isValid = false;
-  }
-
   const expressionChecked = document.querySelectorAll('input[name="expression"]:checked');
 
   if(expressionChecked.length === 0){
     const card = document.querySelector('input[name="expression"]').closest(".card");
     showError(card, "Merci de cocher au moins une réponse.");
     isValid = false;
-  }
-
-  if(joinBlog.checked){
-    const blogCard = document.getElementById("blogCard");
-    const pseudo = document.getElementById("blogPseudo").value.trim();
-    const email = document.getElementById("blogEmail").value.trim();
-    const password = document.getElementById("blogPassword").value.trim();
-    const passwordConfirm = document.getElementById("blogPasswordConfirm").value.trim();
-
-    if(!pseudo || !email || !password || !passwordConfirm){
-      showError(blogCard, "Merci de compléter tous les champs du blog sécurisé.");
-      isValid = false;
-    }else if(password.length < 6){
-      showError(blogCard, "Le mot de passe doit contenir au moins 6 caractères.");
-      isValid = false;
-    }else if(password !== passwordConfirm){
-      showError(blogCard, "Les mots de passe ne correspondent pas.");
-      isValid = false;
-    }
   }
 
   if(!isValid){
@@ -722,80 +534,25 @@ sendBtn.addEventListener("click", async () => {
   sendBtn.disabled = true;
   status.textContent = "Envoi en cours...";
 
-  const wantsBlog = joinBlog.checked;
-  let blogUid = null;
-  let blogPseudo = "";
-
-  const age = getRadio("age");
-  const genre = getRadio("genre");
-  const departement = document.getElementById("departement").value.trim();
+  const data = {
+    age: getRadio("age"),
+    genre: getRadio("genre"),
+    justice: getRadio("justice"),
+    parle: getRadio("parle"),
+    ecoute: getRadio("ecoute"),
+    expression: getChecks("expression"),
+    message: document.getElementById("message").value.trim(),
+    partageAutorise: document.getElementById("partage").checked,
+    createdAt: serverTimestamp()
+  };
 
   try {
-    if(wantsBlog){
-      status.textContent = "Création du compte blog...";
-
-      blogPseudo = document.getElementById("blogPseudo").value.trim();
-      const email = document.getElementById("blogEmail").value.trim();
-      const password = document.getElementById("blogPassword").value.trim();
-
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      blogUid = userCredential.user.uid;
-
-      await setDoc(doc(db, "blogUsers", blogUid), {
-        pseudo: blogPseudo,
-        email: email,
-        age: age,
-        genre: genre,
-        departement: departement,
-        plan: "free",
-        createdAt: serverTimestamp(),
-        active: true,
-        online: false
-      });
-    }
-
-    const data = {
-      age: age,
-      genre: genre,
-      departement: departement,
-      justice: getRadio("justice"),
-      parle: getRadio("parle"),
-      ecoute: getRadio("ecoute"),
-      expression: getChecks("expression"),
-      message: document.getElementById("message").value.trim(),
-      partageAutorise: document.getElementById("partage").checked,
-      blogAccessRequested: wantsBlog,
-      blogUid: blogUid,
-      blogPseudo: blogPseudo,
-      createdAt: serverTimestamp()
-    };
-
-    status.textContent = "Enregistrement du témoignage...";
     await addDoc(collection(db, "reponses"), data);
-
-    document.querySelector(".page").style.display = "none";
-
-    if(wantsBlog){
-      document.getElementById("successText").innerHTML =
-        "Ta voix a été entendue.<br><br>Ton accès au blog sécurisé a aussi été créé.";
-      document.getElementById("blogSuccessBtn").style.display = "inline-block";
-    }
-
-    document.getElementById("successScreen").style.display = "flex";
-
+    status.textContent = "Merci ❤️ ta réponse a bien été envoyée.";
+    sendBtn.textContent = "Envoyé";
   } catch (error) {
     console.error(error);
-
-    if(error.code === "auth/email-already-in-use"){
-      status.textContent = "Cet email est déjà utilisé pour un compte blog.";
-    }else if(error.code === "auth/invalid-email"){
-      status.textContent = "L’adresse email n’est pas valide.";
-    }else if(error.code === "auth/weak-password"){
-      status.textContent = "Le mot de passe est trop faible.";
-    }else{
-      status.textContent = "Erreur : la réponse n’a pas pu être envoyée.";
-    }
-
+    status.textContent = "Erreur : la réponse n’a pas pu être envoyée.";
     sendBtn.disabled = false;
   }
 });
