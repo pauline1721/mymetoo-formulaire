@@ -308,7 +308,48 @@ textarea{
   line-height:1.4;  
   color:#5b23ad;  
   margin-top:8px;  
-}  
+}
+
+.legal-option{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  margin-top:12px;
+  font-size:14px;
+  line-height:1.4;
+  color:#24106b;
+  font-weight:600;
+}
+
+.blog-fields .legal-option input{
+  appearance:none;
+  width:23px;
+  height:23px;
+  border:2.5px solid #835ac4;
+  background:#fff;
+  flex-shrink:0;
+  padding:0;
+  margin:0;
+}
+
+.blog-fields .legal-option input:checked{
+  background:
+    linear-gradient(45deg,transparent 43%,#6e42b7 44%,#6e42b7 56%,transparent 57%),
+    linear-gradient(-45deg,transparent 35%,#6e42b7 36%,#6e42b7 52%,transparent 53%);
+}
+
+.legal-option a,
+.legal-links a{
+  color:#5b23ad;
+  font-weight:bold;
+}
+
+.legal-links{
+  text-align:center;
+  margin-top:14px;
+  font-size:14px;
+  color:#6e4cb0;
+}
   
 .bottom{  
   grid-column:1/-1;  
@@ -478,7 +519,6 @@ button:disabled{
   <label class="option"><input type="radio" name="genre" value="Je préfère ne pas répondre">Je préfère ne pas répondre</label>  
   <img src="icon-genre.png" class="icon" alt="">  
 </div>
-
 <div class="card full">  
   <div class="title">3. Ton vécu a-t-il été porté devant la justice ?</div>  
   <label class="option"><input type="radio" name="justice" value="Non, jamais">Non, jamais</label>  
@@ -672,6 +712,17 @@ button:disabled{
       <option value="Mayotte (976)">Mayotte (976)</option>
     </select>
 
+    <label class="legal-option">
+      <input type="checkbox" id="acceptCGU">
+      <span>
+        J’accepte les
+        <a href="cgu.html" target="_blank">CGU</a>, la
+        <a href="confidentialite.html" target="_blank">politique de confidentialité</a>
+        et les
+        <a href="mentions-legales.html" target="_blank">mentions légales</a>.
+      </span>
+    </label>
+
     <div class="blog-note">  
       Ces informations seront visibles uniquement dans ton profil blog.
       Ton email et ton mot de passe ne seront jamais visibles publiquement.  
@@ -701,6 +752,12 @@ button:disabled{
 
 <div id="status"></div>
 
+<div class="legal-links">
+  <a href="cgu.html">CGU</a> ·
+  <a href="confidentialite.html">Confidentialité</a> ·
+  <a href="mentions-legales.html">Mentions légales</a>
+</div>
+
 </main>
 
 <div id="successScreen">  
@@ -714,6 +771,7 @@ button:disabled{
     <a href="blog.html" class="success-btn" id="blogSuccessBtn" style="display:none;">Accéder au blog</a>  
   </div>  
 </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -789,7 +847,6 @@ function validateForm(){
     isValid = false;
   }
 
-  // VALIDATION BLOG
   if(joinBlog.checked){
     const blogCard = document.getElementById("blogCard");
 
@@ -797,10 +854,13 @@ function validateForm(){
     const email = document.getElementById("blogEmail").value.trim();
     const password = document.getElementById("blogPassword").value.trim();
     const passwordConfirm = document.getElementById("blogPasswordConfirm").value.trim();
+    const blogAge = document.getElementById("blogAge").value;
+    const blogGenre = document.getElementById("blogGenre").value;
     const departement = document.getElementById("blogDepartement").value;
+    const acceptCGU = document.getElementById("acceptCGU").checked;
 
-    if(!pseudo || !email || !password || !passwordConfirm || !departement){
-      showError(blogCard, "Merci de compléter toutes les informations du profil blog.");
+    if(!pseudo || !email || !password || !passwordConfirm || !blogAge || !blogGenre || !departement || !acceptCGU){
+      showError(blogCard, "Merci de compléter toutes les informations du profil blog et d’accepter les conditions.");
       isValid = false;
     }else if(password.length < 6){
       showError(blogCard, "Mot de passe trop court (6 caractères minimum).");
@@ -835,15 +895,12 @@ sendBtn.addEventListener("click", async () => {
   const genre = getRadio("genre");
 
   try {
-
-    /* ========================
-       CREATION COMPTE BLOG
-    ======================== */
     if(wantsBlog){
-
       blogPseudo = document.getElementById("blogPseudo").value.trim();
       const email = document.getElementById("blogEmail").value.trim();
       const password = document.getElementById("blogPassword").value.trim();
+      const blogAge = document.getElementById("blogAge").value;
+      const blogGenre = document.getElementById("blogGenre").value;
       const departement = document.getElementById("blogDepartement").value;
 
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -852,22 +909,17 @@ sendBtn.addEventListener("click", async () => {
       await setDoc(doc(db, "blogUsers", blogUid), {
         pseudo: blogPseudo,
         email: email,
-
-        // 👇 PROFIL BLOG
-        age: age,
-        genre: genre,
+        age: blogAge,
+        genre: blogGenre,
         departement: departement,
-
         plan: "free",
+        acceptCGU: true,
+        acceptCGUAt: serverTimestamp(),
         createdAt: serverTimestamp(),
         active: true,
         online: false
       });
     }
-
-    /* ========================
-       ENREGISTREMENT FORMULAIRE
-    ======================== */
 
     await addDoc(collection(db, "reponses"), {
       age: age,
@@ -899,6 +951,10 @@ sendBtn.addEventListener("click", async () => {
 
     if(error.code === "auth/email-already-in-use"){
       status.textContent = "Email déjà utilisé.";
+    }else if(error.code === "auth/invalid-email"){
+      status.textContent = "L’adresse email n’est pas valide.";
+    }else if(error.code === "auth/weak-password"){
+      status.textContent = "Le mot de passe est trop faible.";
     }else{
       status.textContent = "Erreur lors de l'envoi.";
     }
@@ -907,3 +963,6 @@ sendBtn.addEventListener("click", async () => {
   }
 });
 </script>
+
+</body>
+</html>
