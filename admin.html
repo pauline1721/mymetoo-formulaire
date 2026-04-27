@@ -347,11 +347,13 @@ const firebaseConfig = {
   appId: "1:1084270329845:web:337a6172a4817f0db2eabc"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = initializeAuth(app, {
+const adminApp = initializeApp(firebaseConfig, "adminApp");
+
+const auth = initializeAuth(adminApp, {
   persistence: browserSessionPersistence
 });
-const db = getFirestore(app);
+
+const db = getFirestore(adminApp);
 
 let dailyChart = null;
 
