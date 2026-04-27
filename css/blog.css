@@ -392,6 +392,31 @@ button.danger{
   overflow-y:auto;
 }
 
+.private-conversation{
+  background:#f7effb;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:8px;
+  cursor:pointer;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+
+.private-conversation:hover{
+  background:#efe4f8;
+}
+
+.private-conversation .name{
+  font-weight:bold;
+  color:#6f42bd;
+}
+
+.private-conversation .preview{
+  margin-top:5px;
+  font-size:14px;
+}
+
 .menu-modal{
   display:none;
   position:fixed;
@@ -534,6 +559,145 @@ button.danger{
   text-decoration:none;
 }
 
+/* CHAT PRIVÉ */
+.private-chat-window{
+  display:none;
+  position:fixed;
+  right:25px;
+  bottom:25px;
+  width:370px;
+  max-width:calc(100vw - 30px);
+  background:#fbf8ff;
+  border:2px solid #ded2ec;
+  border-radius:16px;
+  box-shadow:0 10px 35px rgba(0,0,0,.22);
+  z-index:40000;
+  overflow:hidden;
+}
+
+.private-chat-top{
+  background:#6f42bd;
+  color:white;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  font-weight:bold;
+}
+
+.window-actions{
+  display:flex;
+  gap:6px;
+  flex-shrink:0;
+}
+
+.window-btn{
+  margin:0;
+  padding:5px 9px;
+  border-radius:8px;
+  background:white;
+  color:#6f42bd;
+}
+
+.window-btn.delete{
+  background:#d94b6a;
+  color:white;
+}
+
+.window-btn.report{
+  background:#ffb347;
+  color:#24106b;
+}
+
+.private-messages{
+  background:white;
+  padding:12px;
+  height:260px;
+  overflow-y:auto;
+}
+
+.private-msg{
+  background:#f7effb;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:8px;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  word-break:break-word;
+}
+
+.private-msg.mine{
+  background:#eadcf8;
+}
+
+.private-write{
+  padding:12px;
+  background:#fbf8ff;
+}
+
+.private-write textarea{
+  min-height:60px;
+  resize:vertical;
+  background:white;
+}
+
+/* SIGNALEMENT */
+.report-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(36,16,107,.55);
+  z-index:50000;
+  justify-content:center;
+  align-items:center;
+  padding:18px;
+}
+
+.report-modal-box{
+  width:100%;
+  max-width:430px;
+  background:white;
+  border:2px solid #ded2ec;
+  border-radius:18px;
+  box-shadow:0 14px 45px rgba(0,0,0,.25);
+  overflow:hidden;
+}
+
+.report-modal-top{
+  background:#6f42bd;
+  color:white;
+  padding:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+}
+
+.report-modal-content{
+  padding:18px;
+  background:#fbf8ff;
+}
+
+.report-modal-content p{
+  margin:0 0 10px;
+  font-weight:bold;
+  color:#5b23ad;
+}
+
+.report-modal-content textarea{
+  min-height:110px;
+  resize:vertical;
+  background:white;
+}
+
+.report-modal-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
 .footer{
   text-align:center;
   margin-top:30px;
@@ -579,5 +743,11 @@ button.danger{
   .menu-btn{
     left:12px;
     top:12px;
+  }
+
+  .private-chat-window{
+    right:10px;
+    bottom:10px;
+    width:calc(100vw - 20px);
   }
 }
