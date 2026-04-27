@@ -265,6 +265,7 @@
     <div class="profile-field"><strong>Département :</strong> <span id="memberProfileDepartement"></span></div>
 
     <button onclick="messageMemberProfile()">💬 Envoyer un message privé</button>
+    <button class="secondary" onclick="blockMemberProfile()">🚫 Bloquer ce membre</button>
     <button class="danger" onclick="reportMemberProfile()">⚠️ Signaler ce profil</button>
 
     <div id="memberProfileStatus" class="status"></div>
@@ -278,6 +279,7 @@
 
     <div class="window-actions">
       <button class="window-btn" onclick="viewPrivateProfile()">👤 Profil</button>
+      <button class="window-btn" onclick="blockPrivateUser()">🚫</button>
       <button class="window-btn report" onclick="reportPrivateConversation()">⚠️</button>
       <button class="window-btn" onclick="minimizePrivateChat()">—</button>
       <button class="window-btn delete" onclick="hideCurrentPrivateConversation()">✕</button>
