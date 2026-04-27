@@ -290,39 +290,49 @@ button:hover{
 
   <button class="logout" onclick="logout()">Se déconnecter</button>
 
+  <!-- STATS -->
   <div class="stats">
     <div class="stat">
       <strong id="total">0</strong>
-      Réponses totales
+      Réponses
     </div>
     <div class="stat">
-      <strong id="partages">0</strong>
-      Messages partageables
+      <strong id="usersCount">0</strong>
+      Utilisateurs
     </div>
     <div class="stat">
-      <strong id="femmes">0</strong>
-      Femmes
+      <strong id="reportsCount">0</strong>
+      Signalements
     </div>
     <div class="stat">
-      <strong id="hommes">0</strong>
-      Hommes
+      <strong id="disabledCount">0</strong>
+      Comptes bloqués
     </div>
   </div>
 
+  <!-- GRAPH -->
   <div class="chartBox">
     <h2>Formulaires envoyés par jour</h2>
     <canvas id="dailyChart"></canvas>
   </div>
 
+  <!-- SIGNALMENTS -->
   <h2>🚨 Signalements</h2>
   <div id="reportsData"></div>
 
-  <h2>Liste des réponses</h2>
+  <!-- UTILISATEURS -->
+  <h2>👤 Utilisateurs du blog</h2>
+  <div id="usersData"></div>
+
+  <!-- MESSAGES PUBLICS -->
+  <h2>💬 Messages publics</h2>
+  <div id="messagesData"></div>
+
+  <!-- TEMOIGNAGES -->
+  <h2>📝 Témoignages</h2>
   <div id="data"></div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module">
+  <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { initializeAuth, browserSessionPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -375,6 +385,269 @@ window.logout = async function(){
   await signOut(auth);
 };
 
+onAuthStateChanged(auth, user => {
+  if(user && user.uid === ADMIN_UID){
+    document.getElementById("login").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    loadAllAdminData();
+  }else{
+    if(user){
+      signOut(auth);
+    }
+
+    document.getElementById("login").style.display = "block";
+    document.getElementById("adminContent").style.display = "none";
+  }
+});
+
+async function loadAllAdminData(){
+  await loadReports();
+  await loadUsers();
+  await loadPublicMessages();
+  await loadData();
+}
+
+/* =========================
+   SIGNALMENTS
+========================= */
+
+async function loadReports(){
+  const container = document.getElementById("reportsData");
+  container.innerHTML = "";
+
+  const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+
+  let pendingCount = 0;
+
+  if(snapshot.empty){
+    container.innerHTML = `<div class="empty">Aucun signalement pour le moment.</div>`;
+    document.getElementById("reportsCount").innerText = "0";
+    return;
+  }
+
+  snapshot.forEach(item => {
+    const r = item.data();
+    const id = item.id;
+    const dateObj = r.createdAt?.toDate ? r.createdAt.toDate() : null;
+    const done = r.status === "done";
+
+    if(!done) pendingCount++;
+
+    let typeText = "Signalement";
+
+    if(r.type === "profile") typeText = "Profil signalé";
+    if(r.type === "privateConversation") typeText = "Discussion privée signalée";
+    if(r.type === "blogMessage") typeText = "Message public signalé";
+
+    const reportedUid = r.reportedUserUid || r.authorUid || "";
+
+    const div = document.createElement("div");
+    div.className = done ? "report-card done" : "report-card";
+
+    div.innerHTML = `
+      <div class="report-type">🚨 ${typeText}</div>
+
+      <div class="field"><span class="label">Statut :</span> ${r.status || "pending"}</div>
+      <div class="field"><span class="label">Signalé par UID :</span> ${r.reportedBy || ""}</div>
+
+      <div class="field"><span class="label">Utilisateur signalé :</span> ${r.reportedUserPseudo || r.pseudo || ""}</div>
+      <div class="field"><span class="label">UID utilisateur signalé :</span> ${reportedUid}</div>
+
+      <div class="field"><span class="label">Genre :</span> ${r.reportedUserGenre || ""}</div>
+      <div class="field"><span class="label">Âge :</span> ${r.reportedUserAge || ""}</div>
+
+      <div class="field"><span class="label">Chat ID :</span> ${r.chatId || ""}</div>
+      <div class="field"><span class="label">Message ID :</span> ${r.messageId || ""}</div>
+
+      ${r.message ? `<div class="report-message"><span class="label">Message signalé :</span><br>${r.message}</div>` : ""}
+
+      <div class="field"><span class="label">Date :</span> ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}</div>
+
+      <button class="report-btn done-btn" onclick="markReportDone('${id}')">
+        Marquer comme traité
+      </button>
+
+      ${reportedUid ? `
+        <button class="report-btn" onclick="disableUser('${reportedUid}')">
+          Bloquer l’utilisateur
+        </button>
+      ` : ""}
+    `;
+
+    container.appendChild(div);
+  });
+
+  document.getElementById("reportsCount").innerText = pendingCount;
+}
+
+window.markReportDone = async function(reportId){
+  try{
+    await updateDoc(doc(db, "reports", reportId), {
+      status: "done"
+    });
+
+    loadReports();
+  }catch(e){
+    alert("Erreur lors du traitement du signalement.");
+    console.error(e);
+  }
+};
+
+/* =========================
+   UTILISATEURS BLOG
+========================= */
+
+async function loadUsers(){
+  const container = document.getElementById("usersData");
+  container.innerHTML = "";
+
+  const snapshot = await getDocs(collection(db, "blogUsers"));
+
+  let usersCount = 0;
+  let disabledCount = 0;
+
+  if(snapshot.empty){
+    container.innerHTML = `<div class="empty">Aucun utilisateur blog.</div>`;
+    document.getElementById("usersCount").innerText = "0";
+    document.getElementById("disabledCount").innerText = "0";
+    return;
+  }
+
+  snapshot.forEach(item => {
+    const u = item.data();
+    const uid = item.id;
+    const active = u.active !== false;
+    const online = u.online === true;
+    const lastSeen = u.lastSeen?.toDate ? u.lastSeen.toDate().toLocaleString("fr-FR") : "";
+
+    usersCount++;
+    if(!active) disabledCount++;
+
+    const div = document.createElement("div");
+    div.className = active ? "card" : "card hidden-response";
+
+    div.innerHTML = `
+      ${!active ? `<div class="badge-hidden">Compte désactivé</div>` : ""}
+
+      <div class="field"><span class="label">Pseudo :</span> ${u.pseudo || "Anonyme"}</div>
+      <div class="field"><span class="label">UID :</span> ${uid}</div>
+      <div class="field"><span class="label">Genre :</span> ${u.genre || u.gender || "Non renseigné"}</div>
+      <div class="field"><span class="label">Âge :</span> ${u.age || u.trancheAge || u.ageRange || "Non renseigné"}</div>
+      <div class="field"><span class="label">Statut :</span> ${active ? "Actif" : "Bloqué"}</div>
+      <div class="field"><span class="label">En ligne :</span> ${online ? "Oui" : "Non"}</div>
+      <div class="field"><span class="label">Dernière activité :</span> ${lastSeen}</div>
+
+      <button class="${active ? "report-btn" : "hide-btn"}" onclick="${active ? `disableUser('${uid}')` : `enableUser('${uid}')`}">
+        ${active ? "Bloquer cet utilisateur" : "Réactiver cet utilisateur"}
+      </button>
+    `;
+
+    container.appendChild(div);
+  });
+
+  document.getElementById("usersCount").innerText = usersCount;
+  document.getElementById("disabledCount").innerText = disabledCount;
+}
+
+window.disableUser = async function(uid){
+  const ok = confirm("Bloquer cet utilisateur ?");
+  if(!ok) return;
+
+  try{
+    await updateDoc(doc(db, "blogUsers", uid), {
+      active:false,
+      online:false
+    });
+
+    await loadUsers();
+    await loadReports();
+  }catch(e){
+    alert("Erreur : impossible de bloquer l’utilisateur.");
+    console.error(e);
+  }
+};
+
+window.enableUser = async function(uid){
+  const ok = confirm("Réactiver cet utilisateur ?");
+  if(!ok) return;
+
+  try{
+    await updateDoc(doc(db, "blogUsers", uid), {
+      active:true
+    });
+
+    loadUsers();
+  }catch(e){
+    alert("Erreur : impossible de réactiver l’utilisateur.");
+    console.error(e);
+  }
+};
+
+/* =========================
+   MESSAGES PUBLICS BLOG
+========================= */
+
+async function loadPublicMessages(){
+  const container = document.getElementById("messagesData");
+  container.innerHTML = "";
+
+  const q = query(collection(db, "blogMessages"), orderBy("createdAt", "desc"));
+  const snapshot = await getDocs(q);
+
+  if(snapshot.empty){
+    container.innerHTML = `<div class="empty">Aucun message public.</div>`;
+    return;
+  }
+
+  snapshot.forEach(item => {
+    const m = item.data();
+    const id = item.id;
+    const visible = m.visible !== false;
+    const dateObj = m.createdAt?.toDate ? m.createdAt.toDate() : null;
+
+    const div = document.createElement("div");
+    div.className = visible ? "card" : "card hidden-response";
+
+    div.innerHTML = `
+      ${!visible ? `<div class="badge-hidden">Message masqué</div>` : ""}
+      <div class="field"><span class="label">Pseudo :</span> ${m.pseudo || "Anonyme"}</div>
+      <div class="field"><span class="label">UID :</span> ${m.uid || ""}</div>
+      <div class="field"><span class="label">Date :</span> ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}</div>
+      <div class="message"><span class="label">Message :</span><br>${m.message || ""}</div>
+
+      <button onclick="togglePublicMessageVisibility('${id}', ${visible})" class="hide-btn">
+        ${visible ? "Masquer ce message" : "Afficher ce message"}
+      </button>
+
+      ${m.uid ? `
+        <button class="report-btn" onclick="disableUser('${m.uid}')">
+          Bloquer l’utilisateur
+        </button>
+      ` : ""}
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+window.togglePublicMessageVisibility = async function(id, isVisible){
+  try{
+    await updateDoc(doc(db, "blogMessages", id), {
+      visible: !isVisible
+    });
+
+    loadPublicMessages();
+  }catch(e){
+    alert("Erreur lors de la modification du message.");
+    console.error(e);
+  }
+};
+
+/* =========================
+   TEMOIGNAGES + REPONSES
+========================= */
+
 window.toggleVisibility = async function(id, isVisible){
   try{
     await updateDoc(doc(db, "reponses", id), {
@@ -401,22 +674,6 @@ window.toggleReplyVisibility = async function(parentId, replyId, isVisible){
   }
 };
 
-onAuthStateChanged(auth, user => {
-  if(user && user.uid === ADMIN_UID){
-    document.getElementById("login").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
-    loadReports();
-    loadData();
-  }else{
-    if(user){
-      signOut(auth);
-    }
-
-    document.getElementById("login").style.display = "block";
-    document.getElementById("adminContent").style.display = "none";
-  }
-});
-
 function renderDailyChart(daysData){
   const labels = Object.keys(daysData).sort();
   const values = labels.map(day => daysData[day]);
@@ -441,97 +698,17 @@ function renderDailyChart(daysData){
     options: {
       responsive: true,
       plugins: {
-        legend: {
-          display: false
-        }
+        legend: { display: false }
       },
       scales: {
         y: {
           beginAtZero: true,
-          ticks: {
-            precision: 0
-          }
+          ticks: { precision: 0 }
         }
       }
     }
   });
 }
-
-async function loadReports(){
-  const container = document.getElementById("reportsData");
-  container.innerHTML = "";
-
-  const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
-  const snapshot = await getDocs(q);
-
-  if(snapshot.empty){
-    container.innerHTML = `<div class="empty">Aucun signalement pour le moment.</div>`;
-    return;
-  }
-
-  snapshot.forEach(item => {
-    const r = item.data();
-    const id = item.id;
-    const dateObj = r.createdAt?.toDate ? r.createdAt.toDate() : null;
-    const done = r.status === "done";
-
-    let typeText = "Signalement";
-
-    if(r.type === "profile"){
-      typeText = "Profil signalé";
-    }
-
-    if(r.type === "privateConversation"){
-      typeText = "Discussion privée signalée";
-    }
-
-    if(r.type === "blogMessage"){
-      typeText = "Message public signalé";
-    }
-
-    const div = document.createElement("div");
-    div.className = done ? "report-card done" : "report-card";
-
-    div.innerHTML = `
-      <div class="report-type">🚨 ${typeText}</div>
-
-      <div class="field"><span class="label">Statut :</span> ${r.status || "pending"}</div>
-      <div class="field"><span class="label">Signalé par UID :</span> ${r.reportedBy || ""}</div>
-
-      <div class="field"><span class="label">Utilisateur signalé :</span> ${r.reportedUserPseudo || r.pseudo || ""}</div>
-      <div class="field"><span class="label">UID utilisateur signalé :</span> ${r.reportedUserUid || r.authorUid || ""}</div>
-
-      <div class="field"><span class="label">Genre :</span> ${r.reportedUserGenre || ""}</div>
-      <div class="field"><span class="label">Âge :</span> ${r.reportedUserAge || ""}</div>
-
-      <div class="field"><span class="label">Chat ID :</span> ${r.chatId || ""}</div>
-      <div class="field"><span class="label">Message ID :</span> ${r.messageId || ""}</div>
-
-      ${r.message ? `<div class="report-message"><span class="label">Message signalé :</span><br>${r.message}</div>` : ""}
-
-      <div class="field"><span class="label">Date :</span> ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}</div>
-
-      <button class="report-btn done-btn" onclick="markReportDone('${id}')">
-        Marquer comme traité
-      </button>
-    `;
-
-    container.appendChild(div);
-  });
-}
-
-window.markReportDone = async function(reportId){
-  try{
-    await updateDoc(doc(db, "reports", reportId), {
-      status: "done"
-    });
-
-    loadReports();
-  }catch(e){
-    alert("Erreur lors du traitement du signalement.");
-    console.error(e);
-  }
-};
 
 async function loadReplies(parentId, repliesContainer){
   repliesContainer.innerHTML = "";
@@ -542,7 +719,6 @@ async function loadReplies(parentId, repliesContainer){
   );
 
   const snap = await getDocs(q);
-
   let count = 0;
 
   snap.forEach(replyDoc => {
@@ -608,13 +784,8 @@ async function loadData(){
       partages++;
     }
 
-    if(d.genre === "Une femme"){
-      femmes++;
-    }
-
-    if(d.genre === "Un homme"){
-      hommes++;
-    }
+    if(d.genre === "Une femme") femmes++;
+    if(d.genre === "Un homme") hommes++;
 
     const div = document.createElement("div");
     div.className = isVisible ? "card" : "card hidden-response";
@@ -631,7 +802,6 @@ async function loadData(){
       <div class="field"><span class="label">Inscrit au blog :</span> ${d.blogAccessRequested ? "Oui" : "Non"}</div>
       <div class="field"><span class="label">Pseudo blog :</span> ${d.blogPseudo || ""}</div>
       <div class="field"><span class="label">UID blog :</span> ${d.blogUid || ""}</div>
-
       <div class="field"><span class="label">Affiché sur la page témoignages :</span> ${isVisible ? "Oui" : "Non"}</div>
       <div class="field"><span class="label">Date :</span> ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}</div>
       <div class="message"><span class="label">Message :</span><br>${d.message || "Aucun message"}</div>
@@ -647,7 +817,6 @@ async function loadData(){
     `;
 
     container.appendChild(div);
-
     await loadReplies(id, document.getElementById("admin-replies-" + id));
   }
 
@@ -660,6 +829,3 @@ async function loadData(){
 }
 
 </script>
-
-</body>
-</html>
