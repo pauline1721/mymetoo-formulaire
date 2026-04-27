@@ -256,7 +256,24 @@
     </div>
   </div>
 </div>
+<div id="memberProfileModal" class="menu-modal">
+  <div class="menu-modal-top">
+    <span id="memberProfileTitle">Profil membre</span>
+    <button class="profile-close" onclick="closeMemberProfile()">✕</button>
+  </div>
 
+  <div class="menu-modal-content">
+    <div class="profile-field"><strong>Pseudo :</strong> <span id="memberProfilePseudo"></span></div>
+    <div class="profile-field"><strong>Tranche d’âge :</strong> <span id="memberProfileAge"></span></div>
+    <div class="profile-field"><strong>Genre :</strong> <span id="memberProfileGenre"></span></div>
+    <div class="profile-field"><strong>Département :</strong> <span id="memberProfileDepartement"></span></div>
+
+    <button onclick="messageMemberProfile()">💬 Envoyer un message privé</button>
+    <button class="danger" onclick="reportMemberProfile()">⚠️ Signaler ce profil</button>
+
+    <div id="memberProfileStatus" class="status"></div>
+  </div>
+</div>
 <script type="module" src="js/blog.js"></script>
 
 </body>
