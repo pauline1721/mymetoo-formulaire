@@ -69,6 +69,62 @@ button.danger{background:#d94b6a}
 .profile-field strong{color:#6f42bd}
 .profile-actions{display:flex;flex-direction:column;gap:8px}
 .profile-close{margin:0;padding:5px 9px;border-radius:8px;background:white;color:#6f42bd}
+
+.report-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(36,16,107,.55);
+  z-index:20000;
+  justify-content:center;
+  align-items:center;
+  padding:18px;
+}
+
+.report-modal-box{
+  width:100%;
+  max-width:430px;
+  background:white;
+  border:2px solid #ded2ec;
+  border-radius:18px;
+  box-shadow:0 14px 45px rgba(0,0,0,.25);
+  overflow:hidden;
+}
+
+.report-modal-top{
+  background:#6f42bd;
+  color:white;
+  padding:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+}
+
+.report-modal-content{
+  padding:18px;
+  background:#fbf8ff;
+}
+
+.report-modal-content p{
+  margin:0 0 10px;
+  font-weight:bold;
+  color:#5b23ad;
+}
+
+.report-modal-content textarea{
+  min-height:110px;
+  resize:vertical;
+  background:white;
+}
+
+.report-modal-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
 .footer{text-align:center;margin-top:30px;color:#6e4cb0;font-weight:bold}
 @media(max-width:800px){.page{padding:12px}.logo{width:130px}h1{font-size:46px}.subtitle{font-size:24px}.leaf{width:180px;opacity:.25}.chat-layout{grid-template-columns:1fr}.members-panel{height:auto;max-height:180px}.chat-panel{height:620px}.private-chat-window{right:10px;bottom:10px;width:calc(100vw - 20px)}}
 </style>
@@ -185,6 +241,27 @@ button.danger{background:#d94b6a}
     <div id="profileStatus" class="status"></div>
   </div>
 </div>
+
+<div id="reportModal" class="report-modal">
+  <div class="report-modal-box">
+    <div class="report-modal-top">
+      <span id="reportModalTitle">⚠️ Signalement</span>
+      <button class="profile-close" onclick="closeReportModal()">✕</button>
+    </div>
+
+    <div class="report-modal-content">
+      <p id="reportModalText">Explique la raison du signalement :</p>
+      <textarea id="reportReason" placeholder="Écris la raison ici..."></textarea>
+
+      <div class="report-modal-actions">
+        <button onclick="confirmReport()">Envoyer le signalement</button>
+        <button class="secondary" onclick="closeReportModal()">Annuler</button>
+      </div>
+
+      <div id="reportModalStatus" class="status"></div>
+    </div>
+  </div>
+</div>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -221,6 +298,9 @@ let unsubscribeMembers = null;
 let unsubscribePrivateConversations = null;
 let unsubscribePrivateChat = null;
 let presenceInterval = null;
+
+let reportMode = null;
+let reportTarget = null;
 
 function checkImage(file){
   if(!file) return "Aucune image sélectionnée.";
@@ -303,6 +383,21 @@ onAuthStateChanged(auth, async user => {
 
     const data = snap.data();
 
+    if(data.banUntil && data.banUntil.toDate){
+      const banDate = data.banUntil.toDate();
+
+      if(banDate > new Date()){
+        await updateDoc(doc(db,"blogUsers",user.uid),{
+          online:false
+        });
+
+        await signOut(auth);
+        document.getElementById("loginStatus").textContent =
+          "Compte temporairement bloqué suite à plusieurs signalements validés.";
+        return;
+      }
+    }
+
     if(data.active === false){
       await signOut(auth);
       document.getElementById("loginStatus").textContent = "Ce compte a été désactivé.";
@@ -325,13 +420,13 @@ onAuthStateChanged(auth, async user => {
     listenPrivateConversations();
 
     presenceInterval = setInterval(async ()=>{
-  if(auth.currentUser){
-    await updateDoc(doc(db,"blogUsers",auth.currentUser.uid),{
-      online:true,
-      lastSeen:serverTimestamp()
-    });
-   }
-},10000);
+      if(auth.currentUser){
+        await updateDoc(doc(db,"blogUsers",auth.currentUser.uid),{
+          online:true,
+          lastSeen:serverTimestamp()
+        });
+      }
+    },10000);
 
   }else{
     stopRealtime();
@@ -501,7 +596,7 @@ window.messageProfileUser = function(){
   openPrivateChat(uid, pseudo);
 };
 
-window.reportProfileUser = async function(){
+window.reportProfileUser = function(){
   const user = auth.currentUser;
   const status = document.getElementById("profileStatus");
 
@@ -510,26 +605,78 @@ window.reportProfileUser = async function(){
     return;
   }
 
-  const reason = prompt("Pourquoi signales-tu ce profil ?");
-if(!reason || reason.trim().length < 5){
-  status.textContent = "Merci d’expliquer la raison du signalement.";
-  return;
+  reportMode = "profile";
+  reportTarget = {...currentProfileUser};
+
+  document.getElementById("reportModalTitle").textContent = "⚠️ Signaler ce profil";
+  document.getElementById("reportModalText").textContent = "Explique pourquoi tu signales ce profil :";
+  document.getElementById("reportReason").value = "";
+  document.getElementById("reportModalStatus").textContent = "";
+  document.getElementById("reportModal").style.display = "flex";
 };
 
-  try{
-    await addDoc(collection(db,"reports"),{
-      type:"profile",
-      reportedUserUid:currentProfileUser.uid,
-      reportedUserPseudo:currentProfileUser.pseudo,
-      reportedUserGenre:currentProfileUser.genre,
-      reportedUserAge:currentProfileUser.age,
-      reportedBy:user.uid,
-      reason: reason.trim(),
-      createdAt:serverTimestamp(),
-      status:"pending"
-    });
+window.closeReportModal = function(){
+  document.getElementById("reportModal").style.display = "none";
+  document.getElementById("reportReason").value = "";
+  document.getElementById("reportModalStatus").textContent = "";
+  reportMode = null;
+  reportTarget = null;
+};
 
-    status.textContent = "Profil signalé ✅";
+window.confirmReport = async function(){
+  const user = auth.currentUser;
+  const reason = document.getElementById("reportReason").value.trim();
+  const status = document.getElementById("reportModalStatus");
+
+  if(!user){
+    status.textContent = "Tu dois être connecté(e).";
+    return;
+  }
+
+  if(!reason || reason.length < 5){
+    status.textContent = "Merci d’expliquer la raison du signalement.";
+    return;
+  }
+
+  if(!reportMode || !reportTarget){
+    status.textContent = "Aucun signalement en cours.";
+    return;
+  }
+
+  try{
+    if(reportMode === "profile"){
+      await addDoc(collection(db,"reports"),{
+        type:"profile",
+        reportedUserUid:reportTarget.uid,
+        reportedUserPseudo:reportTarget.pseudo,
+        reportedUserGenre:reportTarget.genre,
+        reportedUserAge:reportTarget.age,
+        reportedBy:user.uid,
+        reason:reason,
+        createdAt:serverTimestamp(),
+        status:"pending"
+      });
+
+      document.getElementById("profileStatus").textContent = "Profil signalé ✅";
+    }
+
+    if(reportMode === "privateConversation"){
+      await addDoc(collection(db,"reports"),{
+        type:"privateConversation",
+        chatId:reportTarget.chatId,
+        reportedUserUid:reportTarget.uid,
+        reportedUserPseudo:reportTarget.pseudo,
+        reportedBy:user.uid,
+        reason:reason,
+        createdAt:serverTimestamp(),
+        status:"pending"
+      });
+
+      document.getElementById("privateStatus").textContent = "Discussion signalée ✅";
+    }
+
+    closeReportModal();
+
   }catch(error){
     console.error(error);
     status.textContent = "Erreur lors du signalement.";
@@ -776,7 +923,7 @@ window.sendPrivateImage = async function(){
   }
 };
 
-window.reportPrivateConversation = async function(){
+window.reportPrivateConversation = function(){
   const user = auth.currentUser;
   const status = document.getElementById("privateStatus");
 
@@ -785,27 +932,20 @@ window.reportPrivateConversation = async function(){
     return;
   }
 
-  const ok = confirm("Signaler cette discussion privée à l’administrateur ?");
-  if(!ok) return;
-
   const chatId = getChatId(user.uid,currentPrivateUser.uid);
 
-  try{
-    await addDoc(collection(db,"reports"),{
-      type:"privateConversation",
-      chatId,
-      reportedUserUid:currentPrivateUser.uid,
-      reportedUserPseudo:currentPrivateUser.pseudo,
-      reportedBy:user.uid,
-      createdAt:serverTimestamp(),
-      status:"pending"
-    });
+  reportMode = "privateConversation";
+  reportTarget = {
+    uid:currentPrivateUser.uid,
+    pseudo:currentPrivateUser.pseudo,
+    chatId:chatId
+  };
 
-    status.textContent = "Discussion signalée ✅";
-  }catch(error){
-    console.error(error);
-    status.textContent = "Erreur lors du signalement.";
-  }
+  document.getElementById("reportModalTitle").textContent = "⚠️ Signaler cette discussion";
+  document.getElementById("reportModalText").textContent = "Explique pourquoi tu signales cette discussion privée :";
+  document.getElementById("reportReason").value = "";
+  document.getElementById("reportModalStatus").textContent = "";
+  document.getElementById("reportModal").style.display = "flex";
 };
 
 window.minimizePrivateChat = function(){
