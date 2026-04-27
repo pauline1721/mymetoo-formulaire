@@ -341,4 +341,5 @@ window.openMemberProfile = function(uid, data){
     document.getElementById("memberProfilePseudo").innerText = data.pseudo || "Anonyme";
     document.getElementById("memberProfileAge").innerText = data.age || "Non renseigné";
     document.getElementById("memberProfileGenre").innerText = data.genre || "Non renseigné";
-    document.getElementById("memberProfileDepartement
+    document.getElementById("memberProfileDepartement").innerText =
+  data.departement || "Non renseigné";
