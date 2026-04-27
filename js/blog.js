@@ -98,6 +98,23 @@ window.logout = async function(){
   await signOut(auth);
 };
 
+window.resetPassword = async function(){
+  const email = document.getElementById("email").value.trim();
+  const status = document.getElementById("loginStatus");
+
+  if(!email){
+    status.textContent = "Entre ton email avant de réinitialiser le mot de passe.";
+    return;
+  }
+
+  try{
+    await sendPasswordResetEmail(auth, email);
+    status.textContent = "Email de réinitialisation envoyé ✅";
+  }catch{
+    status.textContent = "Impossible d’envoyer l’email de réinitialisation.";
+  }
+};
+
 /* ================= AUTH STATE ================= */
 
 onAuthStateChanged(auth, async user => {
@@ -158,15 +175,20 @@ function loadMembers(){
     container.innerHTML = "";
     const blocked = currentUserData?.blockedUsers || [];
 
+    let count = 0;
+
     snap.forEach(docSnap => {
 
       const uid = docSnap.id;
       const data = docSnap.data();
 
+      if(!auth.currentUser) return;
       if(uid === auth.currentUser.uid) return;
       if(data.active === false) return;
       if(data.online !== true) return;
       if(blocked.includes(uid)) return;
+
+      count++;
 
       const div = document.createElement("div");
       div.className = "member";
@@ -178,6 +200,10 @@ function loadMembers(){
 
       container.appendChild(div);
     });
+
+    if(count === 0){
+      container.innerHTML = `<div class="member">Aucun autre membre en ligne</div>`;
+    }
 
   });
 
@@ -209,6 +235,7 @@ function loadPublicMessages(){
       div.innerHTML = `
         <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
         ${m.message || ""}
+        ${m.imageUrl ? `<img src="${m.imageUrl}" class="chat-img">` : ""}
       `;
 
       container.appendChild(div);
@@ -220,6 +247,7 @@ function loadPublicMessages(){
   });
 
 }
+
 window.sendMessage = async function(){
   const text = document.getElementById("chatMessage").value.trim();
   if(!text) return;
@@ -392,21 +420,64 @@ window.changePassword = async function(){
   }
 };
 
-window.resetPassword = async function(){
-  const email = document.getElementById("email").value.trim();
-  const status = document.getElementById("loginStatus");
+/* ================= MEMBRES BLOQUÉS ================= */
 
-  if(!email){
-    status.textContent = "Entre ton email avant de réinitialiser le mot de passe.";
+window.openBlockedUsersModal = async function(){
+  closeMenu();
+
+  const user = auth.currentUser;
+  const list = document.getElementById("blockedUsersList");
+
+  if(!user || !list) return;
+
+  list.innerHTML = "Chargement...";
+
+  const blocked = currentUserData?.blockedUsers || [];
+
+  if(blocked.length === 0){
+    list.innerHTML = "Aucun membre bloqué.";
+    document.getElementById("blockedUsersModal").style.display = "block";
     return;
   }
 
-  try{
-    await sendPasswordResetEmail(auth, email);
-    status.textContent = "Email de réinitialisation envoyé ✅";
-  }catch{
-    status.textContent = "Impossible d’envoyer l’email de réinitialisation.";
+  list.innerHTML = "";
+
+  for(const uid of blocked){
+    const snap = await getDoc(doc(db,"blogUsers",uid));
+    const data = snap.exists() ? snap.data() : null;
+
+    const div = document.createElement("div");
+    div.className = "private-conversation";
+
+    div.innerHTML = `
+      <div class="name">${data?.pseudo || "Utilisateur"}</div>
+      <div class="preview">${data?.departement || "Département non renseigné"}</div>
+      <button onclick="unblockUser('${uid}')">Débloquer</button>
+    `;
+
+    list.appendChild(div);
   }
+
+  document.getElementById("blockedUsersModal").style.display = "block";
+};
+
+window.closeBlockedUsersModal = function(){
+  document.getElementById("blockedUsersModal").style.display = "none";
+};
+
+window.unblockUser = async function(uid){
+  const user = auth.currentUser;
+  if(!user || !uid) return;
+
+  await updateDoc(doc(db,"blogUsers",user.uid),{
+    blockedUsers:arrayRemove(uid)
+  });
+
+  currentUserData.blockedUsers = (currentUserData.blockedUsers || []).filter(id => id !== uid);
+
+  await openBlockedUsersModal();
+  loadMembers();
+  loadPrivateConversations();
 };
 
 /* ================= PROFIL MEMBRE ================= */
@@ -459,8 +530,7 @@ async function blockUser(uid, pseudo){
 
   const chatId = getChatId(user.uid, uid);
   await setDoc(doc(db,"privateMessages",chatId),{
-    hiddenFor:arrayUnion(user.uid),
-    unreadFor:""
+    hiddenFor:arrayUnion(user.uid)
   }, { merge:true });
 
   document.getElementById("memberProfileModal").style.display = "none";
