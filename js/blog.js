@@ -770,3 +770,47 @@ window.addEventListener("beforeunload", () => {
     });
   }
 });
+
+
+// 👇 AJOUTE ÇA ICI
+window.viewPrivateProfile = async function(){
+  const user = auth.currentUser;
+  if(!user || !currentPrivateUser) return;
+
+  try{
+    const snap = await getDoc(doc(db,"blogUsers", currentPrivateUser.uid));
+
+    if(!snap.exists()){
+      alert("Profil introuvable.");
+      return;
+    }
+
+    const data = snap.data();
+
+    document.getElementById("memberProfileTitle").innerText =
+      "Profil de " + (data.pseudo || "Anonyme");
+
+    document.getElementById("memberProfilePseudo").innerText =
+      data.pseudo || "Anonyme";
+
+    document.getElementById("memberProfileAge").innerText =
+      data.age || "Non renseigné";
+
+    document.getElementById("memberProfileGenre").innerText =
+      data.genre || "Non renseigné";
+
+    document.getElementById("memberProfileDepartement").innerText =
+      data.departement || "Non renseigné";
+
+    const modal = document.getElementById("memberProfileModal");
+    modal.dataset.uid = currentPrivateUser.uid;
+    modal.dataset.pseudo = data.pseudo || "Anonyme";
+
+    modal.style.display = "block";
+
+  }catch(error){
+    console.error(error);
+    alert("Erreur chargement profil.");
+  }
+};
+
