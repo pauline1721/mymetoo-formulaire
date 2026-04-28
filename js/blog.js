@@ -25,6 +25,7 @@ import {
   arrayUnion,
   arrayRemove,
   onSnapshot
+  limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
@@ -268,10 +269,18 @@ function loadPublicMessages(){
 
   if(unsubscribePublicMessages) unsubscribePublicMessages();
 
-  const q = query(collection(db,"blogMessages"), orderBy("createdAt","asc"));
+  const isPremium =
+    currentUserData?.premium === true ||
+    currentUserData?.plan === "premium";
+
+  const q = isPremium
+    ? query(collection(db,"blogMessages"), orderBy("createdAt","asc"))
+    : query(collection(db,"blogMessages"), orderBy("createdAt","desc"), limit(30));
 
   unsubscribePublicMessages = onSnapshot(q, snap => {
     container.innerHTML = "";
+
+    let messages = [];
 
     snap.forEach(docSnap => {
       const m = docSnap.data();
@@ -281,6 +290,14 @@ function loadPublicMessages(){
       const room = m.room || "general";
       if(room !== currentRoom) return;
 
+      messages.push(m);
+    });
+
+    if(!isPremium){
+      messages = messages.slice(0, 5).reverse();
+    }
+
+    messages.forEach(m => {
       const div = document.createElement("div");
       div.className = "msg";
 
