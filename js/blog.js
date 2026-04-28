@@ -92,6 +92,7 @@ window.login = async function(){
 };
 
 window.logout = async function(){
+  closeMenu();
   const user = auth.currentUser;
 
   if(user){
