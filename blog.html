@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blog sécurisé - MyMeToo</title>
-
 <link rel="stylesheet" href="css/blog.css">
 </head>
 
@@ -42,11 +41,11 @@
   <img src="logoUNIS.png" class="logo" alt="UNIS">
   <div class="unis">UNIS</div>
   <h1>MyMeToo*</h1>
-  <div class="subtitle">Blog sécurisé</div>
+  <div class="subtitle">Chat sécurisé</div>
 </div>
 
 <div id="loginBox" class="box">
-  <h2>Connexion au blog</h2>
+  <h2>Connexion au chat</h2>
   <p>Connecte-toi avec le compte créé depuis le formulaire.</p>
 
   <input id="email" type="email" placeholder="Email">
@@ -65,40 +64,76 @@
 
 <div id="blogContent">
 
-  <div class="chat-layout">
-    <aside class="members-panel">
-      <h2>En ligne</h2>
-      <div id="membersList"></div>
+  <div class="chat-app">
+
+    <aside class="chat-sidebar">
+      <div class="sidebar-title">Salons</div>
+
+      <button class="room-btn active" id="room-general" onclick="switchRoom('general')">💬 Général</button>
+      <button class="room-btn" id="room-entraide" onclick="switchRoom('entraide')">💜 Entraide</button>
+      <button class="room-btn" id="room-anonyme" onclick="switchRoom('anonyme')">🕊️ Anonyme</button>
+      <button class="room-btn" id="room-region" onclick="switchRoom('region')">📍 Région</button>
+      <button class="room-btn premium-room" id="room-premium" onclick="switchRoom('premium')">⭐ Premium</button>
+
+      <div class="sidebar-separator"></div>
+
+      <div class="sidebar-title">Membres</div>
+
+      <input id="memberSearch" class="member-filter" type="text" placeholder="Rechercher un pseudo" oninput="loadMembers()">
+
+      <select id="filterAge" class="member-filter" onchange="loadMembers()">
+        <option value="">Tous les âges</option>
+        <option value="Moins de 18 ans">Moins de 18 ans</option>
+        <option value="18 / 35 ans">18 / 35 ans</option>
+        <option value="Plus de 35 ans">Plus de 35 ans</option>
+        <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
+      </select>
+
+      <select id="filterGenre" class="member-filter" onchange="loadMembers()">
+        <option value="">Tous les genres</option>
+        <option value="Une femme">Une femme</option>
+        <option value="Un homme">Un homme</option>
+        <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
+      </select>
+
+      <input id="filterDepartement" class="member-filter" type="text" placeholder="Département" oninput="loadMembers()">
+
+      <div id="membersList" class="members-list"></div>
     </aside>
 
-    <section class="chat-panel">
+    <section class="chat-main">
       <div class="chat-top">
-        <strong id="welcomePseudo">Connecté(e)</strong>
+        <div>
+          <div id="activeRoomTitle" class="active-room-title">💬 Salon général</div>
+          <strong id="welcomePseudo">Connecté(e)</strong>
+        </div>
+
         <button id="btnPrivate" onclick="openPrivatePanel()">💬 Messages privés</button>
       </div>
 
       <div id="messages" class="messages"></div>
 
       <div class="write-box">
-        <textarea id="chatMessage" placeholder="Écris ton message ici..."></textarea>
+        <textarea id="chatMessage" placeholder="Écris ton message dans le salon..."></textarea>
 
-        <div class="file-row">
+        <div class="composer-actions">
           <input id="publicImageInput" type="file" accept="image/png,image/jpeg,image/webp">
-          <button onclick="sendPublicImage()">📷 Envoyer photo</button>
+          <button onclick="sendPublicImage()">📷 Photo</button>
+          <button onclick="sendMessage()">Envoyer</button>
         </div>
 
-        <button onclick="sendMessage()">Envoyer</button>
         <div id="messageStatus" class="status"></div>
       </div>
     </section>
-  </div>
 
-  <div id="privatePanel" class="private-panel">
-    <div class="private-header">
-      <span>Messages privés</span>
-      <button class="secondary" onclick="closePrivatePanel()">Réduire la liste</button>
-    </div>
-    <div id="privateList" class="private-list">Aucune conversation privée pour le moment.</div>
+    <aside id="privatePanel" class="private-panel">
+      <div class="private-header">
+        <span>Messages privés</span>
+        <button class="secondary" onclick="closePrivatePanel()">Réduire</button>
+      </div>
+      <div id="privateList" class="private-list">Aucune conversation privée pour le moment.</div>
+    </aside>
+
   </div>
 
 </div>
@@ -165,9 +200,7 @@
   </div>
 
   <div class="menu-modal-content">
-    <div id="blockedUsersList" class="private-list">
-      Aucun membre bloqué.
-    </div>
+    <div id="blockedUsersList" class="private-list">Aucun membre bloqué.</div>
   </div>
 </div>
 
@@ -293,7 +326,7 @@
     <span id="privateTitle">Discussion privée</span>
 
     <div class="window-actions">
-      <button class="window-btn" onclick="viewPrivateProfile()">👤 Profil</button>
+      <button class="window-btn" onclick="viewPrivateProfile()">👤</button>
       <button class="window-btn" onclick="blockPrivateUser()">🚫</button>
       <button class="window-btn report" onclick="reportPrivateConversation()">⚠️</button>
       <button class="window-btn" onclick="minimizePrivateChat()">—</button>
@@ -305,8 +338,7 @@
 
   <div class="private-write">
     <textarea id="privateText" placeholder="Écris ton message privé ici..."></textarea>
-
-    <button onclick="sendPrivateMessage()">Envoyer en privé</button>
+    <button onclick="sendPrivateMessage()">Envoyer</button>
     <div id="privateStatus" class="status"></div>
   </div>
 </div>
