@@ -167,6 +167,7 @@ onAuthStateChanged(auth, async user => {
     document.getElementById("welcomePseudo").innerText = "Connecté(e) : " + currentPseudo;
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("blogContent").style.display = "block";
+    document.getElementById("menuButton").style.display = "block";
 
     loadMembers();
     loadPublicMessages();
@@ -175,6 +176,7 @@ onAuthStateChanged(auth, async user => {
   }else{
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("blogContent").style.display = "none";
+    document.getElementById("menuButton").style.display = "none";
   }
 });
 
