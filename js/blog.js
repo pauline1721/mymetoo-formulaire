@@ -51,6 +51,7 @@ const storage = getStorage(app);
 let currentPseudo = "Anonyme";
 let currentUserData = null;
 let currentPrivateUser = null;
+let currentRoom = "general";
 
 let currentReportMode = null;
 let currentReportTarget = null;
@@ -60,6 +61,14 @@ let unsubscribeMembers = null;
 let unsubscribePublicMessages = null;
 let unsubscribePrivateList = null;
 let unsubscribePrivateChat = null;
+
+const roomTitles = {
+  general: "💬 Salon général",
+  entraide: "💜 Salon entraide",
+  anonyme: "🕊️ Salon anonyme",
+  region: "📍 Salon région",
+  premium: "⭐ Salon premium"
+};
 
 function getChatId(uid1, uid2){
   return uid1 < uid2 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
@@ -130,6 +139,13 @@ onAuthStateChanged(auth, async user => {
     }
 
     currentUserData = snap.data();
+
+    if(currentUserData.active === false){
+      await signOut(auth);
+      document.getElementById("loginStatus").textContent = "Ce compte est désactivé.";
+      return;
+    }
+
     currentPseudo = currentUserData.pseudo || "Anonyme";
 
     await updateDoc(doc(db,"blogUsers",user.uid),{
@@ -162,16 +178,42 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-/* ================= MEMBRES ================= */
+/* ================= SALONS ================= */
+
+window.switchRoom = function(room){
+  currentRoom = room;
+
+  document.querySelectorAll(".room-btn").forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  const activeBtn = document.getElementById("room-" + room);
+  if(activeBtn) activeBtn.classList.add("active");
+
+  const title = document.getElementById("activeRoomTitle");
+  if(title) title.innerText = roomTitles[room] || "💬 Salon";
+
+  loadPublicMessages();
+};
+
+/* ================= MEMBRES + FILTRES ================= */
 
 function loadMembers(){
   const container = document.getElementById("membersList");
+  if(!container) return;
 
   if(unsubscribeMembers) unsubscribeMembers();
 
   unsubscribeMembers = onSnapshot(collection(db,"blogUsers"), snap => {
     container.innerHTML = "";
+
     const blocked = currentUserData?.blockedUsers || [];
+
+    const search = (document.getElementById("memberSearch")?.value || "").toLowerCase().trim();
+    const filterAge = document.getElementById("filterAge")?.value || "";
+    const filterGenre = document.getElementById("filterGenre")?.value || "";
+    const filterDepartement = (document.getElementById("filterDepartement")?.value || "").toLowerCase().trim();
+
     let count = 0;
 
     snap.forEach(docSnap => {
@@ -183,6 +225,16 @@ function loadMembers(){
       if(data.active === false) return;
       if(data.online !== true) return;
       if(blocked.includes(uid)) return;
+
+      const pseudo = (data.pseudo || "Anonyme").toLowerCase();
+      const age = data.age || "";
+      const genre = data.genre || "";
+      const departement = (data.departement || "").toLowerCase();
+
+      if(search && !pseudo.includes(search)) return;
+      if(filterAge && age !== filterAge) return;
+      if(filterGenre && genre !== filterGenre) return;
+      if(filterDepartement && !departement.includes(filterDepartement)) return;
 
       count++;
 
@@ -198,15 +250,18 @@ function loadMembers(){
     });
 
     if(count === 0){
-      container.innerHTML = `<div class="member">Aucun autre membre en ligne</div>`;
+      container.innerHTML = `<div class="member">Aucun membre trouvé</div>`;
     }
   });
 }
+
+window.loadMembers = loadMembers;
 
 /* ================= CHAT PUBLIC ================= */
 
 function loadPublicMessages(){
   const container = document.getElementById("messages");
+  if(!container) return;
 
   if(unsubscribePublicMessages) unsubscribePublicMessages();
 
@@ -220,11 +275,18 @@ function loadPublicMessages(){
 
       if(m.visible === false) return;
 
+      const room = m.room || "general";
+      if(room !== currentRoom) return;
+
       const div = document.createElement("div");
       div.className = "msg";
 
+      const displayedPseudo = currentRoom === "anonyme"
+        ? "Anonyme"
+        : (m.pseudo || "Anonyme");
+
       div.innerHTML = `
-        <div class="msg-meta">${m.pseudo || "Anonyme"}</div>
+        <div class="msg-meta">${displayedPseudo}</div>
         ${m.message || ""}
         ${m.imageUrl ? `<img src="${m.imageUrl}" class="chat-img">` : ""}
       `;
@@ -240,11 +302,15 @@ window.sendMessage = async function(){
   const text = document.getElementById("chatMessage").value.trim();
   if(!text) return;
 
+  const user = auth.currentUser;
+  if(!user) return;
+
   await addDoc(collection(db,"blogMessages"),{
-    uid:auth.currentUser.uid,
+    uid:user.uid,
     pseudo:currentPseudo,
     message:text,
     type:"text",
+    room:currentRoom,
     visible:true,
     createdAt:serverTimestamp()
   });
@@ -255,19 +321,21 @@ window.sendMessage = async function(){
 window.sendPublicImage = async function(){
   const input = document.getElementById("publicImageInput");
   const file = input.files[0];
+  const user = auth.currentUser;
 
-  if(!file) return;
+  if(!file || !user) return;
 
-  const storageRef = ref(storage, "images/" + auth.currentUser.uid + "/" + Date.now() + "_" + file.name);
+  const storageRef = ref(storage, "images/" + user.uid + "/" + Date.now() + "_" + file.name);
   await uploadBytes(storageRef, file);
   const url = await getDownloadURL(storageRef);
 
   await addDoc(collection(db,"blogMessages"),{
-    uid:auth.currentUser.uid,
+    uid:user.uid,
     pseudo:currentPseudo,
     imageUrl:url,
     message:"",
     type:"image",
+    room:currentRoom,
     visible:true,
     createdAt:serverTimestamp()
   });
@@ -349,6 +417,7 @@ window.updateProfile = async function(){
 
     status.textContent = "Profil mis à jour ✅";
     openMyProfile();
+    loadMembers();
 
   }catch(error){
     console.error(error);
@@ -604,11 +673,21 @@ function loadPrivateConversations(){
 }
 
 window.openPrivatePanel = function(){
-  document.getElementById("privatePanel").style.display = "block";
+  const panel = document.getElementById("privatePanel");
+  if(panel){
+    panel.style.display = "block";
+    panel.classList.add("mobile-open");
+  }
 };
 
 window.closePrivatePanel = function(){
-  document.getElementById("privatePanel").style.display = "none";
+  const panel = document.getElementById("privatePanel");
+  if(panel){
+    panel.classList.remove("mobile-open");
+    if(window.innerWidth <= 800){
+      panel.style.display = "none";
+    }
+  }
 };
 
 window.openPrivateChat = async function(uid, pseudo){
