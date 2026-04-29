@@ -6,17 +6,28 @@
 <title>Admin sécurisé - MyMeToo</title>
 
 <style>
-body{
-  font-family:Arial, sans-serif;
-  background:#f4effa;
-  margin:0;
-  padding:20px;
-  color:#24106b;
+:root{
+  --violet:#24106b;
+  --violet2:#5b23ad;
+  --violet3:#6f42bd;
+  --fond:#f4effa;
+  --soft:#fbf8ff;
+  --danger:#d94b6a;
+  --success:#2f9e44;
+  --warning:#ffb347;
 }
 
-h1,h2{
-  text-align:center;
-  color:#5b23ad;
+*{box-sizing:border-box}
+
+body{
+  font-family:Arial, sans-serif;
+  background:var(--fond);
+  margin:0;
+  color:var(--violet);
+}
+
+h1,h2,h3{
+  color:var(--violet2);
 }
 
 #login{
@@ -24,26 +35,26 @@ h1,h2{
   margin:70px auto;
   background:white;
   padding:25px;
-  border-radius:14px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  border-radius:16px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);
   text-align:center;
 }
 
-input{
+input,select{
   width:100%;
   padding:12px;
   margin:8px 0;
-  border:1px solid #ccc;
-  border-radius:8px;
+  border:1px solid #d8c2eb;
+  border-radius:10px;
   font-size:16px;
 }
 
 button{
-  background:#5b23ad;
+  background:var(--violet2);
   color:white;
   border:none;
-  padding:12px 22px;
-  border-radius:8px;
+  padding:11px 18px;
+  border-radius:9px;
   cursor:pointer;
   font-weight:bold;
   margin-top:10px;
@@ -60,8 +71,77 @@ button:hover{
 
 #adminContent{
   display:none;
-  max-width:1100px;
-  margin:0 auto;
+  min-height:100vh;
+}
+
+.admin-layout{
+  display:grid;
+  grid-template-columns:270px 1fr;
+  min-height:100vh;
+}
+
+.admin-sidebar{
+  background:linear-gradient(180deg,#24106b,#5b23ad);
+  color:white;
+  padding:20px;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+}
+
+.admin-sidebar h1{
+  color:white;
+  font-size:24px;
+  margin:0 0 20px;
+  text-align:left;
+}
+
+.admin-sidebar button{
+  width:100%;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+  color:white;
+  text-align:left;
+  margin:6px 0;
+  border-radius:12px;
+  padding:13px;
+}
+
+.admin-sidebar button.active{
+  background:white;
+  color:var(--violet2);
+}
+
+.admin-sidebar .logout{
+  background:var(--danger);
+  text-align:center;
+  margin-top:20px;
+}
+
+.admin-main{
+  padding:24px;
+  overflow:auto;
+}
+
+.admin-top{
+  background:white;
+  padding:18px 22px;
+  border-radius:18px;
+  box-shadow:0 5px 18px rgba(0,0,0,0.05);
+  margin-bottom:20px;
+}
+
+.admin-top h2{
+  margin:0;
+}
+
+.admin-section{
+  display:none;
+}
+
+.admin-section.active{
+  display:block;
 }
 
 .stats{
@@ -74,7 +154,7 @@ button:hover{
 .stat{
   background:white;
   padding:18px;
-  border-radius:12px;
+  border-radius:14px;
   text-align:center;
   box-shadow:0 5px 15px rgba(0,0,0,0.05);
 }
@@ -82,35 +162,26 @@ button:hover{
 .stat strong{
   display:block;
   font-size:30px;
-  color:#5b23ad;
+  color:var(--violet2);
 }
 
 .chartBox{
   background:white;
-  border-radius:14px;
+  border-radius:16px;
   padding:20px;
-  margin:20px auto;
+  margin:20px 0;
   box-shadow:0 5px 15px rgba(0,0,0,0.05);
-  max-width:900px;
-}
-
-#data,
-#reportsData,
-#usersData,
-#messagesData{
-  max-width:900px;
-  margin:0 auto;
 }
 
 .card{
   background:white;
-  border-radius:12px;
+  border-radius:14px;
   padding:22px;
   margin-bottom:18px;
   box-shadow:0 5px 15px rgba(0,0,0,0.05);
   font-size:16px;
   line-height:1.5;
-  color:#24106b;
+  color:var(--violet);
   overflow:hidden;
 }
 
@@ -126,13 +197,13 @@ button:hover{
 
 .label{
   font-weight:bold;
-  color:#5b23ad;
+  color:var(--violet2);
 }
 
 .message{
   background:#f7effb;
   padding:12px;
-  border-radius:8px;
+  border-radius:10px;
   margin-top:12px;
   font-size:17px;
   word-wrap:break-word;
@@ -142,7 +213,7 @@ button:hover{
 
 .badge-hidden{
   display:inline-block;
-  background:#d94b6a;
+  background:var(--danger);
   color:white;
   padding:5px 10px;
   border-radius:999px;
@@ -153,8 +224,8 @@ button:hover{
 
 .badge-warning{
   display:inline-block;
-  background:#ffb347;
-  color:#24106b;
+  background:var(--warning);
+  color:var(--violet);
   padding:5px 10px;
   border-radius:999px;
   font-size:13px;
@@ -164,17 +235,7 @@ button:hover{
 
 .hide-btn{
   margin-top:12px;
-  background:#6f42bd;
-  color:white;
-  border:none;
-  padding:9px 14px;
-  border-radius:7px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-.hide-btn:hover{
-  background:#5a35a3;
+  background:var(--violet3);
 }
 
 .replies-admin{
@@ -185,13 +246,13 @@ button:hover{
 
 .replies-admin-title{
   font-weight:bold;
-  color:#5b23ad;
+  color:var(--violet2);
   margin-bottom:10px;
 }
 
 .reply-admin{
   background:#fbf8ff;
-  border-left:4px solid #6f42bd;
+  border-left:4px solid var(--violet3);
   border-radius:8px;
   padding:12px;
   margin-top:10px;
@@ -202,7 +263,7 @@ button:hover{
 
 .reply-admin.hidden-reply{
   opacity:.6;
-  border-left:4px solid #d94b6a;
+  border-left:4px solid var(--danger);
   background:#fff5f7;
 }
 
@@ -215,23 +276,17 @@ button:hover{
 
 .reply-hide-btn{
   margin-top:8px;
-  background:#d94b6a;
-  color:white;
-  border:none;
-  padding:7px 11px;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:bold;
+  background:var(--danger);
 }
 
 .reply-hide-btn.show{
-  background:#6f42bd;
+  background:var(--violet3);
 }
 
 .report-card{
   background:#fff5f7;
-  border:2px solid #d94b6a;
-  border-radius:12px;
+  border:2px solid var(--danger);
+  border-radius:14px;
   padding:18px;
   margin-bottom:15px;
   box-shadow:0 5px 15px rgba(0,0,0,0.05);
@@ -239,14 +294,14 @@ button:hover{
 
 .report-type{
   font-weight:bold;
-  color:#d94b6a;
+  color:var(--danger);
   font-size:18px;
   margin-bottom:8px;
 }
 
 .report-message{
   background:white;
-  border-radius:8px;
+  border-radius:10px;
   padding:12px;
   margin-top:10px;
   word-wrap:break-word;
@@ -262,34 +317,39 @@ button:hover{
 }
 
 .report-btn{
-  background:#d94b6a;
-  margin-right:8px;
+  background:var(--danger);
 }
 
 .accept-btn{
-  background:#2f9e44;
+  background:var(--success);
 }
 
 .refuse-btn{
-  background:#d94b6a;
+  background:var(--danger);
 }
 
 .block-btn{
-  background:#24106b;
-}
-
-.logout{
-  display:block;
-  margin:0 auto 20px;
+  background:var(--violet);
 }
 
 .empty{
   text-align:center;
   background:white;
   padding:25px;
-  border-radius:12px;
-  color:#5b23ad;
+  border-radius:14px;
+  color:var(--violet2);
   font-weight:bold;
+}
+
+@media(max-width:850px){
+  .admin-layout{
+    grid-template-columns:1fr;
+  }
+
+  .admin-sidebar{
+    position:relative;
+    height:auto;
+  }
 }
 </style>
 </head>
@@ -308,51 +368,79 @@ button:hover{
 </div>
 
 <div id="adminContent">
-  <h1>📊 Admin MyMeToo</h1>
+  <div class="admin-layout">
 
-  <button class="logout" onclick="logout()">Se déconnecter</button>
+    <aside class="admin-sidebar">
+      <h1>📊 Admin</h1>
 
-  <div class="stats">
-    <div class="stat">
-      <strong id="total">0</strong>
-      Réponses
-    </div>
-    <div class="stat">
-      <strong id="usersCount">0</strong>
-      Utilisateurs
-    </div>
-    <div class="stat">
-      <strong id="reportsCount">0</strong>
-      Signalements à traiter
-    </div>
-    <div class="stat">
-      <strong id="disabledCount">0</strong>
-      Comptes bloqués
-    </div>
+      <button id="nav-dashboard" class="active" onclick="showAdminSection('dashboard')">🏠 Tableau de bord</button>
+      <button id="nav-reports" onclick="showAdminSection('reports')">🚨 Signalements</button>
+      <button id="nav-users" onclick="showAdminSection('users')">👤 Utilisateurs</button>
+      <button id="nav-chat" onclick="showAdminSection('chat')">💬 Chat public</button>
+      <button id="nav-testimonials" onclick="showAdminSection('testimonials')">📝 Témoignages</button>
+
+      <button class="logout" onclick="logout()">Se déconnecter</button>
+    </aside>
+
+    <main class="admin-main">
+
+      <div class="admin-top">
+        <h2 id="adminTitle">Tableau de bord</h2>
+      </div>
+
+      <section id="section-dashboard" class="admin-section active">
+        <div class="stats">
+          <div class="stat">
+            <strong id="total">0</strong>
+            Réponses
+          </div>
+          <div class="stat">
+            <strong id="usersCount">0</strong>
+            Utilisateurs
+          </div>
+          <div class="stat">
+            <strong id="reportsCount">0</strong>
+            Signalements à traiter
+          </div>
+          <div class="stat">
+            <strong id="disabledCount">0</strong>
+            Comptes bloqués
+          </div>
+        </div>
+
+        <div class="chartBox">
+          <h2>Formulaires envoyés par jour</h2>
+          <canvas id="dailyChart"></canvas>
+        </div>
+      </section>
+
+      <section id="section-reports" class="admin-section">
+        <h2>🚨 Signalements à traiter</h2>
+        <div id="reportsData"></div>
+      </section>
+
+      <section id="section-users" class="admin-section">
+        <h2>👤 Utilisateurs du blog</h2>
+        <div id="usersData"></div>
+      </section>
+
+      <section id="section-chat" class="admin-section">
+        <h2>💬 Messages publics</h2>
+        <div id="messagesData"></div>
+      </section>
+
+      <section id="section-testimonials" class="admin-section">
+        <h2>📝 Témoignages</h2>
+        <div id="data"></div>
+      </section>
+
+    </main>
   </div>
-
-  <div class="chartBox">
-    <h2>Formulaires envoyés par jour</h2>
-    <canvas id="dailyChart"></canvas>
-  </div>
-
-  <h2>🚨 Signalements à traiter</h2>
-  <div id="reportsData"></div>
-
-  <h2>👤 Utilisateurs du blog</h2>
-  <div id="usersData"></div>
-
-  <h2>💬 Messages publics</h2>
-  <div id="messagesData"></div>
-
-  <h2>📝 Témoignages</h2>
-  <div id="data"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { initializeAuth, browserSessionPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore,
@@ -385,6 +473,40 @@ const auth = initializeAuth(adminApp, {
 const db = getFirestore(adminApp);
 
 let dailyChart = null;
+
+/* =========================
+   NAVIGATION ADMIN
+========================= */
+
+const sectionTitles = {
+  dashboard: "Tableau de bord",
+  reports: "Signalements",
+  users: "Utilisateurs",
+  chat: "Chat public",
+  testimonials: "Témoignages"
+};
+
+window.showAdminSection = function(sectionName){
+  document.querySelectorAll(".admin-section").forEach(section => {
+    section.classList.remove("active");
+  });
+
+  document.querySelectorAll(".admin-sidebar button").forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  const section = document.getElementById("section-" + sectionName);
+  const nav = document.getElementById("nav-" + sectionName);
+
+  if(section) section.classList.add("active");
+  if(nav) nav.classList.add("active");
+
+  document.getElementById("adminTitle").innerText = sectionTitles[sectionName] || "Admin";
+};
+
+/* =========================
+   AUTH ADMIN
+========================= */
 
 window.login = async function(){
   const email = document.getElementById("email").value.trim();
@@ -427,7 +549,7 @@ async function loadAllAdminData(){
 }
 
 /* =========================
-   SIGNALMENTS
+   SIGNALEMENTS
 ========================= */
 
 async function getValidatedReportCountForUser(uid){
@@ -624,8 +746,7 @@ window.markReportDone = async function(reportId){
     console.error(e);
   }
 };
-
-/* =========================
+  /* =========================
    UTILISATEURS BLOG
 ========================= */
 
@@ -668,8 +789,11 @@ async function loadUsers(){
 
       <div class="field"><span class="label">Pseudo :</span> ${u.pseudo || "Anonyme"}</div>
       <div class="field"><span class="label">UID :</span> ${uid}</div>
+      <div class="field"><span class="label">Email :</span> ${u.email || "Non renseigné"}</div>
       <div class="field"><span class="label">Genre :</span> ${u.genre || u.gender || "Non renseigné"}</div>
       <div class="field"><span class="label">Âge :</span> ${u.age || u.trancheAge || u.ageRange || "Non renseigné"}</div>
+      <div class="field"><span class="label">Département :</span> ${u.departement || "Non renseigné"}</div>
+      <div class="field"><span class="label">Premium :</span> ${u.premium === true || u.plan === "premium" ? "Oui" : "Non"}</div>
       <div class="field"><span class="label">Statut :</span> ${active ? "Actif" : "Bloqué"}</div>
       <div class="field"><span class="label">Signalements validés :</span> ${validatedReports}</div>
       <div class="field"><span class="label">En ligne :</span> ${online ? "Oui" : "Non"}</div>
@@ -677,6 +801,10 @@ async function loadUsers(){
 
       <button class="${active ? "report-btn" : "hide-btn"}" onclick="${active ? `disableUser('${uid}')` : `enableUser('${uid}')`}">
         ${active ? "Bloquer cet utilisateur" : "Réactiver cet utilisateur"}
+      </button>
+
+      <button class="hide-btn" onclick="togglePremiumUser('${uid}', ${u.premium === true || u.plan === "premium"})">
+        ${u.premium === true || u.plan === "premium" ? "Retirer Premium" : "Activer Premium"}
       </button>
     `;
 
@@ -723,6 +851,23 @@ window.enableUser = async function(uid){
   }
 };
 
+window.togglePremiumUser = async function(uid, isPremium){
+  const ok = confirm(isPremium ? "Retirer Premium à cet utilisateur ?" : "Activer Premium pour cet utilisateur ?");
+  if(!ok) return;
+
+  try{
+    await updateDoc(doc(db, "blogUsers", uid), {
+      premium: !isPremium,
+      plan: !isPremium ? "premium" : "free"
+    });
+
+    await loadUsers();
+  }catch(e){
+    alert("Erreur : impossible de modifier le statut Premium.");
+    console.error(e);
+  }
+};
+
 /* =========================
    MESSAGES PUBLICS BLOG
 ========================= */
@@ -750,10 +895,13 @@ async function loadPublicMessages(){
 
     div.innerHTML = `
       ${!visible ? `<div class="badge-hidden">Message masqué</div>` : ""}
+      <div class="field"><span class="label">Salon :</span> ${m.room || "general"}</div>
       <div class="field"><span class="label">Pseudo :</span> ${m.pseudo || "Anonyme"}</div>
       <div class="field"><span class="label">UID :</span> ${m.uid || ""}</div>
+      <div class="field"><span class="label">Type :</span> ${m.type || "text"}</div>
       <div class="field"><span class="label">Date :</span> ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}</div>
       <div class="message"><span class="label">Message :</span><br>${m.message || ""}</div>
+      ${m.imageUrl ? `<div class="message"><span class="label">Image :</span><br><a href="${m.imageUrl}" target="_blank">Voir l’image</a></div>` : ""}
 
       <button onclick="togglePublicMessageVisibility('${id}', ${visible})" class="hide-btn">
         ${visible ? "Masquer ce message" : "Afficher ce message"}
@@ -850,8 +998,7 @@ function renderDailyChart(daysData){
     }
   });
 }
-
-async function loadReplies(parentId, repliesContainer){
+  async function loadReplies(parentId, repliesContainer){
   repliesContainer.innerHTML = "";
 
   const q = query(
@@ -921,6 +1068,10 @@ async function loadData(){
       daysData[dayKey] = (daysData[dayKey] || 0) + 1;
     }
 
+    const expressionText = Array.isArray(d.expression)
+      ? d.expression.join(", ")
+      : (d.expression || "");
+
     const div = document.createElement("div");
     div.className = isVisible ? "card" : "card hidden-response";
 
@@ -931,7 +1082,7 @@ async function loadData(){
       <div class="field"><span class="label">Justice :</span> ${d.justice || ""}</div>
       <div class="field"><span class="label">Parlé :</span> ${d.parle || ""}</div>
       <div class="field"><span class="label">Écoute :</span> ${d.ecoute || ""}</div>
-      <div class="field"><span class="label">Expression :</span> ${(d.expression || []).join(", ")}</div>
+      <div class="field"><span class="label">Expression :</span> ${expressionText}</div>
       <div class="field"><span class="label">Partage autorisé :</span> ${d.partageAutorise ? "Oui" : "Non"}</div>
       <div class="field"><span class="label">Inscrit au blog :</span> ${d.blogAccessRequested ? "Oui" : "Non"}</div>
       <div class="field"><span class="label">Pseudo blog :</span> ${d.blogPseudo || ""}</div>
@@ -957,8 +1108,7 @@ async function loadData(){
   document.getElementById("total").innerText = total;
   renderDailyChart(daysData);
 }
-
-</script>
+  </script>
 
 </body>
 </html>
