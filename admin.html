@@ -144,11 +144,18 @@ button:hover{
   display:block;
 }
 
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:1fr 1.2fr;
+  gap:20px;
+  align-items:start;
+}
+
 .stats{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  grid-template-columns:1fr 1fr;
   gap:15px;
-  margin:20px 0;
+  margin:0;
 }
 
 .stat{
@@ -355,6 +362,15 @@ button:hover{
     height:auto;
   }
 }
+  @media(max-width:900px){
+  .dashboard-grid{
+    grid-template-columns:1fr;
+  }
+
+  .stats{
+    grid-template-columns:1fr 1fr;
+  }
+}
 </style>
 </head>
 
@@ -393,30 +409,36 @@ button:hover{
       </div>
 
       <section id="section-dashboard" class="admin-section active">
-        <div class="stats">
-          <div class="stat">
-            <strong id="total">0</strong>
-            Réponses
-          </div>
-          <div class="stat">
-            <strong id="usersCount">0</strong>
-            Utilisateurs
-          </div>
-          <div class="stat">
-            <strong id="reportsCount">0</strong>
-            Signalements à traiter
-          </div>
-          <div class="stat">
-            <strong id="disabledCount">0</strong>
-            Comptes bloqués
-          </div>
-        </div>
+       <div class="dashboard-grid">
 
-        <div class="chartBox">
-          <h2>Formulaires envoyés par jour</h2>
-          <canvas id="dailyChart"></canvas>
-        </div>
-      </section>
+  <div class="stats">
+    <div class="stat">
+      <strong id="total">0</strong>
+      Réponses
+    </div>
+
+    <div class="stat">
+      <strong id="usersCount">0</strong>
+      Utilisateurs
+    </div>
+
+    <div class="stat">
+      <strong id="reportsCount">0</strong>
+      Signalements à traiter
+    </div>
+
+    <div class="stat">
+      <strong id="disabledCount">0</strong>
+      Comptes bloqués
+    </div>
+  </div>
+
+  <div class="chartBox">
+    <h2>Formulaires envoyés par jour</h2>
+    <canvas id="dailyChart"></canvas>
+  </div>
+
+</div>
 
       <section id="section-reports" class="admin-section">
         <h2>🚨 Signalements à traiter</h2>
