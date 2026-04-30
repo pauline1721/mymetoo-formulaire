@@ -81,6 +81,10 @@ window.logout = async function(){
   await signOut(auth);
 };
 
+window.openBlogAsAdmin = function(){
+  window.open("blog.html", "_blank");
+};
+
 onAuthStateChanged(auth, user => {
   if(user && user.uid === ADMIN_UID){
     document.getElementById("login").style.display = "none";
