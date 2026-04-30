@@ -27,7 +27,10 @@
   </div>
 
   <div class="menu-bottom">
-  <button onclick="toggleAdminContact()">👁 Mode invisible</button>
+  <button id="adminInvisibleBtn" class="menu-item" onclick="toggleAdminContact()" style="display:none;">
+    <span id="adminStatusDot">🟢</span> Mode invisible
+  </button>
+
   <button class="menu-logout" onclick="logout()">Se déconnecter</button>
 </div>
 </nav>
