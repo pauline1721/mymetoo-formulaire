@@ -19,6 +19,7 @@
 
   <div class="menu-content">
     <button class="menu-item" onclick="openMyProfile()">👤 Mon profil</button>
+<button id="adminSettingsBtn" class="menu-item" onclick="openAdminSettingsModal()" style="display:none;">👑 Réglages admin</button>
     <button class="menu-item" onclick="openBlockedUsersModal()">🚫 Membres bloqués</button>
     <button class="menu-item" onclick="openHelpModal()">🚨 Aide / urgence</button>
     <button class="menu-item premium" onclick="openPremiumModal()">⭐ Premium</button>
@@ -317,9 +318,9 @@
     <div class="profile-field"><strong>Genre :</strong> <span id="memberProfileGenre"></span></div>
     <div class="profile-field"><strong>Département :</strong> <span id="memberProfileDepartement"></span></div>
 
-    <button onclick="messageMemberProfile()">💬 Envoyer un message privé</button>
-    <button class="secondary" onclick="blockMemberProfile()">🚫 Bloquer ce membre</button>
-    <button class="danger" onclick="reportMemberProfile()">⚠️ Signaler ce profil</button>
+    <button id="memberPrivateBtn" onclick="messageMemberProfile()">💬 Envoyer un message privé</button>
+    <button id="memberBlockBtn" class="secondary" onclick="blockMemberProfile()">🚫 Bloquer ce membre</button>
+    <button id="memberReportBtn" class="danger" onclick="reportMemberProfile()">⚠️ Signaler ce profil</button>
 
     <div id="memberProfileStatus" class="status"></div>
   </div>
@@ -348,6 +349,31 @@
   </div>
 </div>
 
+  <!-- RÉGLAGES ADMIN -->
+<div id="adminSettingsModal" class="menu-modal">
+  <div class="menu-modal-top">
+    <span>👑 Réglages administrateur</span>
+    <button class="profile-close" onclick="closeAdminSettingsModal()">✕</button>
+  </div>
+
+  <div class="menu-modal-content">
+    <div class="profile-field">
+      <strong>Visibilité du profil admin :</strong><br>
+      <span id="adminVisibleStatus">Chargement...</span>
+      <button onclick="toggleAdminVisibility()">Changer visibilité</button>
+    </div>
+
+    <div class="profile-field">
+      <strong>Messages privés vers admin :</strong><br>
+      <span id="adminContactStatus">Chargement...</span>
+      <button onclick="toggleAdminContact()">Activer / désactiver contact</button>
+    </div>
+
+    <div id="adminSettingsStatus" class="status"></div>
+  </div>
+</div>
+
+  
 <!-- SIGNALEMENT -->
 <div id="reportModal" class="report-modal">
   <div class="report-modal-box">
