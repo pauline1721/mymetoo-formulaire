@@ -256,6 +256,7 @@ function loadMembers(){
 
       if(!auth.currentUser) return;
       if(uid === auth.currentUser.uid) return;
+      if(uid === ADMIN_UID && data.adminProfileVisible === false && !isAdmin) return;
       if(data.active === false) return;
       if(data.online !== true) return;
       if(blocked.includes(uid)) return;
@@ -659,7 +660,6 @@ window.messageMemberProfile = async function(){
   const uid = modal.dataset.uid;
   const pseudo = modal.dataset.pseudo || "Utilisateur";
 
-  // 🔒 Si c'est l'admin → vérifier si contact autorisé
   if(uid === ADMIN_UID){
     const snap = await getDoc(doc(db,"blogUsers", uid));
     const data = snap.exists() ? snap.data() : null;
@@ -672,9 +672,8 @@ window.messageMemberProfile = async function(){
     }
   }
 
-  // ⚠️ ça doit être EN DEHORS du if
   closeMemberProfile();
-  openPrivateChat(uid, pseudo);
+  await openPrivateChat(uid, pseudo);
 };
 
 /* ================= BLOCAGE ================= */
@@ -1189,15 +1188,20 @@ window.toggleAdminContact = async function(){
   const newState = !(currentUserData.allowContact === true);
 
   await updateDoc(doc(db,"blogUsers", user.uid),{
-    allowContact: newState
+    allowContact: newState,
+    adminProfileVisible: newState
   });
 
   currentUserData.allowContact = newState;
+  currentUserData.adminProfileVisible = newState;
 
   alert(newState 
     ? "🟢 Tu es visible (on peut t’écrire)" 
     : "🔴 Tu es invisible (personne ne peut t’écrire)");
 };
+
+
+
 window.addEventListener("beforeunload", () => {
   const user = auth.currentUser;
 
