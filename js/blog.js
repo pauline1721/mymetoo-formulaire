@@ -200,6 +200,15 @@ onAuthStateChanged(auth, async user => {
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("blogContent").style.display = "block";
     document.getElementById("menuButton").style.display = "block";
+    const adminInvisibleBtn = document.getElementById("adminInvisibleBtn");
+if(adminInvisibleBtn){
+  adminInvisibleBtn.style.display = isAdmin ? "block" : "none";
+}
+
+const adminStatusDot = document.getElementById("adminStatusDot");
+if(adminStatusDot){
+  adminStatusDot.textContent = currentUserData.allowContact === false ? "🔴" : "🟢";
+}
 
     loadMembers();
     loadPublicMessages();
@@ -1202,6 +1211,10 @@ window.toggleAdminContact = async function(){
   });
 
   currentUserData.allowContact = newState;
+  const adminStatusDot = document.getElementById("adminStatusDot");
+if(adminStatusDot){
+  adminStatusDot.textContent = newState ? "🟢" : "🔴";
+}
   currentUserData.adminProfileVisible = newState;
 
   alert(newState 
