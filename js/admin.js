@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  initializeAuth,
-  browserSessionPersistence,
+  getAuth,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged
@@ -31,9 +30,7 @@ const firebaseConfig = {
 
 const adminApp = initializeApp(firebaseConfig, "adminApp");
 
-const auth = initializeAuth(adminApp, {
-  persistence: browserSessionPersistence
-});
+const auth = getAuth(adminApp);
 
 const db = getFirestore(adminApp);
 
