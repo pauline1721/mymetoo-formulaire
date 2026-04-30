@@ -730,7 +730,6 @@ window.blockPrivateUser = function(){
 function loadPrivateConversations(){
   const user = auth.currentUser;
   const list = document.getElementById("privateList");
-  const btnPrivate = document.getElementById("btnPrivate");
 
   if(!user || !list) return;
   if(unsubscribePrivateList) unsubscribePrivateList();
@@ -740,7 +739,6 @@ function loadPrivateConversations(){
 
     const blocked = currentUserData?.blockedUsers || [];
     let totalConversations = 0;
-    let unreadCount = 0;
 
     snap.forEach(docSnap => {
       const chat = docSnap.data();
@@ -750,16 +748,17 @@ function loadPrivateConversations(){
       if(Array.isArray(chat.hiddenFor) && chat.hiddenFor.includes(user.uid)) return;
 
       const otherUid = chat.participants.find(id => id !== user.uid);
+      if(!otherUid) return;
       if(blocked.includes(otherUid)) return;
 
       const otherPseudo = chat.participantPseudos?.[otherUid] || "Utilisateur";
       const isUnread = chat.unreadFor === user.uid;
 
       totalConversations++;
-      if(isUnread) unreadCount++;
 
       const div = document.createElement("div");
       div.className = "private-conversation";
+
       div.innerHTML = `
         <div class="name">
           ${otherPseudo}
@@ -777,12 +776,6 @@ function loadPrivateConversations(){
 
     if(totalConversations === 0){
       list.innerHTML = "Aucune conversation privée pour le moment.";
-    }
-
-    if(btnPrivate){
-      btnPrivate.innerHTML = unreadCount > 0
-        ? `💬 Messages privés <span class="private-badge">${unreadCount}</span>`
-        : "💬 Messages privés";
     }
   });
 }
@@ -818,12 +811,25 @@ window.openPrivateChat = async function(uid, pseudo){
   const otherSnap = await getDoc(doc(db,"blogUsers",uid));
   const otherData = otherSnap.exists() ? otherSnap.data() : null;
 
+  if(uid === ADMIN_UID && user.uid !== ADMIN_UID){
+    const canContactAdmin = otherData?.allowContact !== false;
+
+    if(!canContactAdmin){
+      alert("L’administrateur n’est pas disponible actuellement.");
+      return;
+    }
+  }
+
   if(otherData?.blockedUsers?.includes(user.uid)){
     alert("Tu ne peux pas envoyer de message privé à cet utilisateur.");
     return;
   }
 
-  currentPrivateUser = { uid, pseudo };
+  currentPrivateUser = {
+    uid: uid,
+    pseudo: pseudo || otherData?.pseudo || "Utilisateur"
+  };
+
   const chatId = getChatId(user.uid, uid);
   const chatRef = doc(db,"privateMessages",chatId);
 
@@ -834,7 +840,7 @@ window.openPrivateChat = async function(uid, pseudo){
     participants:[user.uid, uid],
     participantPseudos:{
       [user.uid]:currentPseudo,
-      [uid]:pseudo
+      [uid]:currentPrivateUser.pseudo
     },
     hiddenFor:arrayRemove(user.uid),
     updatedAt:serverTimestamp()
@@ -846,7 +852,7 @@ window.openPrivateChat = async function(uid, pseudo){
 
   await setDoc(chatRef, dataToSave, { merge:true });
 
-  document.getElementById("privateTitle").innerText = "Discussion avec " + pseudo;
+  document.getElementById("privateTitle").innerText = "Discussion avec " + currentPrivateUser.pseudo;
   document.getElementById("privateChatWindow").style.display = "block";
   document.getElementById("privateStatus").textContent = "";
 
@@ -887,22 +893,25 @@ window.sendPrivateMessage = async function(){
     return;
   }
 
-  const blocked = currentUserData?.blockedUsers || [];
-  if(blocked.includes(currentPrivateUser.uid)){
-    status.textContent = "Tu as bloqué cet utilisateur.";
+  if(!text){
+    status.textContent = "Écris un message avant d’envoyer.";
     return;
   }
 
   const otherSnap = await getDoc(doc(db,"blogUsers",currentPrivateUser.uid));
   const otherData = otherSnap.exists() ? otherSnap.data() : null;
 
-  if(otherData?.blockedUsers?.includes(user.uid)){
-    status.textContent = "Message impossible.";
-    return;
+  if(currentPrivateUser.uid === ADMIN_UID && user.uid !== ADMIN_UID){
+    const canContactAdmin = otherData?.allowContact !== false;
+
+    if(!canContactAdmin){
+      status.textContent = "L’administrateur n’est pas disponible actuellement.";
+      return;
+    }
   }
 
-  if(!text){
-    status.textContent = "Écris un message avant d’envoyer.";
+  if(otherData?.blockedUsers?.includes(user.uid)){
+    status.textContent = "Message impossible.";
     return;
   }
 
