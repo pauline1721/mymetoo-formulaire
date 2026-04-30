@@ -666,11 +666,13 @@ window.messageMemberProfile = async function(){
 
     const canContact = data?.allowContact !== false;
 
-if(!canContact){
-  alert("L’administrateur n’est pas disponible actuellement.");
-  return;
-}
+    if(!canContact){
+      alert("L’administrateur n’est pas disponible actuellement.");
+      return;
+    }
+  }
 
+  // ⚠️ ça doit être EN DEHORS du if
   closeMemberProfile();
   openPrivateChat(uid, pseudo);
 };
