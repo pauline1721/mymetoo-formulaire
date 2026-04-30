@@ -614,7 +614,11 @@ window.openMemberProfile = function(uid, data){
   const modal = document.getElementById("memberProfileModal");
   if(!modal) return;
 
-  document.getElementById("memberProfileTitle").innerText = "Profil de " + (data.pseudo || "Anonyme");
+  const isAdminProfile = uid === ADMIN_UID;
+
+  document.getElementById("memberProfileTitle").innerText =
+    isAdminProfile ? "👑 Administrateur" : "Profil de " + (data.pseudo || "Anonyme");
+
   document.getElementById("memberProfilePseudo").innerText = data.pseudo || "Anonyme";
   document.getElementById("memberProfileAge").innerText = data.age || "Non renseigné";
   document.getElementById("memberProfileGenre").innerText = data.genre || "Non renseigné";
@@ -622,6 +626,27 @@ window.openMemberProfile = function(uid, data){
 
   modal.dataset.uid = uid;
   modal.dataset.pseudo = data.pseudo || "Anonyme";
+
+  const privateBtn = document.getElementById("memberPrivateBtn");
+  const blockBtn = document.getElementById("memberBlockBtn");
+  const reportBtn = document.getElementById("memberReportBtn");
+
+  if(isAdminProfile){
+    // 🔥 admin → jamais bloquable / signalable
+    if(blockBtn) blockBtn.style.display = "none";
+    if(reportBtn) reportBtn.style.display = "none";
+
+    // 🔥 message privé activable/désactivable
+    if(privateBtn){
+      privateBtn.style.display = data.adminContactEnabled === false ? "none" : "block";
+    }
+  }else{
+    // utilisateurs normaux
+    if(privateBtn) privateBtn.style.display = "block";
+    if(blockBtn) blockBtn.style.display = "block";
+    if(reportBtn) reportBtn.style.display = "block";
+  }
+
   modal.style.display = "block";
 };
 
@@ -629,10 +654,21 @@ window.closeMemberProfile = function(){
   document.getElementById("memberProfileModal").style.display = "none";
 };
 
-window.messageMemberProfile = function(){
+window.messageMemberProfile = async function(){
   const modal = document.getElementById("memberProfileModal");
   const uid = modal.dataset.uid;
   const pseudo = modal.dataset.pseudo || "Utilisateur";
+
+  // 🔒 Si c'est l'admin → vérifier si contact autorisé
+  if(uid === ADMIN_UID){
+    const snap = await getDoc(doc(db,"blogUsers", uid));
+    const data = snap.exists() ? snap.data() : null;
+
+    if(!data?.allowContact){
+      alert("L’administrateur n’est pas disponible actuellement.");
+      return;
+    }
+  }
 
   closeMemberProfile();
   openPrivateChat(uid, pseudo);
@@ -673,6 +709,12 @@ async function blockUser(uid, pseudo){
 
 window.blockMemberProfile = function(){
   const modal = document.getElementById("memberProfileModal");
+
+  if(modal.dataset.uid === ADMIN_UID){
+    alert("Impossible de bloquer l’administrateur.");
+    return;
+  }
+
   blockUser(modal.dataset.uid, modal.dataset.pseudo);
 };
 
@@ -934,6 +976,12 @@ window.hideCurrentPrivateConversation = async function(){
 
 window.reportMemberProfile = function(){
   const modal = document.getElementById("memberProfileModal");
+
+  // 🔒 Protection admin
+  if(modal.dataset.uid === ADMIN_UID){
+    alert("Impossible de signaler l’administrateur.");
+    return;
+  }
 
   currentReportMode = "profile";
   currentReportTarget = {
