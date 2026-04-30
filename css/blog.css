@@ -901,4 +901,16 @@ button.danger{background:#d94b6a}
   .msg{
     max-width:95%;
   }
+
+  .admin-message-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.admin-hidden-msg{
+  opacity:.65;
+  border:2px dashed #d94b6a;
+}
 }
