@@ -142,23 +142,27 @@ onAuthStateChanged(auth, async user => {
   if(!snap.exists()){
     if(isAdmin){
       currentUserData = {
-        pseudo:"Administrateur",
-        premium:true,
-        plan:"premium",
-        active:true,
-        blockedUsers:[]
-      };
+  pseudo:"Administrateur",
+  premium:true,
+  plan:"premium",
+  active:true,
+  blockedUsers:[],
+  adminProfileVisible:true,
+  adminContactEnabled:true
+};
 
       await setDoc(doc(db,"blogUsers",user.uid),{
-        pseudo:"Administrateur",
-        email:user.email || "",
-        active:true,
-        premium:true,
-        plan:"premium",
-        role:"admin",
-        online:true,
-        lastSeen:serverTimestamp()
-      }, { merge:true });
+  pseudo:"Administrateur",
+  email:user.email || "",
+  active:true,
+  premium:true,
+  plan:"premium",
+  role:"admin",
+  adminProfileVisible:true,
+  adminContactEnabled:true,
+  online:true,
+  lastSeen:serverTimestamp()
+}, { merge:true });
     }else{
       await signOut(auth);
       return;
@@ -1076,6 +1080,71 @@ window.adminBlockUser = async function(uid){
   });
 
   alert("Utilisateur bloqué ✅");
+};
+
+window.openAdminSettingsModal = function(){
+  if(!isAdmin) return;
+
+  closeMenu();
+
+  const visibleText = document.getElementById("adminVisibleStatus");
+  const contactText = document.getElementById("adminContactStatus");
+
+  if(visibleText){
+    visibleText.textContent = currentUserData.adminProfileVisible === false
+      ? "Invisible pour les membres"
+      : "Visible pour les membres";
+  }
+
+  if(contactText){
+    contactText.textContent = currentUserData.adminContactEnabled === false
+      ? "Messages privés désactivés"
+      : "Messages privés activés";
+  }
+
+  document.getElementById("adminSettingsStatus").textContent = "";
+  document.getElementById("adminSettingsModal").style.display = "block";
+};
+
+window.closeAdminSettingsModal = function(){
+  document.getElementById("adminSettingsModal").style.display = "none";
+};
+
+window.toggleAdminVisibility = async function(){
+  if(!isAdmin || !auth.currentUser) return;
+
+  const newValue = currentUserData.adminProfileVisible === false ? true : false;
+
+  await updateDoc(doc(db,"blogUsers",auth.currentUser.uid),{
+    adminProfileVisible:newValue
+  });
+
+  currentUserData.adminProfileVisible = newValue;
+
+  document.getElementById("adminVisibleStatus").textContent = newValue
+    ? "Visible pour les membres"
+    : "Invisible pour les membres";
+
+  document.getElementById("adminSettingsStatus").textContent = "Visibilité mise à jour ✅";
+  loadMembers();
+};
+
+window.toggleAdminContact = async function(){
+  if(!isAdmin || !auth.currentUser) return;
+
+  const newValue = currentUserData.adminContactEnabled === false ? true : false;
+
+  await updateDoc(doc(db,"blogUsers",auth.currentUser.uid),{
+    adminContactEnabled:newValue
+  });
+
+  currentUserData.adminContactEnabled = newValue;
+
+  document.getElementById("adminContactStatus").textContent = newValue
+    ? "Messages privés activés"
+    : "Messages privés désactivés";
+
+  document.getElementById("adminSettingsStatus").textContent = "Contact admin mis à jour ✅";
 };
 
 window.addEventListener("beforeunload", () => {
