@@ -658,3 +658,6 @@ async function loadData(){
   document.getElementById("total").innerText = total;
   renderDailyChart(daysData);
 }
+window.openBlogAsAdmin = function(){
+  window.open("./blog.html", "_blank");
+};
