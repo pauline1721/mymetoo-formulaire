@@ -664,11 +664,12 @@ window.messageMemberProfile = async function(){
     const snap = await getDoc(doc(db,"blogUsers", uid));
     const data = snap.exists() ? snap.data() : null;
 
-    if(!data?.allowContact){
-      alert("L’administrateur n’est pas disponible actuellement.");
-      return;
-    }
-  }
+    const canContact = data?.allowContact !== false;
+
+if(!canContact){
+  alert("L’administrateur n’est pas disponible actuellement.");
+  return;
+}
 
   closeMemberProfile();
   openPrivateChat(uid, pseudo);
@@ -1178,23 +1179,23 @@ window.toggleAdminVisibility = async function(){
 };
 
 window.toggleAdminContact = async function(){
-  if(!isAdmin || !auth.currentUser) return;
+  if(!isAdmin) return;
 
-  const newValue = currentUserData.adminContactEnabled === false ? true : false;
+  const user = auth.currentUser;
+  if(!user) return;
 
-  await updateDoc(doc(db,"blogUsers",auth.currentUser.uid),{
-    adminContactEnabled:newValue
+  const newState = !(currentUserData.allowContact === true);
+
+  await updateDoc(doc(db,"blogUsers", user.uid),{
+    allowContact: newState
   });
 
-  currentUserData.adminContactEnabled = newValue;
+  currentUserData.allowContact = newState;
 
-  document.getElementById("adminContactStatus").textContent = newValue
-    ? "Messages privés activés"
-    : "Messages privés désactivés";
-
-  document.getElementById("adminSettingsStatus").textContent = "Contact admin mis à jour ✅";
+  alert(newState 
+    ? "🟢 Tu es visible (on peut t’écrire)" 
+    : "🔴 Tu es invisible (personne ne peut t’écrire)");
 };
-
 window.addEventListener("beforeunload", () => {
   const user = auth.currentUser;
 
