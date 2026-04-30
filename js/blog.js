@@ -48,6 +48,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const ADMIN_UID = "YBknFdtouzRiDzSj8b2KjncQ7sp2";
+let isAdmin = false;
 
 let currentPseudo = "Anonyme";
 let currentUserData = null;
@@ -133,14 +135,37 @@ window.resetPassword = async function(){
 
 onAuthStateChanged(auth, async user => {
   if(user){
-    const snap = await getDoc(doc(db,"blogUsers",user.uid));
+  isAdmin = user.uid === ADMIN_UID;
 
-    if(!snap.exists()){
+  const snap = await getDoc(doc(db,"blogUsers",user.uid));
+
+  if(!snap.exists()){
+    if(isAdmin){
+      currentUserData = {
+        pseudo:"Administrateur",
+        premium:true,
+        plan:"premium",
+        active:true,
+        blockedUsers:[]
+      };
+
+      await setDoc(doc(db,"blogUsers",user.uid),{
+        pseudo:"Administrateur",
+        email:user.email || "",
+        active:true,
+        premium:true,
+        plan:"premium",
+        role:"admin",
+        online:true,
+        lastSeen:serverTimestamp()
+      }, { merge:true });
+    }else{
       await signOut(auth);
       return;
     }
-
+  }else{
     currentUserData = snap.data();
+  }
 
     if(currentUserData.active === false){
       await signOut(auth);
@@ -166,7 +191,8 @@ onAuthStateChanged(auth, async user => {
       }
     }, 10000);
 
-    document.getElementById("welcomePseudo").innerText = "Connecté(e) : " + currentPseudo;
+    document.getElementById("welcomePseudo").innerText =
+   isAdmin ? "Connecté(e) : " + currentPseudo + " 👑 ADMIN" : "Connecté(e) : " + currentPseudo;
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("blogContent").style.display = "block";
     document.getElementById("menuButton").style.display = "block";
@@ -271,7 +297,8 @@ function loadPublicMessages(){
 
   const isPremium =
     currentUserData?.premium === true ||
-    currentUserData?.plan === "premium";
+    currentUserData?.plan === "premium" ||
+    isAdmin === true;
 
   const q = isPremium
     ? query(collection(db,"blogMessages"), orderBy("createdAt","asc"))
@@ -285,12 +312,15 @@ function loadPublicMessages(){
     snap.forEach(docSnap => {
       const m = docSnap.data();
 
-      if(m.visible === false) return;
+      if(m.visible === false && !isAdmin) return;
 
       const room = m.room || "general";
       if(room !== currentRoom) return;
 
-      messages.push(m);
+      messages.push({
+        id:docSnap.id,
+        ...m
+      });
     });
 
     if(!isPremium){
@@ -299,16 +329,33 @@ function loadPublicMessages(){
 
     messages.forEach(m => {
       const div = document.createElement("div");
-      div.className = "msg";
+      div.className = m.visible === false ? "msg admin-hidden-msg" : "msg";
 
-      const displayedPseudo = currentRoom === "anonyme"
+      const displayedPseudo = currentRoom === "anonyme" && !isAdmin
         ? "Anonyme"
         : (m.pseudo || "Anonyme");
 
       div.innerHTML = `
-        <div class="msg-meta">${displayedPseudo}</div>
+        ${m.visible === false && isAdmin ? `<div class="private-badge">Message masqué</div>` : ""}
+
+        <div class="msg-meta">
+          ${displayedPseudo}
+          ${isAdmin ? `<span class="private-badge">UID : ${m.uid || "inconnu"}</span>` : ""}
+        </div>
+
         ${m.message || ""}
         ${m.imageUrl ? `<img src="${m.imageUrl}" class="chat-img">` : ""}
+
+        ${isAdmin ? `
+          <div class="admin-message-actions">
+            ${m.visible === false
+              ? `<button class="secondary" onclick="adminShowPublicMessage('${m.id}')">Afficher</button>`
+              : `<button class="danger" onclick="adminHidePublicMessage('${m.id}')">Masquer</button>`
+            }
+
+            ${m.uid ? `<button class="danger" onclick="adminBlockUser('${m.uid}')">Bloquer utilisateur</button>` : ""}
+          </div>
+        ` : ""}
       `;
 
       container.appendChild(div);
@@ -993,6 +1040,42 @@ window.openLegalModal = function(){
 
 window.closeLegalModal = function(){
   document.getElementById("legalModal").style.display = "none";
+};
+
+window.adminHidePublicMessage = async function(messageId){
+  if(!isAdmin) return;
+
+  const ok = confirm("Masquer ce message public ?");
+  if(!ok) return;
+
+  await updateDoc(doc(db,"blogMessages",messageId),{
+    visible:false
+  });
+};
+
+window.adminShowPublicMessage = async function(messageId){
+  if(!isAdmin) return;
+
+  const ok = confirm("Réafficher ce message public ?");
+  if(!ok) return;
+
+  await updateDoc(doc(db,"blogMessages",messageId),{
+    visible:true
+  });
+};
+
+window.adminBlockUser = async function(uid){
+  if(!isAdmin || !uid) return;
+
+  const ok = confirm("Bloquer cet utilisateur depuis le chat ?");
+  if(!ok) return;
+
+  await updateDoc(doc(db,"blogUsers",uid),{
+    active:false,
+    online:false
+  });
+
+  alert("Utilisateur bloqué ✅");
 };
 
 window.addEventListener("beforeunload", () => {
