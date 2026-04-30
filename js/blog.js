@@ -25,7 +25,8 @@ import {
   arrayUnion,
   arrayRemove,
   onSnapshot,
-  limit
+  limit,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
@@ -648,7 +649,7 @@ window.openMemberProfile = function(uid, data){
 
     // 🔥 message privé activable/désactivable
     if(privateBtn){
-      privateBtn.style.display = data.adminContactEnabled === false ? "none" : "block";
+      privateBtn.style.display = data.allowContact === false ? "none" : "block";
     }
   }else{
     // utilisateurs normaux
@@ -743,27 +744,47 @@ function loadPrivateConversations(){
   if(!user || !list) return;
   if(unsubscribePrivateList) unsubscribePrivateList();
 
-  unsubscribePrivateList = onSnapshot(collection(db,"privateMessages"), snap => {
+  const q = query(
+    collection(db,"privateMessages"),
+    where("participants","array-contains",user.uid)
+  );
+
+  unsubscribePrivateList = onSnapshot(q, snap => {
     list.innerHTML = "";
 
     const blocked = currentUserData?.blockedUsers || [];
-    let totalConversations = 0;
+    let conversations = [];
 
     snap.forEach(docSnap => {
       const chat = docSnap.data();
 
-      if(!Array.isArray(chat.participants)) return;
-      if(!chat.participants.includes(user.uid)) return;
       if(Array.isArray(chat.hiddenFor) && chat.hiddenFor.includes(user.uid)) return;
 
       const otherUid = chat.participants.find(id => id !== user.uid);
       if(!otherUid) return;
       if(blocked.includes(otherUid)) return;
 
-      const otherPseudo = chat.participantPseudos?.[otherUid] || "Utilisateur";
-      const isUnread = chat.unreadFor === user.uid;
+      conversations.push({
+        id: docSnap.id,
+        ...chat,
+        otherUid
+      });
+    });
 
-      totalConversations++;
+    conversations.sort((a,b) => {
+      const da = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : 0;
+      const dbb = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : 0;
+      return dbb - da;
+    });
+
+    if(conversations.length === 0){
+      list.innerHTML = "Aucune conversation privée pour le moment.";
+      return;
+    }
+
+    conversations.forEach(chat => {
+      const otherPseudo = chat.participantPseudos?.[chat.otherUid] || "Utilisateur";
+      const isUnread = chat.unreadFor === user.uid;
 
       const div = document.createElement("div");
       div.className = "private-conversation";
@@ -777,15 +798,14 @@ function loadPrivateConversations(){
       `;
 
       div.onclick = function(){
-        openPrivateChat(otherUid, otherPseudo);
+        openPrivateChat(chat.otherUid, otherPseudo);
       };
 
       list.appendChild(div);
     });
-
-    if(totalConversations === 0){
-      list.innerHTML = "Aucune conversation privée pour le moment.";
-    }
+  }, error => {
+    console.error("Erreur messages privés :", error);
+    list.innerHTML = "Erreur de chargement des messages privés.";
   });
 }
 
@@ -811,12 +831,6 @@ window.openPrivateChat = async function(uid, pseudo){
   const user = auth.currentUser;
   if(!user || !uid) return;
 
-  const blocked = currentUserData?.blockedUsers || [];
-  if(blocked.includes(uid)){
-    alert("Tu as bloqué cet utilisateur.");
-    return;
-  }
-
   const otherSnap = await getDoc(doc(db,"blogUsers",uid));
   const otherData = otherSnap.exists() ? otherSnap.data() : null;
 
@@ -829,23 +843,20 @@ window.openPrivateChat = async function(uid, pseudo){
     }
   }
 
-  if(otherData?.blockedUsers?.includes(user.uid)){
+  if(otherData?.blockedUsers?.includes(user.uid) && user.uid !== ADMIN_UID){
     alert("Tu ne peux pas envoyer de message privé à cet utilisateur.");
     return;
   }
 
   currentPrivateUser = {
-    uid: uid,
+    uid,
     pseudo: pseudo || otherData?.pseudo || "Utilisateur"
   };
 
   const chatId = getChatId(user.uid, uid);
   const chatRef = doc(db,"privateMessages",chatId);
 
-  const snap = await getDoc(chatRef);
-  const existingChat = snap.exists() ? snap.data() : null;
-
-  const dataToSave = {
+  await setDoc(chatRef,{
     participants:[user.uid, uid],
     participantPseudos:{
       [user.uid]:currentPseudo,
@@ -853,13 +864,11 @@ window.openPrivateChat = async function(uid, pseudo){
     },
     hiddenFor:arrayRemove(user.uid),
     updatedAt:serverTimestamp()
-  };
+  }, { merge:true });
 
-  if(existingChat && existingChat.unreadFor === user.uid){
-    dataToSave.unreadFor = "";
-  }
-
-  await setDoc(chatRef, dataToSave, { merge:true });
+  await updateDoc(chatRef,{
+    unreadFor:""
+  }).catch(() => {});
 
   document.getElementById("privateTitle").innerText = "Discussion avec " + currentPrivateUser.pseudo;
   document.getElementById("privateChatWindow").style.display = "block";
@@ -919,7 +928,7 @@ window.sendPrivateMessage = async function(){
     }
   }
 
-  if(otherData?.blockedUsers?.includes(user.uid)){
+  if(otherData?.blockedUsers?.includes(user.uid) && user.uid !== ADMIN_UID){
     status.textContent = "Message impossible.";
     return;
   }
