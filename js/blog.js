@@ -740,6 +740,7 @@ window.blockPrivateUser = function(){
 function loadPrivateConversations(){
   const user = auth.currentUser;
   const list = document.getElementById("privateList");
+  const btnPrivate = document.getElementById("btnPrivate");
 
   if(!user || !list) return;
   if(unsubscribePrivateList) unsubscribePrivateList();
@@ -752,8 +753,8 @@ function loadPrivateConversations(){
   unsubscribePrivateList = onSnapshot(q, snap => {
     list.innerHTML = "";
 
-    const blocked = currentUserData?.blockedUsers || [];
     let conversations = [];
+    let unreadCount = 0;
 
     snap.forEach(docSnap => {
       const chat = docSnap.data();
@@ -762,15 +763,26 @@ function loadPrivateConversations(){
 
       const otherUid = chat.participants.find(id => id !== user.uid);
       if(!otherUid) return;
-      if(blocked.includes(otherUid)) return;
+
+      const otherPseudo = chat.participantPseudos?.[otherUid] || "Utilisateur";
+
+      const isUnread =
+        chat.unreadFor === user.uid ||
+        (Array.isArray(chat.unreadBy) && chat.unreadBy.includes(user.uid));
+
+      if(isUnread) unreadCount++;
 
       conversations.push({
         id: docSnap.id,
-        ...chat,
-        otherUid
+        otherUid,
+        otherPseudo,
+        isUnread,
+        lastMessage: chat.lastMessage || "",
+        updatedAt: chat.updatedAt
       });
     });
 
+    // tri récent
     conversations.sort((a,b) => {
       const da = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : 0;
       const dbb = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : 0;
@@ -779,35 +791,33 @@ function loadPrivateConversations(){
 
     if(conversations.length === 0){
       list.innerHTML = "Aucune conversation privée pour le moment.";
-      return;
     }
 
     conversations.forEach(chat => {
-      const otherPseudo = chat.participantPseudos?.[chat.otherUid] || "Utilisateur";
-      const isUnread =
-  chat.unreadFor === user.uid ||
-  (Array.isArray(chat.unreadBy) && chat.unreadBy.includes(user.uid));
-
       const div = document.createElement("div");
       div.className = "private-conversation";
 
       div.innerHTML = `
         <div class="name">
-          ${otherPseudo}
-          ${isUnread ? `<span class="private-badge">Nouveau</span>` : ""}
+          ${chat.otherPseudo}
+          ${chat.isUnread ? `<span class="private-badge">Nouveau</span>` : ""}
         </div>
-        <div class="preview">${chat.lastMessage || "Conversation privée"}</div>
+        <div class="preview">${chat.lastMessage}</div>
       `;
 
       div.onclick = function(){
-        openPrivateChat(chat.otherUid, otherPseudo);
+        openPrivateChat(chat.otherUid, chat.otherPseudo);
       };
 
       list.appendChild(div);
     });
-  }, error => {
-    console.error("Erreur messages privés :", error);
-    list.innerHTML = "Erreur de chargement des messages privés.";
+
+    // 🔥 compteur global (super important)
+    if(btnPrivate){
+      btnPrivate.innerHTML = unreadCount > 0
+        ? `💬 Messages privés <span class="private-badge">${unreadCount}</span>`
+        : "💬 Messages privés";
+    }
   });
 }
 
