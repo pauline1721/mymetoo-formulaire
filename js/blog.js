@@ -946,8 +946,11 @@ window.sendPrivateMessage = async function(){
     [currentPrivateUser.uid]:currentPrivateUser.pseudo
   },
   lastMessage:text,
+
+  // 🔥 NOTIFICATIONS FIABLES
   unreadFor:currentPrivateUser.uid,
   unreadBy:arrayUnion(currentPrivateUser.uid),
+
   hiddenFor:arrayRemove(currentPrivateUser.uid),
   updatedAt:serverTimestamp()
 }, { merge:true });
