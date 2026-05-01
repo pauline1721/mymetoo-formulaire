@@ -784,7 +784,9 @@ function loadPrivateConversations(){
 
     conversations.forEach(chat => {
       const otherPseudo = chat.participantPseudos?.[chat.otherUid] || "Utilisateur";
-      const isUnread = chat.unreadFor === user.uid;
+      const isUnread =
+  chat.unreadFor === user.uid ||
+  (Array.isArray(chat.unreadBy) && chat.unreadBy.includes(user.uid));
 
       const div = document.createElement("div");
       div.className = "private-conversation";
@@ -867,8 +869,9 @@ window.openPrivateChat = async function(uid, pseudo){
   }, { merge:true });
 
   await updateDoc(chatRef,{
-    unreadFor:""
-  }).catch(() => {});
+  unreadFor:"",
+  unreadBy:arrayRemove(user.uid)
+}).catch(() => {});
 
   document.getElementById("privateTitle").innerText = "Discussion avec " + currentPrivateUser.pseudo;
   document.getElementById("privateChatWindow").style.display = "block";
@@ -937,16 +940,17 @@ window.sendPrivateMessage = async function(){
   const chatRef = doc(db,"privateMessages",chatId);
 
   await setDoc(chatRef,{
-    participants:[user.uid, currentPrivateUser.uid],
-    participantPseudos:{
-      [user.uid]:currentPseudo,
-      [currentPrivateUser.uid]:currentPrivateUser.pseudo
-    },
-    lastMessage:text,
-    unreadFor:currentPrivateUser.uid,
-    hiddenFor:arrayRemove(currentPrivateUser.uid),
-    updatedAt:serverTimestamp()
-  }, { merge:true });
+  participants:[user.uid, currentPrivateUser.uid],
+  participantPseudos:{
+    [user.uid]:currentPseudo,
+    [currentPrivateUser.uid]:currentPrivateUser.pseudo
+  },
+  lastMessage:text,
+  unreadFor:currentPrivateUser.uid,
+  unreadBy:arrayUnion(currentPrivateUser.uid),
+  hiddenFor:arrayRemove(currentPrivateUser.uid),
+  updatedAt:serverTimestamp()
+}, { merge:true });
 
   await addDoc(collection(db,"privateMessages",chatId,"messages"),{
     from:user.uid,
