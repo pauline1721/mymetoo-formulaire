@@ -913,4 +913,17 @@ button.danger{background:#d94b6a}
   opacity:.65;
   border:2px dashed #d94b6a;
 }
+  #btnPrivate{
+  margin-top:10px;
+  background:#6f42bd;
+  color:white;
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:bold;
+}
+
+.private-conversation-unread{
+  border:2px solid #d94b6a;
+  background:#fff0f5;
+}
 }
