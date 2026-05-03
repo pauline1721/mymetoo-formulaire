@@ -82,15 +82,30 @@ const departements = [
 ];
 
 function initDepartements(){
-  const select = document.getElementById("filterDepartement");
-  if(!select) return;
+  const filterSelect = document.getElementById("filterDepartement");
+  const profileSelect = document.getElementById("profileDepartementEdit");
 
-  departements.forEach(dep => {
-    const option = document.createElement("option");
-    option.value = dep;
-    option.textContent = dep;
-    select.appendChild(option);
-  });
+  if(filterSelect){
+    filterSelect.innerHTML = '<option value="">Tous les départements</option>';
+
+    departements.forEach(dep => {
+      const option = document.createElement("option");
+      option.value = dep;
+      option.textContent = dep;
+      filterSelect.appendChild(option);
+    });
+  }
+
+  if(profileSelect){
+    profileSelect.innerHTML = '<option value="">Choisir un département</option>';
+
+    departements.forEach(dep => {
+      const option = document.createElement("option");
+      option.value = dep;
+      option.textContent = dep;
+      profileSelect.appendChild(option);
+    });
+  }
 }
 
 let isAdmin = false;
