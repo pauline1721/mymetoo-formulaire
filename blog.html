@@ -117,9 +117,13 @@
     <section class="chat-main">
       <div class="chat-top">
         <div>
-          <div id="activeRoomTitle" class="active-room-title">💬 Salon général</div>
-          <strong id="welcomePseudo">Connecté(e)</strong>
-        </div>
+  <div id="activeRoomTitle" class="active-room-title">💬 Salon général</div>
+  <strong id="welcomePseudo">Connecté(e)</strong>
+
+  <button id="btnPrivate" onclick="openPrivatePanel()" type="button">
+    💬 Messages privés
+  </button>
+</div>
       </div>
 
       <div id="messages" class="messages"></div>
