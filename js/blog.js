@@ -1123,7 +1123,11 @@ window.sendPrivateMessage = async function(){
   const otherSnap = await getDoc(doc(db,"blogUsers",currentPrivateUser.uid));
   const otherData = otherSnap.exists() ? otherSnap.data() : null;
 
-  if(currentPrivateUser.uid === ADMIN_UID && user.uid !== ADMIN_UID){
+  // ❌ on bloque seulement SI c’est un utilisateur vers admin
+if(
+  currentPrivateUser.uid === ADMIN_UID &&
+  user.uid !== ADMIN_UID
+){
     const canContactAdmin = otherData?.allowContact !== false;
 
     if(!canContactAdmin){
