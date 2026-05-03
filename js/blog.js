@@ -786,18 +786,6 @@ window.messageMemberProfile = async function(){
   const uid = modal.dataset.uid;
   const pseudo = modal.dataset.pseudo || "Utilisateur";
 
-  if(uid === ADMIN_UID){
-    const snap = await getDoc(doc(db,"blogUsers", uid));
-    const data = snap.exists() ? snap.data() : null;
-
-    const canContact = data?.allowContact !== false;
-
-    if(!canContact){
-      alert("L’administrateur n’est pas disponible actuellement.");
-      return;
-    }
-  }
-
   closeMemberProfile();
   await openPrivateChat(uid, pseudo);
 };
