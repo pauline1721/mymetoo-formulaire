@@ -574,6 +574,9 @@ window.closeMyProfile = function(){
 };
 
 window.openEditProfile = function(){
+
+  initDepartements(); // 👈 AJOUTE CETTE LIGNE ICI
+
   document.getElementById("profileView").style.display = "none";
   document.getElementById("profileEdit").style.display = "block";
 
