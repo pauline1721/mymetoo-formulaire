@@ -984,13 +984,16 @@ window.openPrivateChat = async function(uid, pseudo){
     updatedAt:serverTimestamp()
   }, { merge:true });
 
-  /*
-    On marque comme lu uniquement quand CET utilisateur ouvre la conversation.
-  */
+  const snap = await getDoc(chatRef);
+const chat = snap.exists() ? snap.data() : null;
+
+// ⚠️ ON MARQUE LU UNIQUEMENT SI C'EST LE DESTINATAIRE
+if(chat && chat.unreadFor === user.uid){
   await updateDoc(chatRef,{
     unreadFor:"",
     unreadBy:arrayRemove(user.uid)
   }).catch(() => {});
+}
 
   const privateTitle = document.getElementById("privateTitle");
   const privateChatWindow = document.getElementById("privateChatWindow");
@@ -1072,18 +1075,26 @@ window.sendPrivateMessage = async function(){
   const chatId = getChatId(user.uid, currentPrivateUser.uid);
   const chatRef = doc(db,"privateMessages",chatId);
 
-  await setDoc(chatRef,{
-    participants:[user.uid, currentPrivateUser.uid],
-    participantPseudos:{
-      [user.uid]:currentPseudo,
-      [currentPrivateUser.uid]:currentPrivateUser.pseudo
-    },
+  await updateDoc(chatRef,{
     lastMessage:text,
     unreadFor:currentPrivateUser.uid,
     unreadBy:arrayUnion(currentPrivateUser.uid),
     hiddenFor:arrayRemove(currentPrivateUser.uid),
     updatedAt:serverTimestamp()
-  }, { merge:true });
+  }).catch(async () => {
+    await setDoc(chatRef,{
+      participants:[user.uid, currentPrivateUser.uid],
+      participantPseudos:{
+        [user.uid]:currentPseudo,
+        [currentPrivateUser.uid]:currentPrivateUser.pseudo
+      },
+      lastMessage:text,
+      unreadFor:currentPrivateUser.uid,
+      unreadBy:[currentPrivateUser.uid],
+      hiddenFor:[],
+      updatedAt:serverTimestamp()
+    });
+  });
 
   await addDoc(collection(db,"privateMessages",chatId,"messages"),{
     from:user.uid,
