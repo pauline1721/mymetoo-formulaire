@@ -81,31 +81,34 @@ const departements = [
   "Val-de-Marne (94)","Val-d'Oise (95)"
 ];
 
+function remplirSelectDepartements(select, firstLabel){
+  if(!select) return;
+
+  select.innerHTML = "";
+
+  const firstOption = document.createElement("option");
+  firstOption.value = "";
+  firstOption.textContent = firstLabel;
+  select.appendChild(firstOption);
+
+  departements.forEach(dep => {
+    const option = document.createElement("option");
+    option.value = dep;
+    option.textContent = dep;
+    select.appendChild(option);
+  });
+}
+
 function initDepartements(){
-  const filterSelect = document.getElementById("filterDepartement");
-  const profileSelect = document.getElementById("profileDepartementEdit");
+  remplirSelectDepartements(
+    document.getElementById("filterDepartement"),
+    "Tous les départements"
+  );
 
-  if(filterSelect){
-    filterSelect.innerHTML = '<option value="">Tous les départements</option>';
-
-    departements.forEach(dep => {
-      const option = document.createElement("option");
-      option.value = dep;
-      option.textContent = dep;
-      filterSelect.appendChild(option);
-    });
-  }
-
-  if(profileSelect){
-    profileSelect.innerHTML = '<option value="">Choisir un département</option>';
-
-    departements.forEach(dep => {
-      const option = document.createElement("option");
-      option.value = dep;
-      option.textContent = dep;
-      profileSelect.appendChild(option);
-    });
-  }
+  remplirSelectDepartements(
+    document.getElementById("profileDepartementEdit"),
+    "Choisir un département"
+  );
 }
 
 let isAdmin = false;
