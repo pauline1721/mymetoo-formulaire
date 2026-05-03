@@ -49,9 +49,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
-const ADMIN_UID = "YBknFdtouzRiDzSj8b2KjncQ7sp2";
-let isAdmin = false;
 
+const ADMIN_UID = "YBknFdtouzRiDzSj8b2KjncQ7sp2";
+
+let isAdmin = false;
 let currentPseudo = "Anonyme";
 let currentUserData = null;
 let currentPrivateUser = null;
@@ -90,20 +91,22 @@ window.login = async function(){
   try{
     await signInWithEmailAndPassword(auth, email, password);
     status.textContent = "Connexion réussie ✅";
-  }catch{
+  }catch(error){
+    console.error(error);
     status.textContent = "Email ou mot de passe incorrect.";
   }
 };
 
 window.logout = async function(){
   closeMenu();
+
   const user = auth.currentUser;
 
   if(user){
     await updateDoc(doc(db,"blogUsers",user.uid),{
       online:false,
       lastSeen:serverTimestamp()
-    });
+    }).catch(() => {});
   }
 
   if(presenceInterval) clearInterval(presenceInterval);
@@ -127,7 +130,8 @@ window.resetPassword = async function(){
   try{
     await sendPasswordResetEmail(auth, email);
     status.textContent = "Email de réinitialisation envoyé ✅";
-  }catch{
+  }catch(error){
+    console.error(error);
     status.textContent = "Impossible d’envoyer l’email de réinitialisation.";
   }
 };
@@ -136,41 +140,67 @@ window.resetPassword = async function(){
 
 onAuthStateChanged(auth, async user => {
   if(user){
-  isAdmin = user.uid === ADMIN_UID;
+    isAdmin = user.uid === ADMIN_UID;
 
-  const snap = await getDoc(doc(db,"blogUsers",user.uid));
+    const snap = await getDoc(doc(db,"blogUsers",user.uid));
 
-  if(!snap.exists()){
-    if(isAdmin){
-      currentUserData = {
-  pseudo:"Administrateur",
-  premium:true,
-  plan:"premium",
-  active:true,
-  blockedUsers:[],
-  adminProfileVisible:true,
-  adminContactEnabled:true
-};
+    if(!snap.exists()){
+      if(isAdmin){
+        currentUserData = {
+          pseudo:"Administrateur",
+          premium:true,
+          plan:"premium",
+          active:true,
+          blockedUsers:[],
+          role:"admin",
+          adminProfileVisible:true,
+          adminContactEnabled:true,
+          allowContact:true
+        };
 
-      await setDoc(doc(db,"blogUsers",user.uid),{
-  pseudo:"Administrateur",
-  email:user.email || "",
-  active:true,
-  premium:true,
-  plan:"premium",
-  role:"admin",
-  adminProfileVisible:true,
-  adminContactEnabled:true,
-  online:true,
-  lastSeen:serverTimestamp()
-}, { merge:true });
+        await setDoc(doc(db,"blogUsers",user.uid),{
+          pseudo:"Administrateur",
+          email:user.email || "",
+          active:true,
+          premium:true,
+          plan:"premium",
+          role:"admin",
+          adminProfileVisible:true,
+          adminContactEnabled:true,
+          allowContact:true,
+          online:true,
+          lastSeen:serverTimestamp()
+        }, { merge:true });
+      }else{
+        await signOut(auth);
+        return;
+      }
     }else{
-      await signOut(auth);
-      return;
+      currentUserData = snap.data();
+
+      if(isAdmin){
+        const adminDefaults = {};
+
+        if(currentUserData.allowContact === undefined){
+          adminDefaults.allowContact = true;
+          currentUserData.allowContact = true;
+        }
+
+        if(currentUserData.adminProfileVisible === undefined){
+          adminDefaults.adminProfileVisible = true;
+          currentUserData.adminProfileVisible = true;
+        }
+
+        if(currentUserData.adminContactEnabled === undefined){
+          adminDefaults.adminContactEnabled = true;
+          currentUserData.adminContactEnabled = true;
+        }
+
+        if(Object.keys(adminDefaults).length > 0){
+          await updateDoc(doc(db,"blogUsers",user.uid), adminDefaults).catch(() => {});
+        }
+      }
     }
-  }else{
-    currentUserData = snap.data();
-  }
 
     if(currentUserData.active === false){
       await signOut(auth);
@@ -192,24 +222,28 @@ onAuthStateChanged(auth, async user => {
         await updateDoc(doc(db,"blogUsers",auth.currentUser.uid),{
           online:true,
           lastSeen:serverTimestamp()
-        });
+        }).catch(() => {});
       }
     }, 10000);
 
     document.getElementById("welcomePseudo").innerText =
-   isAdmin ? "Connecté(e) : " + currentPseudo + " 👑 ADMIN" : "Connecté(e) : " + currentPseudo;
+      isAdmin
+        ? "Connecté(e) : " + currentPseudo + " 👑 ADMIN"
+        : "Connecté(e) : " + currentPseudo;
+
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("blogContent").style.display = "block";
     document.getElementById("menuButton").style.display = "block";
-    const adminInvisibleBtn = document.getElementById("adminInvisibleBtn");
-if(adminInvisibleBtn){
-  adminInvisibleBtn.style.display = isAdmin ? "block" : "none";
-}
 
-const adminStatusDot = document.getElementById("adminStatusDot");
-if(adminStatusDot){
-  adminStatusDot.textContent = currentUserData.allowContact === false ? "🔴" : "🟢";
-}
+    const adminInvisibleBtn = document.getElementById("adminInvisibleBtn");
+    if(adminInvisibleBtn){
+      adminInvisibleBtn.style.display = isAdmin ? "block" : "none";
+    }
+
+    const adminStatusDot = document.getElementById("adminStatusDot");
+    if(adminStatusDot){
+      adminStatusDot.textContent = currentUserData.allowContact === false ? "🔴" : "🟢";
+    }
 
     loadMembers();
     loadPublicMessages();
@@ -266,7 +300,9 @@ function loadMembers(){
 
       if(!auth.currentUser) return;
       if(uid === auth.currentUser.uid) return;
+
       if(uid === ADMIN_UID && data.adminProfileVisible === false && !isAdmin) return;
+
       if(data.active === false) return;
       if(data.online !== true) return;
       if(blocked.includes(uid)) return;
@@ -301,7 +337,6 @@ function loadMembers(){
 }
 
 window.loadMembers = loadMembers;
-
 /* ================= CHAT PUBLIC ================= */
 
 function loadPublicMessages(){
@@ -368,7 +403,7 @@ function loadPublicMessages(){
               : `<button class="danger" onclick="adminHidePublicMessage('${m.id}')">Masquer</button>`
             }
 
-            ${m.uid ? `<button class="danger" onclick="adminBlockUser('${m.uid}')">Bloquer utilisateur</button>` : ""}
+            ${m.uid && m.uid !== ADMIN_UID ? `<button class="danger" onclick="adminBlockUser('${m.uid}')">Bloquer utilisateur</button>` : ""}
           </div>
         ` : ""}
       `;
@@ -377,52 +412,69 @@ function loadPublicMessages(){
     });
 
     container.scrollTop = container.scrollHeight;
+  }, error => {
+    console.error("Erreur chat public :", error);
   });
 }
 
 window.sendMessage = async function(){
   const text = document.getElementById("chatMessage").value.trim();
+  const status = document.getElementById("messageStatus");
+
   if(!text) return;
 
   const user = auth.currentUser;
   if(!user) return;
 
-  await addDoc(collection(db,"blogMessages"),{
-    uid:user.uid,
-    pseudo:currentPseudo,
-    message:text,
-    type:"text",
-    room:currentRoom,
-    visible:true,
-    createdAt:serverTimestamp()
-  });
+  try{
+    await addDoc(collection(db,"blogMessages"),{
+      uid:user.uid,
+      pseudo:currentPseudo,
+      message:text,
+      type:"text",
+      room:currentRoom,
+      visible:true,
+      createdAt:serverTimestamp()
+    });
 
-  document.getElementById("chatMessage").value = "";
+    document.getElementById("chatMessage").value = "";
+    if(status) status.textContent = "";
+  }catch(error){
+    console.error(error);
+    if(status) status.textContent = "Erreur lors de l’envoi du message.";
+  }
 };
 
 window.sendPublicImage = async function(){
   const input = document.getElementById("publicImageInput");
-  const file = input.files[0];
+  const status = document.getElementById("messageStatus");
+  const file = input?.files?.[0];
   const user = auth.currentUser;
 
   if(!file || !user) return;
 
-  const storageRef = ref(storage, "images/" + user.uid + "/" + Date.now() + "_" + file.name);
-  await uploadBytes(storageRef, file);
-  const url = await getDownloadURL(storageRef);
+  try{
+    const storageRef = ref(storage, "images/" + user.uid + "/" + Date.now() + "_" + file.name);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
 
-  await addDoc(collection(db,"blogMessages"),{
-    uid:user.uid,
-    pseudo:currentPseudo,
-    imageUrl:url,
-    message:"",
-    type:"image",
-    room:currentRoom,
-    visible:true,
-    createdAt:serverTimestamp()
-  });
+    await addDoc(collection(db,"blogMessages"),{
+      uid:user.uid,
+      pseudo:currentPseudo,
+      imageUrl:url,
+      message:"",
+      type:"image",
+      room:currentRoom,
+      visible:true,
+      createdAt:serverTimestamp()
+    });
 
-  input.value = "";
+    input.value = "";
+    if(status) status.textContent = "";
+  }catch(error){
+    console.error(error);
+    if(status) status.textContent = "Erreur lors de l’envoi de la photo.";
+  }
 };
 
 /* ================= MENU / PROFIL ================= */
@@ -519,6 +571,8 @@ window.closePasswordModal = function(){
 
 window.togglePasswordVisibility = function(id){
   const input = document.getElementById(id);
+  if(!input) return;
+
   input.type = input.type === "password" ? "text" : "password";
 };
 
@@ -554,7 +608,8 @@ window.changePassword = async function(){
     document.getElementById("newPassword").value = "";
     document.getElementById("confirmNewPassword").value = "";
 
-  }catch{
+  }catch(error){
+    console.error(error);
     status.textContent = "Ancien mot de passe incorrect.";
   }
 };
@@ -618,7 +673,6 @@ window.unblockUser = async function(uid){
   loadMembers();
   loadPrivateConversations();
 };
-
 /* ================= PROFIL MEMBRE ================= */
 
 window.openMemberProfile = function(uid, data){
@@ -643,16 +697,13 @@ window.openMemberProfile = function(uid, data){
   const reportBtn = document.getElementById("memberReportBtn");
 
   if(isAdminProfile){
-    // 🔥 admin → jamais bloquable / signalable
     if(blockBtn) blockBtn.style.display = "none";
     if(reportBtn) reportBtn.style.display = "none";
 
-    // 🔥 message privé activable/désactivable
     if(privateBtn){
       privateBtn.style.display = data.allowContact === false ? "none" : "block";
     }
   }else{
-    // utilisateurs normaux
     if(privateBtn) privateBtn.style.display = "block";
     if(blockBtn) blockBtn.style.display = "block";
     if(reportBtn) reportBtn.style.display = "block";
@@ -692,6 +743,11 @@ async function blockUser(uid, pseudo){
   const user = auth.currentUser;
   if(!user || !uid) return;
 
+  if(uid === ADMIN_UID){
+    alert("Impossible de bloquer l’administrateur.");
+    return;
+  }
+
   const ok = confirm("Bloquer " + (pseudo || "ce membre") + " ? Il ne pourra plus t’envoyer de message privé.");
   if(!ok) return;
 
@@ -700,17 +756,20 @@ async function blockUser(uid, pseudo){
   });
 
   currentUserData.blockedUsers = currentUserData.blockedUsers || [];
+
   if(!currentUserData.blockedUsers.includes(uid)){
     currentUserData.blockedUsers.push(uid);
   }
 
   const chatId = getChatId(user.uid, uid);
+
   await setDoc(doc(db,"privateMessages",chatId),{
     hiddenFor:arrayUnion(user.uid)
   }, { merge:true });
 
   document.getElementById("memberProfileModal").style.display = "none";
   document.getElementById("privateChatWindow").style.display = "none";
+
   currentPrivateUser = null;
 
   loadMembers();
@@ -732,18 +791,44 @@ window.blockMemberProfile = function(){
 
 window.blockPrivateUser = function(){
   if(!currentPrivateUser) return;
+
+  if(currentPrivateUser.uid === ADMIN_UID){
+    alert("Impossible de bloquer l’administrateur.");
+    return;
+  }
+
   blockUser(currentPrivateUser.uid, currentPrivateUser.pseudo);
 };
 
 /* ================= MESSAGES PRIVÉS ================= */
 
+function updatePrivateBadge(unreadCount){
+  const btnPrivate = document.getElementById("btnPrivate");
+  const privateHeader = document.querySelector(".private-header span");
+
+  if(btnPrivate){
+    btnPrivate.innerHTML = unreadCount > 0
+      ? `💬 Messages privés <span class="private-badge">${unreadCount}</span>`
+      : "💬 Messages privés";
+  }
+
+  if(privateHeader){
+    privateHeader.innerHTML = unreadCount > 0
+      ? `Messages privés <span class="private-badge">${unreadCount}</span>`
+      : "Messages privés";
+  }
+}
+
 function loadPrivateConversations(){
   const user = auth.currentUser;
   const list = document.getElementById("privateList");
-  const btnPrivate = document.getElementById("btnPrivate");
 
   if(!user || !list) return;
-  if(unsubscribePrivateList) unsubscribePrivateList();
+
+  if(unsubscribePrivateList){
+    unsubscribePrivateList();
+    unsubscribePrivateList = null;
+  }
 
   const q = query(
     collection(db,"privateMessages"),
@@ -759,16 +844,28 @@ function loadPrivateConversations(){
     snap.forEach(docSnap => {
       const chat = docSnap.data();
 
-      if(Array.isArray(chat.hiddenFor) && chat.hiddenFor.includes(user.uid)) return;
+      if(!Array.isArray(chat.participants)) return;
 
       const otherUid = chat.participants.find(id => id !== user.uid);
       if(!otherUid) return;
 
-      const otherPseudo = chat.participantPseudos?.[otherUid] || "Utilisateur";
+      const hiddenFor = Array.isArray(chat.hiddenFor) ? chat.hiddenFor : [];
 
       const isUnread =
         chat.unreadFor === user.uid ||
         (Array.isArray(chat.unreadBy) && chat.unreadBy.includes(user.uid));
+
+      /*
+        Important :
+        Si une conversation est masquée MAIS qu’un nouveau message arrive,
+        on la réaffiche quand même pour que la notification apparaisse.
+      */
+      if(hiddenFor.includes(user.uid) && !isUnread) return;
+
+      const blocked = currentUserData?.blockedUsers || [];
+      if(blocked.includes(otherUid)) return;
+
+      const otherPseudo = chat.participantPseudos?.[otherUid] || "Utilisateur";
 
       if(isUnread) unreadCount++;
 
@@ -777,12 +874,11 @@ function loadPrivateConversations(){
         otherUid,
         otherPseudo,
         isUnread,
-        lastMessage: chat.lastMessage || "",
+        lastMessage: chat.lastMessage || "Conversation privée",
         updatedAt: chat.updatedAt
       });
     });
 
-    // tri récent
     conversations.sort((a,b) => {
       const da = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : 0;
       const dbb = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : 0;
@@ -791,11 +887,15 @@ function loadPrivateConversations(){
 
     if(conversations.length === 0){
       list.innerHTML = "Aucune conversation privée pour le moment.";
+      updatePrivateBadge(0);
+      return;
     }
 
     conversations.forEach(chat => {
       const div = document.createElement("div");
-      div.className = "private-conversation";
+      div.className = chat.isUnread
+        ? "private-conversation private-conversation-unread"
+        : "private-conversation";
 
       div.innerHTML = `
         <div class="name">
@@ -812,17 +912,21 @@ function loadPrivateConversations(){
       list.appendChild(div);
     });
 
-    // 🔥 compteur global (super important)
-    if(btnPrivate){
-      btnPrivate.innerHTML = unreadCount > 0
-        ? `💬 Messages privés <span class="private-badge">${unreadCount}</span>`
-        : "💬 Messages privés";
-    }
+    updatePrivateBadge(unreadCount);
+
+    list.style.display = "none";
+    list.offsetHeight;
+    list.style.display = "block";
+
+  }, error => {
+    console.error("Erreur messages privés :", error);
+    list.innerHTML = "Erreur de chargement des messages privés.";
   });
 }
 
 window.openPrivatePanel = function(){
   const panel = document.getElementById("privatePanel");
+
   if(panel){
     panel.style.display = "block";
     panel.classList.add("mobile-open");
@@ -831,8 +935,10 @@ window.openPrivatePanel = function(){
 
 window.closePrivatePanel = function(){
   const panel = document.getElementById("privatePanel");
+
   if(panel){
     panel.classList.remove("mobile-open");
+
     if(window.innerWidth <= 800){
       panel.style.display = "none";
     }
@@ -861,7 +967,7 @@ window.openPrivateChat = async function(uid, pseudo){
   }
 
   currentPrivateUser = {
-    uid,
+    uid: uid,
     pseudo: pseudo || otherData?.pseudo || "Utilisateur"
   };
 
@@ -878,24 +984,38 @@ window.openPrivateChat = async function(uid, pseudo){
     updatedAt:serverTimestamp()
   }, { merge:true });
 
+  /*
+    On marque comme lu uniquement quand CET utilisateur ouvre la conversation.
+  */
   await updateDoc(chatRef,{
-  unreadFor:"",
-  unreadBy:arrayRemove(user.uid)
-}).catch(() => {});
+    unreadFor:"",
+    unreadBy:arrayRemove(user.uid)
+  }).catch(() => {});
 
-  document.getElementById("privateTitle").innerText = "Discussion avec " + currentPrivateUser.pseudo;
-  document.getElementById("privateChatWindow").style.display = "block";
-  document.getElementById("privateStatus").textContent = "";
+  const privateTitle = document.getElementById("privateTitle");
+  const privateChatWindow = document.getElementById("privateChatWindow");
+  const privateStatus = document.getElementById("privateStatus");
+
+  if(privateTitle) privateTitle.innerText = "Discussion avec " + currentPrivateUser.pseudo;
+  if(privateChatWindow) privateChatWindow.style.display = "block";
+  if(privateStatus) privateStatus.textContent = "";
 
   listenPrivateChat(chatId);
 };
 
 function listenPrivateChat(chatId){
   const container = document.getElementById("privateMessages");
+  if(!container) return;
 
-  if(unsubscribePrivateChat) unsubscribePrivateChat();
+  if(unsubscribePrivateChat){
+    unsubscribePrivateChat();
+    unsubscribePrivateChat = null;
+  }
 
-  const q = query(collection(db,"privateMessages",chatId,"messages"), orderBy("createdAt","asc"));
+  const q = query(
+    collection(db,"privateMessages",chatId,"messages"),
+    orderBy("createdAt","asc")
+  );
 
   unsubscribePrivateChat = onSnapshot(q, snap => {
     container.innerHTML = "";
@@ -904,28 +1024,31 @@ function listenPrivateChat(chatId){
       const m = docSnap.data();
 
       const div = document.createElement("div");
-      div.className = "private-msg " + (m.from === auth.currentUser.uid ? "mine" : "");
+      div.className = "private-msg " + (m.from === auth.currentUser?.uid ? "mine" : "");
       div.textContent = m.message || "";
 
       container.appendChild(div);
     });
 
     container.scrollTop = container.scrollHeight;
+  }, error => {
+    console.error("Erreur discussion privée :", error);
   });
 }
-
 window.sendPrivateMessage = async function(){
   const user = auth.currentUser;
-  const text = document.getElementById("privateText").value.trim();
+  const textInput = document.getElementById("privateText");
   const status = document.getElementById("privateStatus");
 
+  const text = textInput ? textInput.value.trim() : "";
+
   if(!user || !currentPrivateUser){
-    status.textContent = "Aucune conversation sélectionnée.";
+    if(status) status.textContent = "Aucune conversation sélectionnée.";
     return;
   }
 
   if(!text){
-    status.textContent = "Écris un message avant d’envoyer.";
+    if(status) status.textContent = "Écris un message avant d’envoyer.";
     return;
   }
 
@@ -936,13 +1059,13 @@ window.sendPrivateMessage = async function(){
     const canContactAdmin = otherData?.allowContact !== false;
 
     if(!canContactAdmin){
-      status.textContent = "L’administrateur n’est pas disponible actuellement.";
+      if(status) status.textContent = "L’administrateur n’est pas disponible actuellement.";
       return;
     }
   }
 
   if(otherData?.blockedUsers?.includes(user.uid) && user.uid !== ADMIN_UID){
-    status.textContent = "Message impossible.";
+    if(status) status.textContent = "Message impossible.";
     return;
   }
 
@@ -950,20 +1073,17 @@ window.sendPrivateMessage = async function(){
   const chatRef = doc(db,"privateMessages",chatId);
 
   await setDoc(chatRef,{
-  participants:[user.uid, currentPrivateUser.uid],
-  participantPseudos:{
-    [user.uid]:currentPseudo,
-    [currentPrivateUser.uid]:currentPrivateUser.pseudo
-  },
-  lastMessage:text,
-
-  // 🔥 NOTIFICATIONS FIABLES
-  unreadFor:currentPrivateUser.uid,
-  unreadBy:arrayUnion(currentPrivateUser.uid),
-
-  hiddenFor:arrayRemove(currentPrivateUser.uid),
-  updatedAt:serverTimestamp()
-}, { merge:true });
+    participants:[user.uid, currentPrivateUser.uid],
+    participantPseudos:{
+      [user.uid]:currentPseudo,
+      [currentPrivateUser.uid]:currentPrivateUser.pseudo
+    },
+    lastMessage:text,
+    unreadFor:currentPrivateUser.uid,
+    unreadBy:arrayUnion(currentPrivateUser.uid),
+    hiddenFor:arrayRemove(currentPrivateUser.uid),
+    updatedAt:serverTimestamp()
+  }, { merge:true });
 
   await addDoc(collection(db,"privateMessages",chatId,"messages"),{
     from:user.uid,
@@ -974,8 +1094,10 @@ window.sendPrivateMessage = async function(){
     createdAt:serverTimestamp()
   });
 
-  document.getElementById("privateText").value = "";
-  status.textContent = "";
+  if(textInput) textInput.value = "";
+  if(status) status.textContent = "";
+
+  loadPrivateConversations();
 };
 
 window.viewPrivateProfile = async function(){
@@ -988,7 +1110,8 @@ window.viewPrivateProfile = async function(){
 };
 
 window.minimizePrivateChat = function(){
-  document.getElementById("privateChatWindow").style.display = "none";
+  const privateChatWindow = document.getElementById("privateChatWindow");
+  if(privateChatWindow) privateChatWindow.style.display = "none";
 };
 
 window.hideCurrentPrivateConversation = async function(){
@@ -1001,21 +1124,17 @@ window.hideCurrentPrivateConversation = async function(){
   const chatId = getChatId(user.uid, currentPrivateUser.uid);
   const chatRef = doc(db,"privateMessages",chatId);
 
-  const snap = await getDoc(chatRef);
-  const chat = snap.exists() ? snap.data() : null;
+  await setDoc(chatRef,{
+    hiddenFor:arrayUnion(user.uid),
+    unreadFor:"",
+    unreadBy:arrayRemove(user.uid)
+  }, { merge:true });
 
-  const dataToSave = {
-    hiddenFor:arrayUnion(user.uid)
-  };
+  const privateChatWindow = document.getElementById("privateChatWindow");
+  if(privateChatWindow) privateChatWindow.style.display = "none";
 
-  if(chat && chat.unreadFor === user.uid){
-    dataToSave.unreadFor = "";
-  }
-
-  await setDoc(chatRef, dataToSave, { merge:true });
-
-  document.getElementById("privateChatWindow").style.display = "none";
   currentPrivateUser = null;
+  loadPrivateConversations();
 };
 
 /* ================= SIGNALEMENT ================= */
@@ -1023,7 +1142,6 @@ window.hideCurrentPrivateConversation = async function(){
 window.reportMemberProfile = function(){
   const modal = document.getElementById("memberProfileModal");
 
-  // 🔒 Protection admin
   if(modal.dataset.uid === ADMIN_UID){
     alert("Impossible de signaler l’administrateur.");
     return;
@@ -1040,6 +1158,11 @@ window.reportMemberProfile = function(){
 
 window.reportPrivateConversation = function(){
   if(!currentPrivateUser) return;
+
+  if(currentPrivateUser.uid === ADMIN_UID){
+    alert("Impossible de signaler l’administrateur.");
+    return;
+  }
 
   currentReportMode = "privateConversation";
   currentReportTarget = {
@@ -1084,6 +1207,11 @@ window.confirmReport = async function(){
 
   if(!currentReportMode || !currentReportTarget){
     status.textContent = "Aucun signalement sélectionné.";
+    return;
+  }
+
+  if(currentReportTarget.uid === ADMIN_UID){
+    status.textContent = "Impossible de signaler l’administrateur.";
     return;
   }
 
@@ -1165,6 +1293,11 @@ window.adminShowPublicMessage = async function(messageId){
 window.adminBlockUser = async function(uid){
   if(!isAdmin || !uid) return;
 
+  if(uid === ADMIN_UID){
+    alert("Impossible de bloquer l’administrateur.");
+    return;
+  }
+
   const ok = confirm("Bloquer cet utilisateur depuis le chat ?");
   if(!ok) return;
 
@@ -1191,7 +1324,7 @@ window.openAdminSettingsModal = function(){
   }
 
   if(contactText){
-    contactText.textContent = currentUserData.adminContactEnabled === false
+    contactText.textContent = currentUserData.allowContact === false
       ? "Messages privés désactivés"
       : "Messages privés activés";
   }
@@ -1215,11 +1348,18 @@ window.toggleAdminVisibility = async function(){
 
   currentUserData.adminProfileVisible = newValue;
 
-  document.getElementById("adminVisibleStatus").textContent = newValue
-    ? "Visible pour les membres"
-    : "Invisible pour les membres";
+  const visibleText = document.getElementById("adminVisibleStatus");
+  if(visibleText){
+    visibleText.textContent = newValue
+      ? "Visible pour les membres"
+      : "Invisible pour les membres";
+  }
 
-  document.getElementById("adminSettingsStatus").textContent = "Visibilité mise à jour ✅";
+  const adminSettingsStatus = document.getElementById("adminSettingsStatus");
+  if(adminSettingsStatus){
+    adminSettingsStatus.textContent = "Visibilité mise à jour ✅";
+  }
+
   loadMembers();
 };
 
@@ -1232,23 +1372,40 @@ window.toggleAdminContact = async function(){
   const newState = !(currentUserData.allowContact === true);
 
   await updateDoc(doc(db,"blogUsers", user.uid),{
-    allowContact: newState,
-    adminProfileVisible: newState
+    allowContact:newState,
+    adminContactEnabled:newState,
+    adminProfileVisible:newState
   });
 
   currentUserData.allowContact = newState;
-  const adminStatusDot = document.getElementById("adminStatusDot");
-if(adminStatusDot){
-  adminStatusDot.textContent = newState ? "🟢" : "🔴";
-}
+  currentUserData.adminContactEnabled = newState;
   currentUserData.adminProfileVisible = newState;
+
+  const adminStatusDot = document.getElementById("adminStatusDot");
+  if(adminStatusDot){
+    adminStatusDot.textContent = newState ? "🟢" : "🔴";
+  }
+
+  const contactText = document.getElementById("adminContactStatus");
+  if(contactText){
+    contactText.textContent = newState
+      ? "Messages privés activés"
+      : "Messages privés désactivés";
+  }
+
+  const visibleText = document.getElementById("adminVisibleStatus");
+  if(visibleText){
+    visibleText.textContent = newState
+      ? "Visible pour les membres"
+      : "Invisible pour les membres";
+  }
+
+  loadMembers();
 
   alert(newState 
     ? "🟢 Tu es visible (on peut t’écrire)" 
     : "🔴 Tu es invisible (personne ne peut t’écrire)");
 };
-
-
 
 window.addEventListener("beforeunload", () => {
   const user = auth.currentUser;
@@ -1257,6 +1414,6 @@ window.addEventListener("beforeunload", () => {
     updateDoc(doc(db,"blogUsers",user.uid),{
       online:false,
       lastSeen:serverTimestamp()
-    });
+    }).catch(() => {});
   }
 });
