@@ -1005,15 +1005,6 @@ window.openPrivateChat = async function(uid, pseudo){
   const otherSnap = await getDoc(doc(db,"blogUsers",uid));
   const otherData = otherSnap.exists() ? otherSnap.data() : null;
 
-  if(uid === ADMIN_UID && user.uid !== ADMIN_UID){
-  const canContactAdmin = otherData?.allowContact !== false;
-
-  if(!canContactAdmin){
-    alert("L’administrateur n’est pas disponible actuellement.");
-    return;
-  }
-}
-
   if(otherData?.blockedUsers?.includes(user.uid) && user.uid !== ADMIN_UID){
     alert("Tu ne peux pas envoyer de message privé à cet utilisateur.");
     return;
