@@ -80,6 +80,40 @@ const departements = [
   "Essonne (91)","Hauts-de-Seine (92)","Seine-Saint-Denis (93)",
   "Val-de-Marne (94)","Val-d'Oise (95)"
 ];
+const forbiddenWords = [
+  "pute",
+  "salope",
+  "connard",
+  "connasse",
+  "enculé",
+  "encule",
+  "fdp",
+  "ntm",
+  "ta gueule",
+  "tg",
+  "suce",
+  "pd",
+  "batard",
+  "bâtard"
+];
+
+function containsForbiddenWord(text){
+  if(!text) return false;
+
+  const cleanText = text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  return forbiddenWords.some(word => {
+    const cleanWord = word
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    return cleanText.includes(cleanWord);
+  });
+}
 
 function remplirSelectDepartements(select, firstLabel){
   if(!select) return;
@@ -484,6 +518,12 @@ window.sendMessage = async function(){
   const status = document.getElementById("messageStatus");
 
   if(!text) return;
+
+if(containsForbiddenWord(text)){
+  document.getElementById("messageStatus").textContent =
+    "Message refusé : certains mots ne sont pas autorisés.";
+  return;
+}
 
   const user = auth.currentUser;
   if(!user) return;
@@ -1097,7 +1137,17 @@ window.sendPrivateMessage = async function(){
   if(!text){
     if(status) status.textContent = "Écris un message avant d’envoyer.";
     return;
-  }
+}
+
+if(containsForbiddenWord(text)){
+    if(status){
+        status.textContent =
+        "Message refusé : certains mots ne sont pas autorisés.";
+    }
+    return;
+}
+
+const otherSnap = await getDoc(...)
 
   const otherSnap = await getDoc(doc(db,"blogUsers",currentPrivateUser.uid));
   const otherData = otherSnap.exists() ? otherSnap.data() : null;
