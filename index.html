@@ -579,6 +579,7 @@ button:disabled{
   <div class="blog-fields" id="blogFields">  
     <input id="blogPseudo" type="text" placeholder="Pseudo visible dans le blog">  
     <input id="blogEmail" type="email" placeholder="Email de connexion">
+    <input id="blogAccessCode" type="text" placeholder="Code d’accès au blog">
 
     <div class="password-wrap">  
       <input id="blogPassword" type="password" placeholder="Mot de passe">  
@@ -789,6 +790,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const BLOG_ACCESS_CODE = "UNIS-LIVRE-2026";
 
 const sendBtn = document.getElementById("sendBtn");
 const status = document.getElementById("status");
@@ -858,17 +860,21 @@ function validateForm(){
     const blogGenre = document.getElementById("blogGenre").value;
     const departement = document.getElementById("blogDepartement").value;
     const acceptCGU = document.getElementById("acceptCGU").checked;
+    const accessCode = document.getElementById("blogAccessCode").value.trim();
 
-    if(!pseudo || !email || !password || !passwordConfirm || !blogAge || !blogGenre || !departement || !acceptCGU){
-      showError(blogCard, "Merci de compléter toutes les informations du profil blog et d’accepter les conditions.");
-      isValid = false;
-    }else if(password.length < 6){
-      showError(blogCard, "Mot de passe trop court (6 caractères minimum).");
-      isValid = false;
-    }else if(password !== passwordConfirm){
-      showError(blogCard, "Les mots de passe ne correspondent pas.");
-      isValid = false;
-    }
+    if(!pseudo || !email || !password || !passwordConfirm || !blogAge || !blogGenre || !departement || !accessCode || !acceptCGU){
+  showError(blogCard, "Merci de compléter toutes les informations du profil blog et d’accepter les conditions.");
+  isValid = false;
+}else if(accessCode !== BLOG_ACCESS_CODE){
+  showError(blogCard, "Code d’accès au blog incorrect.");
+  isValid = false;
+}else if(password.length < 6){
+  showError(blogCard, "Mot de passe trop court (6 caractères minimum).");
+  isValid = false;
+}else if(password !== passwordConfirm){
+  showError(blogCard, "Les mots de passe ne correspondent pas.");
+  isValid = false;
+}
   }
 
   if(!isValid){
