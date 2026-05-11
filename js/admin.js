@@ -99,6 +99,27 @@ window.openBlogAsAdmin = function(){
   window.open("blog.html", "_blank");
 };
 
+window.filterReportedUsers = function(){
+
+  const value = document
+    .getElementById("reportedUsersSearch")
+    .value
+    .toLowerCase();
+
+  const cards = document.querySelectorAll("#reportedUsersData .card");
+
+  cards.forEach(card => {
+
+    const text = card.innerText.toLowerCase();
+
+    if(text.includes(value)){
+      card.style.display = "block";
+    }else{
+      card.style.display = "none";
+    }
+  });
+};
+
 onAuthStateChanged(auth, user => {
   if(user && user.uid === ADMIN_UID){
     document.getElementById("login").style.display = "none";
