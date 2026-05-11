@@ -120,6 +120,7 @@ async function loadAllAdminData(){
   await loadPublicMessages();
   await loadData();
   await loadAdminLogs();
+  await loadReportedUsers();
 }
 
 async function getValidatedReportCountForUser(uid){
@@ -836,7 +837,135 @@ async function loadAdminLogs(){
     container.appendChild(div);
   });
 }
+async function loadReportedUsers(){
 
+  const container = document.getElementById("reportedUsersData");
+
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  const snapshot = await getDocs(collection(db, "reports"));
+
+  if(snapshot.empty){
+    container.innerHTML =
+      `<div class="empty">Aucun utilisateur signalé.</div>`;
+    return;
+  }
+
+  const grouped = {};
+
+  snapshot.forEach(item => {
+
+    const r = item.data();
+
+    const uid = r.reportedUserUid || r.authorUid;
+
+    if(!uid) return;
+
+    if(!grouped[uid]){
+      grouped[uid] = [];
+    }
+
+    grouped[uid].push({
+      id:item.id,
+      ...r
+    });
+  });
+
+  for(const uid in grouped){
+
+    const reports = grouped[uid];
+
+    const first = reports[0];
+
+    let userData = {};
+
+    try{
+      const userSnap = await getDoc(doc(db, "blogUsers", uid));
+
+      if(userSnap.exists()){
+        userData = userSnap.data();
+      }
+    }catch(e){
+      console.error(e);
+    }
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    let reportsHtml = "";
+
+    reports.forEach(r => {
+
+      const dateObj = r.createdAt?.toDate
+        ? r.createdAt.toDate()
+        : null;
+
+      reportsHtml += `
+        <div class="report-card" style="margin-top:15px;">
+          <div class="field">
+            <span class="label">Signalé par :</span>
+            ${r.reportedBy || "Inconnu"}
+          </div>
+
+          <div class="field">
+            <span class="label">Raison :</span>
+            ${r.reason || "Aucune"}
+          </div>
+
+          <div class="field">
+            <span class="label">Décision admin :</span>
+            ${r.adminDecision || "En attente"}
+          </div>
+
+          <div class="field">
+            <span class="label">Date :</span>
+            ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}
+          </div>
+        </div>
+      `;
+    });
+
+    div.innerHTML = `
+      <h3>👤 ${userData.pseudo || first.reportedUserPseudo || "Utilisateur"}</h3>
+
+      <div class="field">
+        <span class="label">UID :</span>
+        ${uid}
+      </div>
+
+      <div class="field">
+        <span class="label">Email :</span>
+        ${userData.email || "Non renseigné"}
+      </div>
+
+      <div class="field">
+        <span class="label">Genre :</span>
+        ${userData.genre || "Non renseigné"}
+      </div>
+
+      <div class="field">
+        <span class="label">Âge :</span>
+        ${userData.age || "Non renseigné"}
+      </div>
+
+      <div class="field">
+        <span class="label">Département :</span>
+        ${userData.departement || "Non renseigné"}
+      </div>
+
+      <div class="field">
+        <span class="label">Nombre de signalements :</span>
+        ${reports.length}
+      </div>
+
+      ${reportsHtml}
+    `;
+
+    container.appendChild(div);
+  }
+}
 window.openBlogAsAdmin = function(){
   window.open("./blog.html", "_blank");
 };
