@@ -897,8 +897,27 @@ async function loadReportedUsers(){
     });
   });
 
-  for(const uid in grouped){
-    const reports = grouped[uid];
+  const sortedUsers = Object.entries(grouped).sort((a, b) => {
+
+  const reportsA = a[1];
+  const reportsB = b[1];
+
+  const levelA = reportsA.length >= 5
+    ? 3
+    : reportsA.length >= 3
+      ? 2
+      : 1;
+
+  const levelB = reportsB.length >= 5
+    ? 3
+    : reportsB.length >= 3
+      ? 2
+      : 1;
+
+  return levelB - levelA;
+});
+
+  for(const [uid, reports] of sortedUsers){
     const first = reports[0];
     const reportsCount = reports.length;
 
@@ -962,6 +981,15 @@ if(reportsCount >= 5){
 
     const div = document.createElement("div");
 div.className = "card";
+    let borderColor = "#4caf50";
+
+if(dangerLevel === "Élevé"){
+  borderColor = "#ff3b30";
+}
+else if(dangerLevel === "Moyen"){
+  borderColor = "#ff9800";
+}
+
 div.style.borderLeft = `6px solid ${borderColor}`;
 
 div.innerHTML = `
