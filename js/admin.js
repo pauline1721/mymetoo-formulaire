@@ -55,7 +55,7 @@ const sectionTitles = {
   reports: "Signalements",
   users: "Utilisateurs",
   chat: "Chat public",
-  testimonials: "Témoignages"
+  testimonials: "Témoignages",
   logs: "Historique admin"
 };
 
