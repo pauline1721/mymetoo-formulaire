@@ -84,7 +84,23 @@
   <div id="reportsData"></div>
 
   <h2 style="margin-top:40px;">👤 Dossiers utilisateurs signalés</h2>
-  <div id="reportedUsersData"></div>
+
+<input
+  id="reportedUsersSearch"
+  type="text"
+  placeholder="Rechercher pseudo, email ou UID..."
+  oninput="filterReportedUsers()"
+  style="
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:none;
+    margin-top:15px;
+    margin-bottom:20px;
+  "
+>
+
+<div id="reportedUsersData"></div>
 
 </section>
       <section id="section-users" class="admin-section">
