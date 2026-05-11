@@ -153,6 +153,8 @@ let currentPseudo = "Anonyme";
 let currentUserData = null;
 let currentPrivateUser = null;
 let currentRoom = "general";
+let lastMessageTime = 0;
+const MESSAGE_DELAY = 3000;
 
 let currentReportMode = null;
 let currentReportTarget = null;
@@ -530,6 +532,16 @@ if(containsForbiddenWord(text)){
 
   const user = auth.currentUser;
   if(!user) return;
+  const now = Date.now();
+
+if(now - lastMessageTime < MESSAGE_DELAY){
+  if(status){
+    status.textContent = "Attends quelques secondes avant d'envoyer un autre message.";
+  }
+  return;
+}
+
+lastMessageTime = now;
 
   try{
     await addDoc(collection(db,"blogMessages"),{
@@ -1135,9 +1147,20 @@ window.sendPrivateMessage = async function(){
   if(!user || !currentPrivateUser){
     if(status) status.textContent = "Aucune conversation sélectionnée.";
     return;
-  }
+}
 
-  if(!text){
+const now = Date.now();
+
+if(now - lastMessageTime < MESSAGE_DELAY){
+    if(status){
+        status.textContent = "Attends quelques secondes avant d'envoyer un autre message.";
+    }
+    return;
+}
+
+lastMessageTime = now;
+
+if(!text){
     if(status) status.textContent = "Écris un message avant d’envoyer.";
     return;
 }
