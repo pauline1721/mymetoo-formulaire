@@ -1150,8 +1150,6 @@ if(containsForbiddenWord(text)){
     return;
 }
 
-const otherSnap = await getDoc(...)
-
   const otherSnap = await getDoc(doc(db,"blogUsers",currentPrivateUser.uid));
   const otherData = otherSnap.exists() ? otherSnap.data() : null;
 
