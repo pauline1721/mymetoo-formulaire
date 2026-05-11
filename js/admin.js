@@ -1003,6 +1003,10 @@ div.innerHTML = `
     Voir / cacher le dossier
   </button>
 
+  <button class="report-btn" onclick="disableUser('${uid}')">
+  Bloquer cet utilisateur
+</button>
+
   <div id="${safeId}" style="display:none; margin-top:15px;">
     <div class="field"><span class="label">UID :</span> ${uid}</div>
     <div class="field"><span class="label">Pseudo :</span> ${userData.pseudo || first.reportedUserPseudo || "Non renseigné"}</div>
