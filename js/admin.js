@@ -258,11 +258,20 @@ window.acceptReport = async function(reportId){
     });
 
     await addAdminLog("ACCEPT_REPORT", {
-      reportId,
-      targetUid: reportedUid,
-      reason: r.reason || "",
-      type: r.type || ""
-    });
+  reportId,
+  type: r.type || "",
+  reason: r.reason || "",
+
+  reportedByUid: r.reportedBy || "",
+  reportedUserUid: reportedUid,
+  reportedUserPseudo: r.reportedUserPseudo || r.pseudo || "",
+  reportedUserGenre: r.reportedUserGenre || "",
+  reportedUserAge: r.reportedUserAge || "",
+
+  messageId: r.messageId || "",
+  chatId: r.chatId || "",
+  reportedMessage: r.message || ""
+});
 
     const validCount = await getValidatedReportCountForUser(reportedUid);
 
@@ -287,7 +296,17 @@ window.refuseReport = async function(reportId){
   if(!ok) return;
 
   try{
-    await updateDoc(doc(db, "reports", reportId), {
+  const reportSnap = await getDoc(doc(db, "reports", reportId));
+
+  if(!reportSnap.exists()){
+    alert("Signalement introuvable.");
+    return;
+  }
+
+  const r = reportSnap.data();
+  const reportedUid = r.reportedUserUid || r.authorUid || "";
+
+  await updateDoc(doc(db, "reports", reportId), {
       adminDecision:"refused",
       status:"done",
       treatedAt:new Date(),
@@ -295,9 +314,20 @@ window.refuseReport = async function(reportId){
     });
 
     await addAdminLog("REFUSE_REPORT", {
-      reportId
-    });
+  reportId,
+  type: r.type || "",
+  reason: r.reason || "",
 
+  reportedByUid: r.reportedBy || "",
+  reportedUserUid: reportedUid,
+  reportedUserPseudo: r.reportedUserPseudo || r.pseudo || "",
+  reportedUserGenre: r.reportedUserGenre || "",
+  reportedUserAge: r.reportedUserAge || "",
+
+  messageId: r.messageId || "",
+  chatId: r.chatId || "",
+  reportedMessage: r.message || ""
+});
     await loadReports();
 
   }catch(e){
