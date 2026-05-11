@@ -1143,15 +1143,14 @@ window.sendPrivateMessage = async function(){
 }
 
 if(containsForbiddenWord(text)){
-    if(status){
-        status.textContent =
-        "Message refusé : certains mots ne sont pas autorisés.";
-    }
-    return;
+  if(status){
+    status.textContent = "Message refusé : certains mots ne sont pas autorisés.";
+  }
+  return;
 }
 
-  const otherSnap = await getDoc(doc(db,"blogUsers",currentPrivateUser.uid));
-  const otherData = otherSnap.exists() ? otherSnap.data() : null;
+const otherSnap = await getDoc(doc(db, "blogUsers", currentPrivateUser.uid));
+const otherData = otherSnap.exists() ? otherSnap.data() : null;
 
   // ❌ on bloque seulement SI c’est un utilisateur vers admin
   if(
