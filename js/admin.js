@@ -56,7 +56,7 @@ const sectionTitles = {
   users: "Utilisateurs",
   chat: "Chat public",
   testimonials: "Témoignages",
-  logs: "Historique admin"
+  adminLogs: "Historique"
 };
 
 window.showAdminSection = function(sectionName){
