@@ -1004,6 +1004,11 @@ div.innerHTML = `
     Voir / cacher le dossier
   </button>
 
+  <button class="hide-btn"
+onclick="exportReportedUserPdf('${safeId}')">
+  Exporter PDF
+</button>
+
   <button class="report-btn" onclick="disableUser('${uid}')">
   Bloquer cet utilisateur
 </button>
@@ -1066,6 +1071,39 @@ window.hideAllMessagesFromUser = async function(uid){
     alert("Erreur lors du masquage.");
   }
 };
+
+window.exportReportedUserPdf = function(elementId){
+
+  const element = document.getElementById(elementId);
+
+  if(!element){
+    alert("Dossier introuvable.");
+    return;
+  }
+
+  const options = {
+    margin: 10,
+    filename: "dossier-signalement.pdf",
+    image: {
+      type: "jpeg",
+      quality: 0.98
+    },
+    html2canvas: {
+      scale: 2
+    },
+    jsPDF: {
+      unit: "mm",
+      format: "a4",
+      orientation: "portrait"
+    }
+  };
+
+  html2pdf()
+    .set(options)
+    .from(element)
+    .save();
+};
+
 
 window.openBlogAsAdmin = function(){
   window.open("./blog.html", "_blank");
