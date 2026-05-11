@@ -32,8 +32,9 @@
       <button id="nav-users" onclick="showAdminSection('users')">👤 Utilisateurs</button>
       <button id="nav-chat" onclick="showAdminSection('chat')">💬 Chat public</button>
       <button id="nav-testimonials" onclick="showAdminSection('testimonials')">📝 Témoignages</button>
-      <button class="logout" onclick="openBlogAsAdmin()">🌐 Ouvrir le blog</button>
+      <button id="nav-logs" onclick="showAdminSection('logs')">📜 Historique admin</button>
 
+      <button class="logout" onclick="openBlogAsAdmin()">🌐 Ouvrir le blog</button>
       <button class="logout" onclick="logout()">Se déconnecter</button>
     </aside>
 
@@ -83,15 +84,17 @@
 
       <section id="section-users" class="admin-section">
         <h2>👤 Utilisateurs du blog</h2>
+
         <div class="admin-toolbar">
           <button onclick="showAllUsers()">Tous les utilisateurs</button>
           <button onclick="showOnlineUsers()">Utilisateurs connectés</button>
         </div>
-        <h3>🟢 Utilisateurs actifs</h3>
-<div id="activeUsersData"></div>
 
-<h3>🚫 Utilisateurs bloqués</h3>
-<div id="blockedUsersData"></div>
+        <h3>🟢 Utilisateurs actifs</h3>
+        <div id="activeUsersData"></div>
+
+        <h3>🚫 Utilisateurs bloqués</h3>
+        <div id="blockedUsersData"></div>
       </section>
 
       <section id="section-chat" class="admin-section">
@@ -102,6 +105,12 @@
       <section id="section-testimonials" class="admin-section">
         <h2>📝 Témoignages</h2>
         <div id="data"></div>
+      </section>
+
+      <section id="section-logs" class="admin-section">
+        <h2>📜 Historique administrateur</h2>
+        <p class="empty">Toutes les actions importantes de modération seront affichées ici.</p>
+        <div id="adminLogsData"></div>
       </section>
 
     </main>
