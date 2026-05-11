@@ -776,7 +776,11 @@ button:disabled{
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPaxlstCCCIJ_gwCSAI2cNt23yu8iLaK0",
@@ -910,7 +914,10 @@ sendBtn.addEventListener("click", async () => {
       const departement = document.getElementById("blogDepartement").value;
 
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      blogUid = userCredential.user.uid;
+        
+      await sendEmailVerification(userCredential.user);
+
+        blogUid = userCredential.user.uid;
 
       await setDoc(doc(db, "blogUsers", blogUid), {
         pseudo: blogPseudo,
@@ -946,8 +953,8 @@ sendBtn.addEventListener("click", async () => {
 
     if(wantsBlog){
       document.getElementById("successText").innerHTML =
-        "Ta voix a été entendue 💜<br><br>Ton accès au blog est créé.";
-      document.getElementById("blogSuccessBtn").style.display = "inline-block";
+        "Ta voix a été entendue 💜<br><br>Ton compte a été créé. Vérifie ton adresse email pour activer l’accès au blog.";
+      document.getElementById("blogSuccessBtn").style.display = "none";
     }
 
     document.getElementById("successScreen").style.display = "flex";
