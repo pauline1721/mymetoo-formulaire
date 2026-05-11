@@ -981,7 +981,7 @@ if(reportsCount >= 5){
 
     const div = document.createElement("div");
 div.className = "card";
-    let borderColor = "#4caf50";
+  borderColor = "#4caf50";
 
 if(dangerLevel === "Élevé"){
   borderColor = "#ff3b30";
