@@ -14,7 +14,9 @@ import {
   orderBy,
   updateDoc,
   doc,
-  getDoc
+  getDoc,
+  addDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const ADMIN_UID = "YBknFdtouzRiDzSj8b2KjncQ7sp2";
@@ -29,13 +31,24 @@ const firebaseConfig = {
 };
 
 const adminApp = initializeApp(firebaseConfig, "adminApp");
-
 const auth = getAuth(adminApp);
-
 const db = getFirestore(adminApp);
 
 let dailyChart = null;
 let usersCache = [];
+
+async function addAdminLog(action, details = {}){
+  try{
+    await addDoc(collection(db, "adminLogs"), {
+      action,
+      adminUid: ADMIN_UID,
+      ...details,
+      createdAt: serverTimestamp()
+    });
+  }catch(e){
+    console.error("Erreur adminLogs :", e);
+  }
+}
 
 const sectionTitles = {
   dashboard: "Tableau de bord",
@@ -135,6 +148,11 @@ async function tempBlockUser24h(uid){
     tempBlocked:true,
     banUntil:banUntil,
     online:false
+  });
+
+  await addAdminLog("TEMP_BLOCK_24H", {
+    targetUid: uid,
+    reason: "3 signalements validés"
   });
 }
 
@@ -237,6 +255,13 @@ window.acceptReport = async function(reportId){
       treatedBy:ADMIN_UID
     });
 
+    await addAdminLog("ACCEPT_REPORT", {
+      reportId,
+      targetUid: reportedUid,
+      reason: r.reason || "",
+      type: r.type || ""
+    });
+
     const validCount = await getValidatedReportCountForUser(reportedUid);
 
     if(validCount >= 3){
@@ -267,6 +292,10 @@ window.refuseReport = async function(reportId){
       treatedBy:ADMIN_UID
     });
 
+    await addAdminLog("REFUSE_REPORT", {
+      reportId
+    });
+
     await loadReports();
 
   }catch(e){
@@ -282,6 +311,10 @@ window.markReportDone = async function(reportId){
       adminDecision:"treated_without_decision",
       treatedAt:new Date(),
       treatedBy:ADMIN_UID
+    });
+
+    await addAdminLog("MARK_REPORT_DONE", {
+      reportId
     });
 
     await loadReports();
@@ -303,11 +336,16 @@ async function loadUsers(){
 }
 
 async function renderUsers(list){
-  const container = document.getElementById("usersData");
-  container.innerHTML = "";
+  const oldContainer = document.getElementById("usersData");
+  const activeContainer = document.getElementById("activeUsersData");
+  const blockedContainer = document.getElementById("blockedUsersData");
+
+  if(oldContainer) oldContainer.innerHTML = "";
+  if(activeContainer) activeContainer.innerHTML = "";
+  if(blockedContainer) blockedContainer.innerHTML = "";
 
   let usersCount = usersCache.length;
-  let disabledCount = 0;
+  let disabledCount = usersCache.filter(u => u.active === false).length;
 
   for(const u of list){
     const uid = u.id;
@@ -318,8 +356,6 @@ async function renderUsers(list){
     const online = u.online === true && (Date.now() - lastSeenTime < 300000);
     const lastSeen = u.lastSeen?.toDate ? u.lastSeen.toDate().toLocaleString("fr-FR") : "";
     const validatedReports = await getValidatedReportCountForUser(uid);
-
-    if(!active) disabledCount++;
 
     const div = document.createElement("div");
     div.className = active ? "card" : "card hidden-response";
@@ -349,13 +385,27 @@ async function renderUsers(list){
       </button>
     `;
 
-    container.appendChild(div);
+    if(activeContainer && blockedContainer){
+      if(active){
+        activeContainer.appendChild(div);
+      }else{
+        blockedContainer.appendChild(div);
+      }
+    }else if(oldContainer){
+      oldContainer.appendChild(div);
+    }
   }
 
-  const allDisabled = usersCache.filter(u => u.active === false).length;
+  if(activeContainer && activeContainer.innerHTML === ""){
+    activeContainer.innerHTML = `<div class="empty">Aucun utilisateur actif.</div>`;
+  }
+
+  if(blockedContainer && blockedContainer.innerHTML === ""){
+    blockedContainer.innerHTML = `<div class="empty">Aucun utilisateur bloqué.</div>`;
+  }
 
   document.getElementById("usersCount").innerText = usersCount;
-  document.getElementById("disabledCount").innerText = allDisabled;
+  document.getElementById("disabledCount").innerText = disabledCount;
 }
 
 window.showAllUsers = function(){
@@ -381,6 +431,10 @@ window.disableUser = async function(uid){
       online:false
     });
 
+    await addAdminLog("BLOCK_USER", {
+      targetUid: uid
+    });
+
     await loadUsers();
     await loadReports();
   }catch(e){
@@ -400,6 +454,10 @@ window.enableUser = async function(uid){
       banUntil:null
     });
 
+    await addAdminLog("UNBLOCK_USER", {
+      targetUid: uid
+    });
+
     await loadUsers();
   }catch(e){
     alert("Erreur : impossible de réactiver l’utilisateur.");
@@ -415,6 +473,10 @@ window.togglePremiumUser = async function(uid, isPremium){
     await updateDoc(doc(db, "blogUsers", uid), {
       premium: !isPremium,
       plan: !isPremium ? "premium" : "free"
+    });
+
+    await addAdminLog(!isPremium ? "ACTIVATE_PREMIUM" : "REMOVE_PREMIUM", {
+      targetUid: uid
     });
 
     await loadUsers();
@@ -476,6 +538,10 @@ window.togglePublicMessageVisibility = async function(id, isVisible){
       visible: !isVisible
     });
 
+    await addAdminLog(isVisible ? "HIDE_PUBLIC_MESSAGE" : "SHOW_PUBLIC_MESSAGE", {
+      messageId: id
+    });
+
     await loadPublicMessages();
   }catch(e){
     alert("Erreur lors de la modification du message.");
@@ -489,6 +555,10 @@ window.toggleVisibility = async function(id, isVisible){
       visible: !isVisible
     });
 
+    await addAdminLog(isVisible ? "HIDE_TESTIMONIAL" : "SHOW_TESTIMONIAL", {
+      testimonialId: id
+    });
+
     await loadData();
   }catch(e){
     alert("Erreur lors de la modification");
@@ -500,6 +570,11 @@ window.toggleReplyVisibility = async function(parentId, replyId, isVisible){
   try{
     await updateDoc(doc(db, "reponses", parentId, "commentaires", replyId), {
       visible: !isVisible
+    });
+
+    await addAdminLog(isVisible ? "HIDE_TESTIMONIAL_REPLY" : "SHOW_TESTIMONIAL_REPLY", {
+      testimonialId: parentId,
+      replyId: replyId
     });
 
     await loadData();
@@ -658,6 +733,7 @@ async function loadData(){
   document.getElementById("total").innerText = total;
   renderDailyChart(daysData);
 }
+
 window.openBlogAsAdmin = function(){
   window.open("./blog.html", "_blank");
 };
