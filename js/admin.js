@@ -1008,6 +1008,10 @@ div.innerHTML = `
   Bloquer cet utilisateur
 </button>
 
+<button class="hide-btn" onclick="hideAllMessagesFromUser('${uid}')">
+  Masquer tous ses messages
+</button>
+
   <div id="${safeId}" style="display:none; margin-top:15px;">
     <div class="field"><span class="label">UID :</span> ${uid}</div>
     <div class="field"><span class="label">Pseudo :</span> ${userData.pseudo || first.reportedUserPseudo || "Non renseigné"}</div>
@@ -1024,6 +1028,45 @@ div.innerHTML = `
     container.appendChild(div);
   }
 }
+window.hideAllMessagesFromUser = async function(uid){
+
+  const ok = confirm(
+    "Masquer tous les messages publics de cet utilisateur ?"
+  );
+
+  if(!ok) return;
+
+  try{
+
+    const q = query(collection(db, "blogMessages"));
+    const snapshot = await getDocs(q);
+
+    for(const item of snapshot.docs){
+
+      const data = item.data();
+
+      if(data.uid === uid){
+
+        await updateDoc(doc(db, "blogMessages", item.id), {
+          visible:false
+        });
+      }
+    }
+
+    await addAdminLog("HIDE_ALL_MESSAGES", {
+      targetUid: uid
+    });
+
+    alert("Tous les messages ont été masqués.");
+
+    await loadPublicMessages();
+
+  }catch(e){
+    console.error(e);
+    alert("Erreur lors du masquage.");
+  }
+};
+
 window.openBlogAsAdmin = function(){
   window.open("./blog.html", "_blank");
 };
