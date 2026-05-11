@@ -239,6 +239,13 @@ window.resetPassword = async function(){
 onAuthStateChanged(auth, async user => {
   if(user){
 
+    if(!user.emailVerified && user.uid !== ADMIN_UID){
+      await signOut(auth);
+      document.getElementById("loginStatus").textContent =
+        "Merci de valider ton adresse email avant d’accéder au blog.";
+      return;
+    }
+
     initDepartements(); // 👈 ICI EXACTEMENT
 
     isAdmin = user.uid === ADMIN_UID;
