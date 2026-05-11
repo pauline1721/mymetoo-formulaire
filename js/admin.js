@@ -624,7 +624,7 @@ window.toggleReplyVisibility = async function(parentId, replyId, isVisible){
   try{
     await updateDoc(doc(db, "reponses", parentId, "commentaires", replyId), {
       visible: !isVisible
-    });
+    });     
 
     await addAdminLog(isVisible ? "HIDE_TESTIMONIAL_REPLY" : "SHOW_TESTIMONIAL_REPLY", {
       testimonialId: parentId,
@@ -900,6 +900,20 @@ async function loadReportedUsers(){
   for(const uid in grouped){
     const reports = grouped[uid];
     const first = reports[0];
+    const reportsCount = reports.length;
+
+let dangerLevel = "🟢 Faible";
+let borderColor = "#27ae60";
+
+if(reportsCount >= 2){
+  dangerLevel = "🟠 Surveillance";
+  borderColor = "#f39c12";
+}
+
+if(reportsCount >= 5){
+  dangerLevel = "🔴 Dangereux";
+  borderColor = "#e74c3c";
+}
 
     let userData = {};
 
@@ -947,9 +961,10 @@ async function loadReportedUsers(){
     });
 
     const div = document.createElement("div");
-    div.className = "card";
+div.className = "card";
+div.style.borderLeft = `6px solid ${borderColor}`;
 
-    div.innerHTML = `
+div.innerHTML = `
   <div class="field">
     <strong>👤 ${userData.pseudo || first.reportedUserPseudo || "Utilisateur"}</strong><br>
     <span class="label">Email :</span> ${userData.email || "Non renseigné"}<br>
@@ -967,6 +982,7 @@ async function loadReportedUsers(){
     <div class="field"><span class="label">Genre :</span> ${userData.genre || "Non renseigné"}</div>
     <div class="field"><span class="label">Âge :</span> ${userData.age || "Non renseigné"}</div>
     <div class="field"><span class="label">Département :</span> ${userData.departement || "Non renseigné"}</div>
+    <div class="field"><span class="label">Niveau :</span> ${dangerLevel}</div>
     <div class="field"><span class="label">Nombre de signalements :</span> ${reports.length}</div>
 
     ${reportsHtml}
