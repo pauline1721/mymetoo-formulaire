@@ -56,6 +56,7 @@ const sectionTitles = {
   users: "Utilisateurs",
   chat: "Chat public",
   testimonials: "Témoignages"
+  logs: "Historique admin"
 };
 
 window.showAdminSection = function(sectionName){
@@ -118,6 +119,7 @@ async function loadAllAdminData(){
   await loadUsers();
   await loadPublicMessages();
   await loadData();
+  await loadAdminLogs();
 }
 
 async function getValidatedReportCountForUser(uid){
@@ -732,6 +734,62 @@ async function loadData(){
 
   document.getElementById("total").innerText = total;
   renderDailyChart(daysData);
+}
+
+async function loadAdminLogs(){
+  const container = document.getElementById("adminLogsData");
+
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  const q = query(
+    collection(db, "adminLogs"),
+    orderBy("createdAt", "desc")
+  );
+
+  const snapshot = await getDocs(q);
+
+  if(snapshot.empty){
+    container.innerHTML =
+      `<div class="empty">Aucune action administrateur.</div>`;
+    return;
+  }
+
+  snapshot.forEach(item => {
+    const log = item.data();
+
+    const dateObj = log.createdAt?.toDate
+      ? log.createdAt.toDate()
+      : null;
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <div class="field">
+        <span class="label">Action :</span>
+        ${log.action || ""}
+      </div>
+
+      <div class="field">
+        <span class="label">Utilisateur ciblé :</span>
+        ${log.targetUid || "Aucun"}
+      </div>
+
+      <div class="field">
+        <span class="label">Raison :</span>
+        ${log.reason || "Aucune"}
+      </div>
+
+      <div class="field">
+        <span class="label">Date :</span>
+        ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
 }
 
 window.openBlogAsAdmin = function(){
