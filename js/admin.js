@@ -837,10 +837,16 @@ async function loadAdminLogs(){
     container.appendChild(div);
   });
 }
+
+window.toggleReportedUserDetails = function(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  el.style.display = el.style.display === "none" ? "block" : "none";
+};
+
 async function loadReportedUsers(){
-
   const container = document.getElementById("reportedUsersData");
-
   if(!container) return;
 
   container.innerHTML = "";
@@ -848,17 +854,14 @@ async function loadReportedUsers(){
   const snapshot = await getDocs(collection(db, "reports"));
 
   if(snapshot.empty){
-    container.innerHTML =
-      `<div class="empty">Aucun utilisateur signalé.</div>`;
+    container.innerHTML = `<div class="empty">Aucun utilisateur signalé.</div>`;
     return;
   }
 
   const grouped = {};
 
   snapshot.forEach(item => {
-
     const r = item.data();
-
     const uid = r.reportedUserUid || r.authorUid;
 
     if(!uid) return;
@@ -874,16 +877,13 @@ async function loadReportedUsers(){
   });
 
   for(const uid in grouped){
-
     const reports = grouped[uid];
-
     const first = reports[0];
 
     let userData = {};
 
     try{
       const userSnap = await getDoc(doc(db, "blogUsers", uid));
-
       if(userSnap.exists()){
         userData = userSnap.data();
       }
@@ -891,19 +891,17 @@ async function loadReportedUsers(){
       console.error(e);
     }
 
-    const div = document.createElement("div");
-    div.className = "card";
+    const safeId = "reported-user-" + uid.replace(/[^a-zA-Z0-9]/g, "");
 
     let reportsHtml = "";
 
-    reports.forEach(r => {
-
-      const dateObj = r.createdAt?.toDate
-        ? r.createdAt.toDate()
-        : null;
+    reports.forEach((r, index) => {
+      const dateObj = r.createdAt?.toDate ? r.createdAt.toDate() : null;
 
       reportsHtml += `
         <div class="report-card" style="margin-top:15px;">
+          <strong>Signalement n°${index + 1}</strong>
+
           <div class="field">
             <span class="label">Signalé par :</span>
             ${r.reportedBy || "Inconnu"}
@@ -927,42 +925,32 @@ async function loadReportedUsers(){
       `;
     });
 
+    const div = document.createElement("div");
+    div.className = "card";
+
     div.innerHTML = `
-      <h3>👤 ${userData.pseudo || first.reportedUserPseudo || "Utilisateur"}</h3>
+  <div class="field">
+    <strong>👤 ${userData.pseudo || first.reportedUserPseudo || "Utilisateur"}</strong><br>
+    <span class="label">Email :</span> ${userData.email || "Non renseigné"}<br>
+    <span class="label">Signalements :</span> ${reports.length}
+  </div>
 
-      <div class="field">
-        <span class="label">UID :</span>
-        ${uid}
-      </div>
+  <button class="hide-btn" onclick="toggleReportedUserDetails('${safeId}')">
+    Voir / cacher le dossier
+  </button>
 
-      <div class="field">
-        <span class="label">Email :</span>
-        ${userData.email || "Non renseigné"}
-      </div>
+  <div id="${safeId}" style="display:none; margin-top:15px;">
+    <div class="field"><span class="label">UID :</span> ${uid}</div>
+    <div class="field"><span class="label">Pseudo :</span> ${userData.pseudo || first.reportedUserPseudo || "Non renseigné"}</div>
+    <div class="field"><span class="label">Email :</span> ${userData.email || "Non renseigné"}</div>
+    <div class="field"><span class="label">Genre :</span> ${userData.genre || "Non renseigné"}</div>
+    <div class="field"><span class="label">Âge :</span> ${userData.age || "Non renseigné"}</div>
+    <div class="field"><span class="label">Département :</span> ${userData.departement || "Non renseigné"}</div>
+    <div class="field"><span class="label">Nombre de signalements :</span> ${reports.length}</div>
 
-      <div class="field">
-        <span class="label">Genre :</span>
-        ${userData.genre || "Non renseigné"}
-      </div>
-
-      <div class="field">
-        <span class="label">Âge :</span>
-        ${userData.age || "Non renseigné"}
-      </div>
-
-      <div class="field">
-        <span class="label">Département :</span>
-        ${userData.departement || "Non renseigné"}
-      </div>
-
-      <div class="field">
-        <span class="label">Nombre de signalements :</span>
-        ${reports.length}
-      </div>
-
-      ${reportsHtml}
-    `;
-
+    ${reportsHtml}
+  </div>
+`;
     container.appendChild(div);
   }
 }
