@@ -797,26 +797,41 @@ async function loadAdminLogs(){
     div.className = "card";
 
     div.innerHTML = `
-      <div class="field">
-        <span class="label">Action :</span>
-        ${log.action || ""}
-      </div>
+<div class="field">
+  <span class="label">Action :</span>
+  ${log.action || ""}
+</div>
 
-      <div class="field">
-        <span class="label">Utilisateur ciblé :</span>
-        ${log.targetUid || "Aucun"}
-      </div>
+<div class="field">
+  <span class="label">Utilisateur signalé :</span>
+  ${log.reportedUserPseudo || log.targetUid || "Aucun"}
+</div>
 
-      <div class="field">
-        <span class="label">Raison :</span>
-        ${log.reason || "Aucune"}
-      </div>
+<div class="field">
+  <span class="label">UID utilisateur :</span>
+  ${log.reportedUserUid || "Aucun"}
+</div>
 
-      <div class="field">
-        <span class="label">Date :</span>
-        ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}
-      </div>
-    `;
+<div class="field">
+  <span class="label">Auteur du signalement :</span>
+  ${log.reportedByUid || "Inconnu"}
+</div>
+
+<div class="field">
+  <span class="label">Raison :</span>
+  ${log.reason || "Aucune"}
+</div>
+
+<div class="field">
+  <span class="label">Message signalé :</span>
+  ${log.reportedMessage || "Aucun"}
+</div>
+
+<div class="field">
+  <span class="label">Date :</span>
+  ${dateObj ? dateObj.toLocaleString("fr-FR") : ""}
+</div>
+`;
 
     container.appendChild(div);
   });
