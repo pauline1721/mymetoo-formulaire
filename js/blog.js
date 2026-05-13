@@ -339,9 +339,15 @@ onAuthStateChanged(auth, async user => {
         ? "Connecté(e) : " + currentPseudo + " 👑 ADMIN"
         : "Connecté(e) : " + currentPseudo;
 
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("blogContent").style.display = "block";
-    document.getElementById("menuButton").style.display = "block";
+    const loginBox = document.getElementById("loginBox");
+    const blogContent = document.getElementById("blogContent");
+    const menuButton = document.getElementById("menuButton");
+
+    if(loginBox) loginBox.style.display = "none";
+    if(blogContent) blogContent.style.display = "block";
+    if(menuButton) menuButton.style.display = "block";
+
+    console.log("BLOG AFFICHÉ");
 
     const adminInvisibleBtn = document.getElementById("adminInvisibleBtn");
     if(adminInvisibleBtn){
