@@ -187,12 +187,23 @@ window.login = async function(){
   status.textContent = "Connexion en cours...";
 
   try{
-    await signInWithEmailAndPassword(auth, email, password);
-    status.textContent = "Connexion réussie ✅";
-  }catch(error){
-    console.error(error);
-    status.textContent = "Email ou mot de passe incorrect.";
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
+  await user.reload();
+  if(!user.emailVerified){
+    status.textContent = "Merci de vérifier votre adresse email 💜";
+    return;
   }
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("blogContent").style.display = "block";
+  document.getElementById("menuButton").style.display = "flex";
+  status.textContent = "Connexion réussie ✅";
+  console.log("BLOG AFFICHÉ");
+}catch(error){
+
+  console.error(error);
+  status.textContent = "Email ou mot de passe incorrect.";
+}
 };
 
 window.logout = async function(){
