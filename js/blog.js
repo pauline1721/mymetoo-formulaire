@@ -190,7 +190,7 @@ window.login = async function(){
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
   await user.reload();
-  if(!user.emailVerified){
+  if(!user.emailVerified && user.uid !== ADMIN_UID){
     status.textContent = "Merci de vérifier votre adresse email 💜";
     return;
   }
