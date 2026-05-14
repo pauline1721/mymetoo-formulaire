@@ -30,7 +30,7 @@ const firebaseConfig = {
   appId: "1:1084270329845:web:337a6172a4817f0db2eabc"
 };
 
-const adminApp = initializeApp(firebaseConfig, "adminApp");
+const adminApp = initializeApp(firebaseConfig);
 const auth = getAuth(adminApp);
 const db = getFirestore(adminApp);
 
