@@ -96,7 +96,7 @@ window.logout = async function(){
 };
 
 window.openBlogAsAdmin = function(){
-  window.location.href = "./blog.html";
+  window.open("./blog.html", "_blank");
 };
 
 window.filterReportedUsers = function(){
