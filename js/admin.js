@@ -1107,5 +1107,5 @@ window.exportReportedUserPdf = function(elementId){
 
 
 window.openBlogAsAdmin = function(){
-  window.open("./blog.html", "_blank");
+  window.location.href = "./blog.html";
 };
