@@ -96,7 +96,7 @@ window.logout = async function(){
 };
 
 window.openBlogAsAdmin = function(){
-  window.open("blog.html", "_blank");
+  window.open("blog.html?admin=1", "_blank");
 };
 
 window.filterReportedUsers = function(){
@@ -121,6 +121,7 @@ window.filterReportedUsers = function(){
 };
 
 onAuthStateChanged(auth, user => {
+  const adminMode = new URLSearchParams(window.location.search).get("admin") === "1";
   if(user && user.uid === ADMIN_UID){
     document.getElementById("login").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
