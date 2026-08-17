@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Merci - MyMeToo</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  min-height:100%;
+}
+
+body{
+  background:#eee6f2;
+  font-family:Georgia, serif;
+  color:#5c4635;
+}
+
+/* =========================
+   CONTENEUR PRINCIPAL
+========================= */
+
+.page{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+/* =========================
+   VISUEL
+========================= */
+
+.visual{
+  position:relative;
+  width:100%;
+  max-width:760px;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 10px 35px rgba(0,0,0,.15);
+  background:#d7c7ae;
+}
+
+.visual img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+/* =========================
+   ZONE DES BOUTONS
+========================= */
+
+.actions{
+  position:absolute;
+  left:50%;
+  bottom:5.5%;
+  transform:translateX(-50%);
+  width:82%;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* =========================
+   BOUTONS
+========================= */
+
+.action-btn{
+  width:100%;
+  border:none;
+  border-radius:11px;
+  padding:15px 18px;
+
+  background:rgba(238,224,197,.95);
+  border:1px solid rgba(126,96,60,.32);
+
+  color:#5c4635;
+
+  font-family:Georgia, serif;
+  font-size:18px;
+  font-weight:bold;
+  text-align:center;
+  text-decoration:none;
+
+  cursor:pointer;
+
+  box-shadow:0 3px 10px rgba(0,0,0,.08);
+
+  transition:
+    transform .15s ease,
+    background .15s ease;
+}
+
+.action-btn:hover{
+  transform:translateY(-1px);
+  background:rgba(245,232,207,.98);
+}
+
+.action-btn:active{
+  transform:translateY(0);
+}
+
+/* Bouton blog */
+
+#blogBtn{
+  display:none;
+}
+
+/* =========================
+   MESSAGE SI FERMETURE BLOQUÉE
+========================= */
+
+#closeMessage{
+  display:none;
+
+  margin-top:4px;
+  padding:8px 12px;
+
+  background:rgba(255,255,255,.82);
+
+  border-radius:8px;
+
+  color:#5c4635;
+
+  font-family:Arial, sans-serif;
+  font-size:14px;
+  font-weight:600;
+  text-align:center;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:600px){
+
+  .page{
+    padding:0;
+    align-items:flex-start;
+  }
+
+  .visual{
+    max-width:none;
+    min-height:100vh;
+    border-radius:0;
+    box-shadow:none;
+  }
+
+  .actions{
+    width:88%;
+    bottom:4%;
+    gap:9px;
+  }
+
+  .action-btn{
+    padding:13px 12px;
+    font-size:16px;
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="page">
+
+  <div class="visual">
+
+    <img
+      src="merci.png"
+      alt="Ta voix est là. Merci d’avoir été là."
+    >
+
+    <div class="actions">
+
+      <!-- BOUTON 1 : FERMER -->
+
+      <button
+        type="button"
+        class="action-btn"
+        id="closeBtn"
+      >
+        Tu peux maintenant refermer cette page
+      </button>
+
+
+      <!-- BOUTON 2 : TÉMOIGNAGES -->
+
+      <a
+        href="temoignages.html"
+        class="action-btn"
+      >
+        Découvrir les témoignages
+      </a>
+
+
+      <!-- BOUTON 3 : BLOG -->
+
+      <a
+        href="blog.html"
+        class="action-btn"
+        id="blogBtn"
+      >
+        Accéder au blog
+      </a>
+
+
+      <div id="closeMessage">
+        Ton navigateur ne permet pas de fermer automatiquement cette page.
+        Tu peux maintenant fermer cet onglet.
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   AFFICHER LE BOUTON BLOG
+========================= */
+
+const blogCreated =
+  sessionStorage.getItem("blogCreated") === "true";
+
+const blogBtn =
+  document.getElementById("blogBtn");
+
+if(blogCreated){
+
+  blogBtn.style.display =
+    "block";
+
+}
+
+
+/* =========================
+   FERMER LA PAGE
+========================= */
+
+const closeBtn =
+  document.getElementById("closeBtn");
+
+const closeMessage =
+  document.getElementById("closeMessage");
+
+
+closeBtn.addEventListener(
+  "click",
+  () => {
+
+    window.close();
+
+    /*
+      Certains navigateurs refusent
+      de fermer une page qui n’a pas
+      été ouverte par JavaScript.
+    */
+
+    setTimeout(
+      () => {
+
+        closeMessage.style.display =
+          "block";
+
+      },
+      300
+    );
+
+  }
+);
+
+
+/* =========================
+   NETTOYAGE OPTIONNEL
+========================= */
+
+/*
+  On conserve blogCreated pendant
+  la visite de merci.html.
+
+  Il disparaîtra automatiquement
+  quand l’onglet / la session sera fermé.
+*/
+
+</script>
+
+</body>
+
+</html>
