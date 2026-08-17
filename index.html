@@ -53,19 +53,19 @@ body{
 
 .leaf{
   position:absolute;
-  top:30px;
-  width:145px;
+  top:18px;
+  width:190px;
   opacity:.72;
   z-index:1;
   pointer-events:none;
 }
 
 .leaf.left{
-  left:34px;
+  left:18px;
 }
 
 .leaf.right{
-  right:34px;
+  right:18px;
 }
 
 /* =========================
@@ -80,24 +80,26 @@ header{
 
 .logo{
   display:block;
-  width:145px;
-  margin:0 auto 5px;
+  width:180px;
+  margin:0 auto 10px;
 }
 
 h1{
-  margin:0;
+  margin:8px 0 10px;
   font-family:Georgia, serif;
-  font-size:50px;
+  font-size:42px;
   line-height:1;
   color:var(--violet);
+  text-align:center;
 }
 
 .subtitle{
-  margin-top:10px;
+  margin-top:0;
   margin-bottom:18px;
   font-family:Georgia, serif;
   font-size:25px;
   font-weight:bold;
+  text-align:center;
 }
 
 /* =========================
@@ -465,29 +467,33 @@ button:disabled{
   }
 
   .leaf{
-    width:80px;
-    top:20px;
+    width:105px;
+    top:14px;
     opacity:.55;
   }
 
   .leaf.left{
-    left:5px;
+    left:3px;
   }
 
   .leaf.right{
-    right:5px;
+    right:3px;
   }
 
   .logo{
-    width:105px;
+    width:130px;
+    margin-bottom:8px;
   }
 
   h1{
-    font-size:39px;
+    font-size:34px;
+    margin:7px 0 8px;
   }
 
   .subtitle{
     font-size:19px;
+    margin-top:0;
+    margin-bottom:18px;
   }
 
   .intro{
@@ -582,9 +588,7 @@ button:disabled{
 <section class="questions">
 
 
-<!-- =========================
-     QUESTION 1
-========================= -->
+<!-- QUESTION 1 -->
 
 <div class="card">
 
@@ -595,38 +599,22 @@ button:disabled{
   <div class="options four">
 
     <label class="option">
-      <input
-        type="radio"
-        name="age"
-        value="Moins de 18 ans"
-      >
+      <input type="radio" name="age" value="Moins de 18 ans">
       <span>Moins de 18 ans.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="age"
-        value="18 à 35 ans"
-      >
+      <input type="radio" name="age" value="18 à 35 ans">
       <span>18 à 35 ans.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="age"
-        value="Plus de 35 ans"
-      >
+      <input type="radio" name="age" value="Plus de 35 ans">
       <span>Plus de 35 ans.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="age"
-        value="Je préfère ne pas répondre"
-      >
+      <input type="radio" name="age" value="Je préfère ne pas répondre">
       <span>Je préfère ne pas répondre.</span>
     </label>
 
@@ -635,9 +623,7 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     QUESTION 2
-========================= -->
+<!-- QUESTION 2 -->
 
 <div class="card">
 
@@ -648,29 +634,17 @@ button:disabled{
   <div class="options three">
 
     <label class="option">
-      <input
-        type="radio"
-        name="genre"
-        value="Une femme"
-      >
+      <input type="radio" name="genre" value="Une femme">
       <span>Une femme.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="genre"
-        value="Un homme"
-      >
+      <input type="radio" name="genre" value="Un homme">
       <span>Un homme.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="genre"
-        value="Je préfère ne pas répondre"
-      >
+      <input type="radio" name="genre" value="Je préfère ne pas répondre">
       <span>Je préfère ne pas répondre.</span>
     </label>
 
@@ -679,9 +653,7 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     QUESTION 3
-========================= -->
+<!-- QUESTION 3 -->
 
 <div class="card">
 
@@ -692,69 +664,33 @@ button:disabled{
   <div class="options two">
 
     <label class="option">
-      <input
-        type="radio"
-        name="origineViolences"
-        value="Oui, un membre de ma famille"
-      >
-      <span>
-        Oui, un membre de ma famille.
-      </span>
+      <input type="radio" name="origineViolences" value="Oui, un membre de ma famille">
+      <span>Oui, un membre de ma famille.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="origineViolences"
-        value="Non, je ne connaissais pas cette personne"
-      >
-      <span>
-        Non, je ne connaissais pas cette personne.
-      </span>
+      <input type="radio" name="origineViolences" value="Non, je ne connaissais pas cette personne">
+      <span>Non, je ne connaissais pas cette personne.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="origineViolences"
-        value="Oui, mon/ma partenaire ou ex-partenaire"
-      >
-      <span>
-        Oui, mon/ma partenaire ou ex-partenaire.
-      </span>
+      <input type="radio" name="origineViolences" value="Oui, mon/ma partenaire ou ex-partenaire">
+      <span>Oui, mon/ma partenaire ou ex-partenaire.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="origineViolences"
-        value="J’ai vécu plusieurs situations avec différentes personnes"
-      >
-      <span>
-        J’ai vécu plusieurs situations avec différentes personnes.
-      </span>
+      <input type="radio" name="origineViolences" value="J’ai vécu plusieurs situations avec différentes personnes">
+      <span>J’ai vécu plusieurs situations avec différentes personnes.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="origineViolences"
-        value="Oui, une personne de mon entourage"
-      >
-      <span>
-        Oui, une personne de mon entourage.
-      </span>
+      <input type="radio" name="origineViolences" value="Oui, une personne de mon entourage">
+      <span>Oui, une personne de mon entourage.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="origineViolences"
-        value="Je préfère ne pas répondre"
-      >
-      <span>
-        Je préfère ne pas répondre.
-      </span>
+      <input type="radio" name="origineViolences" value="Je préfère ne pas répondre">
+      <span>Je préfère ne pas répondre.</span>
     </label>
 
   </div>
@@ -762,9 +698,7 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     QUESTION 4
-========================= -->
+<!-- QUESTION 4 -->
 
 <div class="card">
 
@@ -775,32 +709,18 @@ button:disabled{
   <div class="options three">
 
     <label class="option">
-      <input
-        type="radio"
-        name="justice"
-        value="Oui"
-      >
+      <input type="radio" name="justice" value="Oui">
       <span>Oui.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="justice"
-        value="Non"
-      >
+      <input type="radio" name="justice" value="Non">
       <span>Non.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="justice"
-        value="Je préfère ne pas répondre"
-      >
-      <span>
-        Je préfère ne pas répondre.
-      </span>
+      <input type="radio" name="justice" value="Je préfère ne pas répondre">
+      <span>Je préfère ne pas répondre.</span>
     </label>
 
   </div>
@@ -808,9 +728,7 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     QUESTION 5
-========================= -->
+<!-- QUESTION 5 -->
 
 <div class="card">
 
@@ -821,59 +739,23 @@ button:disabled{
   <div class="options two">
 
     <label class="option">
-
-      <input
-        type="radio"
-        name="parle"
-        value="Non, je n’en ai jamais parlé"
-      >
-
-      <span>
-        Non, je n’en ai jamais parlé.
-      </span>
-
+      <input type="radio" name="parle" value="Non, je n’en ai jamais parlé">
+      <span>Non, je n’en ai jamais parlé.</span>
     </label>
 
     <label class="option">
-
-      <input
-        type="radio"
-        name="parle"
-        value="Oui, à un professionnel"
-      >
-
-      <span>
-        Oui, à un professionnel (médecin, psychologue...).
-      </span>
-
+      <input type="radio" name="parle" value="Oui, à un professionnel">
+      <span>Oui, à un professionnel (médecin, psychologue...).</span>
     </label>
 
     <label class="option">
-
-      <input
-        type="radio"
-        name="parle"
-        value="Oui, à un proche"
-      >
-
-      <span>
-        Oui, à un proche (famille, ami...).
-      </span>
-
+      <input type="radio" name="parle" value="Oui, à un proche">
+      <span>Oui, à un proche (famille, ami...).</span>
     </label>
 
     <label class="option">
-
-      <input
-        type="radio"
-        name="parle"
-        value="Oui, à plusieurs personnes"
-      >
-
-      <span>
-        Oui, à plusieurs personnes.
-      </span>
-
+      <input type="radio" name="parle" value="Oui, à plusieurs personnes">
+      <span>Oui, à plusieurs personnes.</span>
     </label>
 
   </div>
@@ -881,9 +763,7 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     QUESTION 6
-========================= -->
+<!-- QUESTION 6 -->
 
 <div class="card">
 
@@ -894,38 +774,22 @@ button:disabled{
   <div class="options four">
 
     <label class="option">
-      <input
-        type="radio"
-        name="ecoute"
-        value="Oui"
-      >
+      <input type="radio" name="ecoute" value="Oui">
       <span>Oui.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="ecoute"
-        value="Un peu"
-      >
+      <input type="radio" name="ecoute" value="Un peu">
       <span>Un peu.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="ecoute"
-        value="Non"
-      >
+      <input type="radio" name="ecoute" value="Non">
       <span>Non.</span>
     </label>
 
     <label class="option">
-      <input
-        type="radio"
-        name="ecoute"
-        value="Je ne sais pas"
-      >
+      <input type="radio" name="ecoute" value="Je ne sais pas">
       <span>Je ne sais pas.</span>
     </label>
 
@@ -934,9 +798,7 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     QUESTION 7
-========================= -->
+<!-- QUESTION 7 -->
 
 <div class="card">
 
@@ -951,59 +813,47 @@ button:disabled{
   <div class="options">
 
     <label class="option">
-
       <input
         type="checkbox"
         name="expression"
         value="Pour que mon vécu compte aussi et contribue à montrer l’ampleur des violences"
       >
-
       <span>
         Pour que mon vécu compte aussi et contribue à montrer l’ampleur des violences.
       </span>
-
     </label>
 
     <label class="option">
-
       <input
         type="checkbox"
         name="expression"
         value="Pour me sentir reconnu(e) dans ce que j’ai vécu"
       >
-
       <span>
         Pour me sentir reconnu(e) dans ce que j’ai vécu.
       </span>
-
     </label>
 
     <label class="option">
-
       <input
         type="checkbox"
         name="expression"
         value="Pour ne plus rester complètement silencieux(se), sans avoir à raconter mon histoire"
       >
-
       <span>
         Pour ne plus rester complètement silencieux(se), sans avoir à raconter mon histoire.
       </span>
-
     </label>
 
     <label class="option">
-
       <input
         type="checkbox"
         name="expression"
         value="Pour une autre raison"
       >
-
       <span>
         Pour une autre raison.
       </span>
-
     </label>
 
   </div>
@@ -1011,9 +861,7 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     QUESTION 8
-========================= -->
+<!-- QUESTION 8 -->
 
 <div class="card">
 
@@ -1046,9 +894,7 @@ button:disabled{
 </div>
 
 
-<!-- =========================
-     QUESTION 9 BLOG
-========================= -->
+<!-- QUESTION 9 BLOG -->
 
 <div
   class="card"
@@ -1099,7 +945,6 @@ button:disabled{
       autocomplete="off"
     >
 
-
     <div class="password-wrap">
 
       <input
@@ -1145,46 +990,21 @@ button:disabled{
 
     <select id="blogAge">
 
-      <option value="">
-        Tranche d’âge pour le blog
-      </option>
-
-      <option value="Moins de 18 ans">
-        Moins de 18 ans
-      </option>
-
-      <option value="18 à 35 ans">
-        18 à 35 ans
-      </option>
-
-      <option value="Plus de 35 ans">
-        Plus de 35 ans
-      </option>
-
-      <option value="Je préfère ne pas répondre">
-        Je préfère ne pas répondre
-      </option>
+      <option value="">Tranche d’âge pour le blog</option>
+      <option value="Moins de 18 ans">Moins de 18 ans</option>
+      <option value="18 à 35 ans">18 à 35 ans</option>
+      <option value="Plus de 35 ans">Plus de 35 ans</option>
+      <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
 
     </select>
 
 
     <select id="blogGenre">
 
-      <option value="">
-        Genre pour le blog
-      </option>
-
-      <option value="Une femme">
-        Une femme
-      </option>
-
-      <option value="Un homme">
-        Un homme
-      </option>
-
-      <option value="Je préfère ne pas répondre">
-        Je préfère ne pas répondre
-      </option>
+      <option value="">Genre pour le blog</option>
+      <option value="Une femme">Une femme</option>
+      <option value="Un homme">Un homme</option>
+      <option value="Je préfère ne pas répondre">Je préfère ne pas répondre</option>
 
     </select>
 
@@ -1192,7 +1012,6 @@ button:disabled{
     <select id="blogDepartement">
 
       <option value="">Département</option>
-
       <option value="Ain (01)">Ain (01)</option>
       <option value="Aisne (02)">Aisne (02)</option>
       <option value="Allier (03)">Allier (03)</option>
@@ -1309,31 +1128,19 @@ button:disabled{
 
         J’accepte les
 
-        <a
-          href="cgu.html"
-          target="_blank"
-          rel="noopener"
-        >
+        <a href="cgu.html" target="_blank" rel="noopener">
           CGU
         </a>,
 
         la
 
-        <a
-          href="confidentialite.html"
-          target="_blank"
-          rel="noopener"
-        >
+        <a href="confidentialite.html" target="_blank" rel="noopener">
           politique de confidentialité
         </a>
 
         et les
 
-        <a
-          href="mentions-legales.html"
-          target="_blank"
-          rel="noopener"
-        >
+        <a href="mentions-legales.html" target="_blank" rel="noopener">
           mentions légales
         </a>.
 
@@ -1354,13 +1161,8 @@ button:disabled{
 
 </div>
 
-
 </section>
 
-
-<!-- =========================
-     BAS DU FORMULAIRE
-========================= -->
 
 <div class="footer">
 
@@ -1412,11 +1214,6 @@ button:disabled{
 
 
 <script type="module">
-
-
-/* =========================
-   FIREBASE
-========================= */
 
 import {
   initializeApp
@@ -1477,10 +1274,6 @@ const BLOG_ACCESS_CODE =
   "UNIS-LIVRE-2026";
 
 
-/* =========================
-   ÉLÉMENTS
-========================= */
-
 const sendBtn =
   document.getElementById("sendBtn");
 
@@ -1493,10 +1286,6 @@ const joinBlog =
 const blogFields =
   document.getElementById("blogFields");
 
-
-/* =========================
-   AFFICHAGE BLOG
-========================= */
 
 joinBlog.addEventListener(
   "change",
@@ -1511,10 +1300,6 @@ joinBlog.addEventListener(
 );
 
 
-/* =========================
-   MOTS DE PASSE
-========================= */
-
 window.togglePassword = function(id){
 
   const input =
@@ -1527,10 +1312,6 @@ window.togglePassword = function(id){
 
 };
 
-
-/* =========================
-   RÉCUPÉRER LES RÉPONSES
-========================= */
 
 function getRadio(name){
 
@@ -1553,10 +1334,6 @@ function getChecks(name){
 
 }
 
-
-/* =========================
-   ERREURS
-========================= */
 
 function clearErrors(){
 
@@ -1602,10 +1379,6 @@ function showError(
 }
 
 
-/* =========================
-   VALIDATION
-========================= */
-
 function validateForm(){
 
   clearErrors();
@@ -1617,15 +1390,10 @@ function validateForm(){
   const requiredRadios = [
 
     "age",
-
     "genre",
-
     "origineViolences",
-
     "justice",
-
     "parle",
-
     "ecoute"
 
   ];
@@ -1660,8 +1428,6 @@ function validateForm(){
   );
 
 
-  /* QUESTION 7 */
-
   if(
     document.querySelectorAll(
       'input[name="expression"]:checked'
@@ -1684,13 +1450,10 @@ function validateForm(){
   }
 
 
-  /* BLOG */
-
   if(joinBlog.checked){
 
     const blogCard =
       document.getElementById("blogCard");
-
 
     const pseudo =
       document
@@ -1698,50 +1461,42 @@ function validateForm(){
         .value
         .trim();
 
-
     const email =
       document
         .getElementById("blogEmail")
         .value
         .trim();
 
-
     const password =
       document
         .getElementById("blogPassword")
         .value;
-
 
     const passwordConfirm =
       document
         .getElementById("blogPasswordConfirm")
         .value;
 
-
     const blogAge =
       document
         .getElementById("blogAge")
         .value;
-
 
     const blogGenre =
       document
         .getElementById("blogGenre")
         .value;
 
-
     const departement =
       document
         .getElementById("blogDepartement")
         .value;
-
 
     const accessCode =
       document
         .getElementById("blogAccessCode")
         .value
         .trim();
-
 
     const acceptCGU =
       document
@@ -1821,11 +1576,8 @@ function validateForm(){
     document
       .querySelector(".error")
       ?.scrollIntoView({
-
         behavior:"smooth",
-
         block:"center"
-
       });
 
   }
@@ -1835,10 +1587,6 @@ function validateForm(){
 
 }
 
-
-/* =========================
-   ENVOI
-========================= */
 
 sendBtn.addEventListener(
   "click",
@@ -1876,10 +1624,6 @@ sendBtn.addEventListener(
 
     try{
 
-
-      /* =========================
-         CRÉATION DU COMPTE BLOG
-      ========================= */
 
       if(wantsBlog){
 
@@ -1989,10 +1733,6 @@ sendBtn.addEventListener(
       }
 
 
-      /* =========================
-         ENREGISTREMENT FORMULAIRE
-      ========================= */
-
       await addDoc(
 
         collection(
@@ -2051,10 +1791,6 @@ sendBtn.addEventListener(
       );
 
 
-      /* =========================
-         MÉMORISER SI BLOG CRÉÉ
-      ========================= */
-
       if(wantsBlog){
 
         sessionStorage.setItem(
@@ -2070,10 +1806,6 @@ sendBtn.addEventListener(
 
       }
 
-
-      /* =========================
-         PAGE MERCI
-      ========================= */
 
       window.location.href =
         "merci.html";
@@ -2106,7 +1838,10 @@ sendBtn.addEventListener(
 
         status.textContent =
           "L’adresse email n’est pas valide.";
+
       }
+
+
       else if(
         error.code ===
         "auth/weak-password"
@@ -2114,17 +1849,28 @@ sendBtn.addEventListener(
 
         status.textContent =
           "Le mot de passe est trop faible.";
+
       }
+
+
       else{
+
         status.textContent =
           "Une erreur est survenue. Merci de réessayer.";
+
       }
+
+
       sendBtn.disabled =
         false;
+
     }
+
   }
 );
+
 </script>
+
 </body>
 
 </html>
