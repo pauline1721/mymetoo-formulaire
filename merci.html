@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Merci - MyMeToo</title>
+<title>UNIS - Merci</title>
 
 <style>
 
@@ -17,156 +17,177 @@
 html,
 body{
   margin:0;
-  min-height:100%;
+  padding:0;
 }
 
 body{
+  min-height:100vh;
   background:#eee6f2;
   font-family:Georgia, serif;
-  color:#5c4635;
+  color:#24106b;
 }
 
 /* =========================
-   CONTENEUR PRINCIPAL
+   PAGE
 ========================= */
 
 .page{
+  width:100%;
+  max-width:1030px;
   min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
+  margin:0 auto;
+
+  background:#fff;
+
+  padding:20px 35px 30px;
+
+  text-align:center;
 }
+
 
 /* =========================
-   VISUEL
+   LOGO UNIS
 ========================= */
 
-.visual{
-  position:relative;
-  width:100%;
-  max-width:760px;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 10px 35px rgba(0,0,0,.15);
-  background:#d7c7ae;
-}
-
-.visual img{
+.logo-unis{
   display:block;
-  width:100%;
+
+  width:155px;
+  max-width:35%;
+
   height:auto;
+
+  margin:0 auto 18px;
 }
+
 
 /* =========================
-   ZONE DES BOUTONS
+   VISUEL MERCI
 ========================= */
 
-.actions{
-  position:absolute;
-  left:50%;
-  bottom:5.5%;
-  transform:translateX(-50%);
-  width:82%;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
+.merci-image{
+  display:block;
+
+  width:100%;
+  max-width:850px;
+
+  height:auto;
+
+  margin:0 auto;
+
+  border-radius:15px;
 }
+
 
 /* =========================
    BOUTONS
 ========================= */
 
-.action-btn{
+.buttons{
   width:100%;
-  border:none;
-  border-radius:11px;
-  padding:15px 18px;
+  max-width:700px;
 
-  background:rgba(238,224,197,.95);
-  border:1px solid rgba(126,96,60,.32);
+  margin:20px auto 0;
 
-  color:#5c4635;
+  display:flex;
+  flex-direction:column;
+
+  gap:12px;
+}
+
+
+.btn{
+  display:block;
+
+  width:100%;
+
+  padding:16px 25px;
+
+  border:2px solid #d9c6a0;
+  border-radius:12px;
+
+  background:#f8edda;
+
+  color:#5c421f;
 
   font-family:Georgia, serif;
-  font-size:18px;
+  font-size:20px;
   font-weight:bold;
-  text-align:center;
+
   text-decoration:none;
 
   cursor:pointer;
-
-  box-shadow:0 3px 10px rgba(0,0,0,.08);
 
   transition:
     transform .15s ease,
     background .15s ease;
 }
 
-.action-btn:hover{
+
+.btn:hover{
+  background:#f3e2c5;
   transform:translateY(-1px);
-  background:rgba(245,232,207,.98);
 }
 
-.action-btn:active{
-  transform:translateY(0);
-}
-
-/* Bouton blog */
-
-#blogBtn{
-  display:none;
-}
 
 /* =========================
-   MESSAGE SI FERMETURE BLOQUÉE
+   BOUTON FERMER
 ========================= */
 
-#closeMessage{
+button.btn{
+  appearance:none;
+  -webkit-appearance:none;
+}
+
+
+/* =========================
+   MESSAGE SI LE NAVIGATEUR
+   REFUSE DE FERMER LA PAGE
+========================= */
+
+.close-message{
   display:none;
 
-  margin-top:4px;
-  padding:8px 12px;
+  margin:12px auto 0;
 
-  background:rgba(255,255,255,.82);
-
-  border-radius:8px;
-
-  color:#5c4635;
+  max-width:650px;
 
   font-family:Arial, sans-serif;
   font-size:14px;
-  font-weight:600;
-  text-align:center;
+  line-height:1.4;
+
+  color:#6d5b78;
 }
+
 
 /* =========================
    MOBILE
 ========================= */
 
-@media(max-width:600px){
+@media(max-width:700px){
 
   .page{
-    padding:0;
-    align-items:flex-start;
+    padding:15px 12px 25px;
   }
 
-  .visual{
-    max-width:none;
-    min-height:100vh;
-    border-radius:0;
-    box-shadow:none;
+  .logo-unis{
+    width:125px;
+    max-width:40%;
+    margin-bottom:14px;
   }
 
-  .actions{
-    width:88%;
-    bottom:4%;
-    gap:9px;
+  .merci-image{
+    border-radius:10px;
   }
 
-  .action-btn{
-    padding:13px 12px;
-    font-size:16px;
+  .buttons{
+    margin-top:15px;
+    gap:10px;
+  }
+
+  .btn{
+    padding:14px 15px;
+    font-size:17px;
   }
 
 }
@@ -178,83 +199,79 @@ body{
 
 <body>
 
-<div class="page">
 
-  <div class="visual">
+<main class="page">
 
-    <img
-      src="merci.png"
-      alt="Ta voix est là. Merci d’avoir été là."
+
+  <!-- =========================
+       LOGO UNIS
+  ========================= -->
+
+  <img
+    src="logoUNIS.png"
+    class="logo-unis"
+    alt="UNIS"
+  >
+
+
+  <!-- =========================
+       IMAGE DE REMERCIEMENT
+  ========================= -->
+
+  <img
+    src="merci.png"
+    class="merci-image"
+    alt="Ta voix est là. Merci d’avoir été là."
+  >
+
+
+  <!-- =========================
+       BOUTONS
+  ========================= -->
+
+  <div class="buttons">
+
+
+    <!-- FERMER LA PAGE -->
+
+    <button
+      type="button"
+      class="btn"
+      id="closeBtn"
     >
-
-    <div class="actions">
-
-      <!-- BOUTON 1 : FERMER -->
-
-      <button
-        type="button"
-        class="action-btn"
-        id="closeBtn"
-      >
-        Tu peux maintenant refermer cette page
-      </button>
+      Tu peux maintenant refermer cette page
+    </button>
 
 
-      <!-- BOUTON 2 : TÉMOIGNAGES -->
+    <!-- TÉMOIGNAGES -->
 
-      <a
-        href="temoignages.html"
-        class="action-btn"
-      >
-        Découvrir les témoignages
-      </a>
+    <a
+      href="temoignages.html"
+      class="btn"
+    >
+      Découvrir les témoignages
+    </a>
 
-
-      <!-- BOUTON 3 : BLOG -->
-
-      <a
-        href="blog.html"
-        class="action-btn"
-        id="blogBtn"
-      >
-        Accéder au blog
-      </a>
-
-
-      <div id="closeMessage">
-        Ton navigateur ne permet pas de fermer automatiquement cette page.
-        Tu peux maintenant fermer cet onglet.
-      </div>
-
-    </div>
 
   </div>
 
-</div>
+
+  <div
+    class="close-message"
+    id="closeMessage"
+  >
+    Ton navigateur ne permet pas de fermer automatiquement cette page.
+    Tu peux simplement fermer cet onglet.
+  </div>
+
+
+</main>
 
 
 <script>
 
 /* =========================
-   AFFICHER LE BOUTON BLOG
-========================= */
-
-const blogCreated =
-  sessionStorage.getItem("blogCreated") === "true";
-
-const blogBtn =
-  document.getElementById("blogBtn");
-
-if(blogCreated){
-
-  blogBtn.style.display =
-    "block";
-
-}
-
-
-/* =========================
-   FERMER LA PAGE
+   FERMETURE DE LA PAGE
 ========================= */
 
 const closeBtn =
@@ -268,12 +285,20 @@ closeBtn.addEventListener(
   "click",
   () => {
 
+    /*
+      Les navigateurs autorisent généralement
+      window.close() uniquement lorsqu'une page
+      a été ouverte par JavaScript.
+
+      On tente donc la fermeture.
+    */
+
     window.close();
 
+
     /*
-      Certains navigateurs refusent
-      de fermer une page qui n’a pas
-      été ouverte par JavaScript.
+      Si la page est toujours ouverte,
+      on affiche une petite indication.
     */
 
     setTimeout(
@@ -289,20 +314,8 @@ closeBtn.addEventListener(
   }
 );
 
-
-/* =========================
-   NETTOYAGE OPTIONNEL
-========================= */
-
-/*
-  On conserve blogCreated pendant
-  la visite de merci.html.
-
-  Il disparaîtra automatiquement
-  quand l’onglet / la session sera fermé.
-*/
-
 </script>
+
 
 </body>
 
