@@ -24,7 +24,6 @@ body{
   min-height:100vh;
   background:#eee6f2;
   font-family:Georgia, serif;
-  color:#24106b;
 }
 
 /* =========================
@@ -33,90 +32,125 @@ body{
 
 .page{
   width:100%;
-  max-width:1030px;
   min-height:100vh;
-  margin:0 auto;
 
-  background:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
 
-  padding:20px 35px 30px;
-
-  text-align:center;
+  padding:15px;
 }
 
 
 /* =========================
-   LOGO UNIS
+   GRAND VISUEL
 ========================= */
 
-.logo-unis{
-  display:block;
+.visual{
+  position:relative;
 
-  width:155px;
-  max-width:35%;
+  width:100%;
+  max-width:1000px;
 
-  height:auto;
+  margin:0 auto;
 
-  margin:0 auto 18px;
+  overflow:hidden;
+
+  border-radius:18px;
+
+  box-shadow:
+    0 8px 30px rgba(0,0,0,.12);
 }
 
 
 /* =========================
-   VISUEL MERCI
+   IMAGE MERCI
 ========================= */
 
 .merci-image{
   display:block;
 
   width:100%;
-  max-width:850px;
-
   height:auto;
 
-  margin:0 auto;
-
-  border-radius:15px;
+  margin:0;
 }
 
 
 /* =========================
-   BOUTONS
+   LOGO PAR-DESSUS L'IMAGE
+========================= */
+
+.logo-unis{
+  position:absolute;
+
+  top:2.2%;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  width:190px;
+  height:auto;
+
+  z-index:5;
+}
+
+
+/* =========================
+   BOUTONS DANS L'IMAGE
 ========================= */
 
 .buttons{
-  width:100%;
-  max-width:700px;
+  position:absolute;
 
-  margin:20px auto 0;
+  left:50%;
+  bottom:3%;
+
+  transform:translateX(-50%);
+
+  width:76%;
+  max-width:700px;
 
   display:flex;
   flex-direction:column;
 
   gap:12px;
+
+  z-index:5;
 }
 
+
+/* =========================
+   STYLE DES BOUTONS
+========================= */
 
 .btn{
   display:block;
 
   width:100%;
 
-  padding:16px 25px;
+  padding:15px 20px;
 
-  border:2px solid #d9c6a0;
-  border-radius:12px;
+  border:1px solid rgba(126,94,54,.28);
+  border-radius:15px;
 
-  background:#f8edda;
+  background:rgba(247,231,201,.94);
 
-  color:#5c421f;
+  color:#60451f;
 
   font-family:Georgia, serif;
   font-size:20px;
   font-weight:bold;
 
   text-decoration:none;
+  text-align:center;
 
   cursor:pointer;
+
+  box-shadow:
+    0 3px 12px rgba(0,0,0,.08);
+
+  backdrop-filter:blur(3px);
 
   transition:
     transform .15s ease,
@@ -125,14 +159,12 @@ body{
 
 
 .btn:hover{
-  background:#f3e2c5;
   transform:translateY(-1px);
+
+  background:
+    rgba(252,239,215,.98);
 }
 
-
-/* =========================
-   BOUTON FERMER
-========================= */
 
 button.btn{
   appearance:none;
@@ -141,22 +173,34 @@ button.btn{
 
 
 /* =========================
-   MESSAGE SI LE NAVIGATEUR
-   REFUSE DE FERMER LA PAGE
+   BLOG
+========================= */
+
+#blogBtn{
+  display:none;
+}
+
+
+/* =========================
+   MESSAGE FERMETURE
 ========================= */
 
 .close-message{
   display:none;
 
-  margin:12px auto 0;
+  padding:9px 12px;
 
-  max-width:650px;
+  border-radius:10px;
+
+  background:rgba(255,255,255,.90);
+
+  color:#684f36;
 
   font-family:Arial, sans-serif;
-  font-size:14px;
-  line-height:1.4;
+  font-size:13px;
+  font-weight:600;
 
-  color:#6d5b78;
+  text-align:center;
 }
 
 
@@ -167,27 +211,53 @@ button.btn{
 @media(max-width:700px){
 
   .page{
-    padding:15px 12px 25px;
+    padding:0;
+  }
+
+  .visual{
+    max-width:none;
+    border-radius:0;
+    box-shadow:none;
   }
 
   .logo-unis{
-    width:125px;
-    max-width:40%;
-    margin-bottom:14px;
-  }
-
-  .merci-image{
-    border-radius:10px;
+    width:130px;
+    top:2%;
   }
 
   .buttons{
-    margin-top:15px;
-    gap:10px;
+    width:88%;
+    bottom:2.5%;
+    gap:8px;
   }
 
   .btn{
-    padding:14px 15px;
-    font-size:17px;
+    padding:12px 10px;
+    border-radius:12px;
+    font-size:15px;
+  }
+
+}
+
+
+/* =========================
+   PETITS TÉLÉPHONES
+========================= */
+
+@media(max-width:420px){
+
+  .logo-unis{
+    width:110px;
+  }
+
+  .buttons{
+    width:90%;
+    bottom:2%;
+  }
+
+  .btn{
+    padding:10px 8px;
+    font-size:14px;
   }
 
 }
@@ -203,65 +273,84 @@ button.btn{
 <main class="page">
 
 
-  <!-- =========================
-       LOGO UNIS
-  ========================= -->
-
-  <img
-    src="logoUNIS.png"
-    class="logo-unis"
-    alt="UNIS"
-  >
+  <div class="visual">
 
 
-  <!-- =========================
-       IMAGE DE REMERCIEMENT
-  ========================= -->
+    <!-- =========================
+         IMAGE
+    ========================= -->
 
-  <img
-    src="merci.png"
-    class="merci-image"
-    alt="Ta voix est là. Merci d’avoir été là."
-  >
-
-
-  <!-- =========================
-       BOUTONS
-  ========================= -->
-
-  <div class="buttons">
-
-
-    <!-- FERMER LA PAGE -->
-
-    <button
-      type="button"
-      class="btn"
-      id="closeBtn"
+    <img
+      src="merci.png"
+      class="merci-image"
+      alt="Ta voix est là. Merci d’avoir été là."
     >
-      Tu peux maintenant refermer cette page
-    </button>
 
 
-    <!-- TÉMOIGNAGES -->
+    <!-- =========================
+         LOGO DANS LE VISUEL
+    ========================= -->
 
-    <a
-      href="temoignages.html"
-      class="btn"
+    <img
+      src="logoUNIS.png"
+      class="logo-unis"
+      alt="UNIS"
     >
-      Découvrir les témoignages
-    </a>
 
 
-  </div>
+    <!-- =========================
+         BOUTONS DANS LE VISUEL
+    ========================= -->
+
+    <div class="buttons">
 
 
-  <div
-    class="close-message"
-    id="closeMessage"
-  >
-    Ton navigateur ne permet pas de fermer automatiquement cette page.
-    Tu peux simplement fermer cet onglet.
+      <!-- BOUTON 1 -->
+
+      <button
+        type="button"
+        class="btn"
+        id="closeBtn"
+      >
+        Tu peux maintenant refermer cette page
+      </button>
+
+
+      <!-- BOUTON 2 -->
+
+      <a
+        href="temoignages.html"
+        class="btn"
+      >
+        Découvrir les témoignages
+      </a>
+
+
+      <!-- BOUTON 3
+           uniquement si compte blog créé
+      -->
+
+      <a
+        href="blog.html"
+        class="btn"
+        id="blogBtn"
+      >
+        Accéder au blog
+      </a>
+
+
+      <div
+        class="close-message"
+        id="closeMessage"
+      >
+        Ton navigateur ne permet pas de fermer automatiquement cette page.
+        Tu peux simplement fermer cet onglet.
+      </div>
+
+
+    </div>
+
+
   </div>
 
 
@@ -270,12 +359,34 @@ button.btn{
 
 <script>
 
+
 /* =========================
-   FERMETURE DE LA PAGE
+   BOUTON BLOG
+========================= */
+
+const blogCreated =
+  sessionStorage.getItem("blogCreated") === "true";
+
+
+const blogBtn =
+  document.getElementById("blogBtn");
+
+
+if(blogCreated){
+
+  blogBtn.style.display =
+    "block";
+
+}
+
+
+/* =========================
+   FERMER LA PAGE
 ========================= */
 
 const closeBtn =
   document.getElementById("closeBtn");
+
 
 const closeMessage =
   document.getElementById("closeMessage");
@@ -285,21 +396,9 @@ closeBtn.addEventListener(
   "click",
   () => {
 
-    /*
-      Les navigateurs autorisent généralement
-      window.close() uniquement lorsqu'une page
-      a été ouverte par JavaScript.
-
-      On tente donc la fermeture.
-    */
 
     window.close();
 
-
-    /*
-      Si la page est toujours ouverte,
-      on affiche une petite indication.
-    */
 
     setTimeout(
       () => {
@@ -311,8 +410,10 @@ closeBtn.addEventListener(
       300
     );
 
+
   }
 );
+
 
 </script>
 
